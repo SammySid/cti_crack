@@ -1,0 +1,324 @@
+/* Main CSS for Premium Cooling Tower App */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+    --bg-dark: #0a0c10;
+    --card-bg: rgba(23, 27, 34, 0.7);
+    --accent-cyan: #22d3ee;
+    --accent-blue: #3b82f6;
+    --accent-emerald: #10b981;
+    --accent-amber: #f59e0b;
+    --border-glass: rgba(255, 255, 255, 0.1);
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+}
+
+html {
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    overflow-x: hidden;
+    overscroll-behavior-y: contain;
+}
+
+.glass-card {
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    border: 1px solid var(--border-glass);
+    box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.glass-card:hover {
+    border-color: rgba(34, 211, 238, 0.3);
+    transform: translateY(-2px);
+}
+
+.sidebar-glass {
+    background: rgba(15, 23, 42, 0.8);
+    backdrop-filter: blur(16px);
+    border-right: 1px solid var(--border-glass);
+}
+
+.input-premium {
+    background: rgba(15, 23, 42, 0.5);
+    border: 1px solid rgba(148, 163, 184, 0.2);
+    color: white;
+    transition: all 0.2s ease;
+}
+
+.input-premium:focus {
+    border-color: var(--accent-cyan);
+    box-shadow: 0 0 0 2px rgba(34, 211, 238, 0.2);
+    background: rgba(15, 23, 42, 0.8);
+}
+
+.text-mono {
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, #22d3ee 0%, #3b82f6 100%);
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+.glow-cyan {
+    box-shadow: 0 0 15px rgba(34, 211, 238, 0.2);
+}
+
+/* Custom Scrollbar */
+.custom-scrollbar {
+    scrollbar-width: thin;
+    scrollbar-color: #1e293b var(--bg-dark);
+}
+
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-dark);
+}
+
+::-webkit-scrollbar-thumb {
+    background: #1e293b;
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #334155;
+}
+
+/* Print Overrides - Professional A4 Engineering Report */
+@media print {
+    @page {
+        size: A4 landscape;
+        margin: 10mm;
+    }
+
+    body {
+        background: white !important;
+        color: black !important;
+        height: auto !important;
+        overflow: visible !important;
+        font-family: 'Inter', system-ui, sans-serif !important;
+    }
+
+    .no-print,
+    aside,
+    header.lg\:hidden,
+    #resetDefaults,
+    .absolute.top-8.left-8,
+    /* Nominal Flow Engine label */
+    .absolute.mb-4,
+    /* Info labels */
+    .absolute.-right-4,
+    /* Blurs */
+    .animate-pulse {
+        display: none !important;
+    }
+
+    main {
+        overflow: visible !important;
+        height: auto !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .max-w-6xl {
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .glass-card {
+        background: white !important;
+        border: 2px solid #000 !important;
+        box-shadow: none !important;
+        backdrop-filter: none !important;
+        color: black !important;
+        margin-bottom: 25px !important;
+        border-radius: 0 !important;
+        page-break-inside: avoid;
+        padding: 20px !important;
+    }
+
+    /* Professional Headers for Print */
+    .border-l-4.border-cyan-500 {
+        border-left: 8px solid black !important;
+        padding-left: 15px !important;
+        margin: 30px 0 15px 0 !important;
+    }
+
+    .text-white,
+    .text-slate-300,
+    .text-slate-500,
+    .gradient-text {
+        color: black !important;
+        -webkit-text-fill-color: black !important;
+        background: none !important;
+        font-weight: bold !important;
+    }
+
+    h2,
+    h3 {
+        color: black !important;
+        text-transform: uppercase !important;
+    }
+
+    /* Layout Adjustments for Report Structure */
+    .grid {
+        display: block !important;
+    }
+
+    /* Input Cards - 2 column layout for print */
+    .grid-cols-1.md\:grid-cols-2.lg\:grid-cols-4 {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr !important;
+        gap: 15px !important;
+    }
+
+    /* Results styling */
+    #displaySupply,
+    #displayDemand,
+    #displayApproach,
+    #displayRange {
+        font-size: 24pt !important;
+        color: #000 !important;
+    }
+
+    /* Ensure results section stays together on page 1 */
+    .md\:grid-cols-2.lg\:grid-cols-4 {
+        page-break-inside: avoid !important;
+        margin-bottom: 20mm !important;
+    }
+
+    /* Force each chart to its own page */
+    .glass-card:has(canvas) {
+        page-break-before: always !important;
+        height: auto !important;
+        padding: 5mm !important;
+        display: block !important;
+    }
+
+    /* Standardize all chart parent containers to fixed height for A4 landscape consistency */
+    .glass-card div[class*="h-"] {
+        height: 140mm !important;
+        /* Reduced height for landscape aspect ratio */
+        min-height: 140mm !important;
+        width: 100% !important;
+        margin: 0 !important;
+    }
+
+    /* Charts - High-fidelity Landscape Fitting */
+    canvas {
+        width: 100% !important;
+        height: 100% !important;
+        display: block !important;
+    }
+
+    .lg\:grid-cols-2 {
+        display: block !important;
+    }
+
+    footer {
+        break-before: page !important;
+        border-top: 1px solid #000 !important;
+        margin-top: 20mm !important;
+        padding-top: 10mm !important;
+    }
+}
+
+.sidebar-transition {
+    transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.no-scrollbar {
+    scrollbar-width: none;
+}
+
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+button,
+input,
+select {
+    -webkit-tap-highlight-color: transparent;
+}
+
+@media (max-width: 1023px) {
+    .glass-card {
+        border-radius: 1.1rem;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+    }
+
+    .glass-card:hover {
+        transform: none;
+    }
+
+    .input-premium {
+        min-height: 42px;
+    }
+}
+
+@media (max-width: 640px) {
+    .custom-scrollbar {
+        scrollbar-width: none;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    #displaySupply,
+    #displayDemand,
+    #displayApproach,
+    #displayRange {
+        font-size: 2rem;
+        line-height: 1.1;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+        scroll-behavior: auto !important;
+    }
+}
+
+/* Circular Gauge Styles */
+.gauge-container {
+    position: relative;
+    width: 100px;
+    height: 100px;
+}
+
+.gauge-svg {
+    transform: rotate(-90deg);
+}
+
+.gauge-bg {
+    fill: none;
+    stroke: rgba(255, 255, 255, 0.05);
+    stroke-width: 8;
+}
+
+.gauge-fill {
+    fill: none;
+    stroke: var(--accent-cyan);
+    stroke-width: 8;
+    stroke-linecap: round;
+    transition: stroke-dashoffset 0.6s ease;
+}

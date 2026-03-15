@@ -1,0 +1,116 @@
+export function updateFilterUiState(ui, message = '') {
+    const filterStatus = document.getElementById('filterStatus');
+    const panelStatus = document.getElementById('filterPanelStatus');
+    const runBtn = document.getElementById('runFilterAction');
+
+    if (runBtn) {
+        runBtn.disabled = ui.isFiltering;
+        runBtn.classList.toggle('opacity-50', ui.isFiltering);
+        runBtn.classList.toggle('cursor-not-allowed', ui.isFiltering);
+        runBtn.innerText = ui.isFiltering ? 'Processing...' : 'Generate Filtered Excel';
+    }
+
+    const resolvedMessage = message || (ui.isFiltering ? 'Processing uploaded files...' : 'Filter tool ready.');
+    if (filterStatus) filterStatus.innerText = resolvedMessage;
+    if (panelStatus) panelStatus.innerText = resolvedMessage;
+}
+
+export function syncFilterSettingsToUi(ui) {
+    const pathInput = document.getElementById('filterSourcePath');
+    const startInput = document.getElementById('filterStartTime');
+    const endInput = document.getElementById('filterEndTime');
+    if (pathInput) pathInput.value = ui.filterSettings.sourcePath || '';
+    if (startInput) startInput.value = ui.filterSettings.startTime || '16:00';
+    if (endInput) endInput.value = ui.filterSettings.endTime || '17:00';
+}
+
+export async function runFilterTool(ui) {
+    if (ui.isFiltering) return;
+
+    const startInput = document.getElementById('filterStartTime');
+    const endInput = document.getElementById('filterEndTime');
+    const sourcePathInput = document.getElementById('filterSourcePath');
+    const folderInput = document.getElementById('filterExcelFolder');
+    const filesInput = document.getElementById('filterExcelFiles');
+
+    const startTime = startInput?.value;
+    const endTime = endInput?.value;
+    const sourcePath = sourcePathInput?.value?.trim() || '';
+    const folderFiles = folderInput?.files ? Array.from(folderInput.files) : [];
+    const manualFiles = filesInput?.files ? Array.from(filesInput.files) : [];
+    const files = folderFiles.length > 0 ? folderFiles : manualFiles;
+    const excelFiles = files.filter((file) => file.name.toLowerCase().endsWith('.xlsx'));
+
+    if (!startTime || !endTime) {
+        ui.updateFilterUiState('Please choose both start and end time.');
+        return;
+    }
+    if (!sourcePath && excelFiles.length === 0) {
+        ui.updateFilterUiState('Please provide source folder path or select files.');
+        return;
+    }
+
+    ui.filterSettings = {
+        sourcePath,
+        startTime,
+        endTime
+    };
+    ui.saveFilterSettings();
+
+    ui.isFiltering = true;
+    let finalMessage = '';
+    ui.updateFilterUiState(sourcePath
+        ? 'Scanning saved source folder and filtering data...'
+        : `Scanning ${excelFiles.length} file(s) and filtering data...`);
+
+    try {
+        let response;
+        if (sourcePath) {
+            response = await fetch('/api/filter-excel-local', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ startTime, endTime, sourcePath })
+            });
+        } else {
+            const formData = new FormData();
+            formData.append('startTime', startTime);
+            formData.append('endTime', endTime);
+            excelFiles.forEach((file) => formData.append('files', file, file.name));
+            response = await fetch('/api/filter-excel', {
+                method: 'POST',
+                body: formData
+            });
+        }
+
+        if (!response.ok) {
+            let message = `Filter failed with status ${response.status}`;
+            const errorText = await response.text();
+            if (errorText) {
+                try {
+                    const errorJson = JSON.parse(errorText);
+                    message = errorJson.error || message;
+                } catch (parseError) {
+                    message = errorText;
+                }
+            }
+            throw new Error(message);
+        }
+
+        const blob = await response.blob();
+        const fileName = ui.getDownloadFileName(response.headers.get('content-disposition')) || 'Master_Filtered.xlsx';
+        ui.downloadBlob(blob, fileName);
+        finalMessage = 'Filtered master Excel downloaded successfully.';
+        ui.updateFilterUiState(finalMessage);
+        if (folderInput) folderInput.value = '';
+        if (filesInput) filesInput.value = '';
+    } catch (error) {
+        console.error('Filter export failed', error);
+        finalMessage = error.message || 'Filtering failed. Please try again.';
+        ui.updateFilterUiState(finalMessage);
+    } finally {
+        ui.isFiltering = false;
+        if (!finalMessage) {
+            ui.updateFilterUiState();
+        }
+    }
+}
