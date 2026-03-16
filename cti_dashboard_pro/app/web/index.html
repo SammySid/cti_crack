@@ -501,11 +501,19 @@
                 </div>
 
                 <div class="glass-card rounded-3xl p-8 border border-white/10 space-y-6">
-                    <div>
-                        <label for="filterSourcePath" class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Source Folder Path (remembered)</label>
-                        <input id="filterSourcePath" type="text" placeholder="F:\path\to\folder"
-                            class="w-full input-premium rounded-lg px-3 py-2 text-sm font-mono" />
-                        <p class="text-[10px] text-slate-500 mt-2">Best for repeated runs. Path is saved in browser local storage.</p>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="filterSourcePath" class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Source Folder Path</label>
+                            <input id="filterSourcePath" type="text" placeholder="F:\path\to\data"
+                                class="w-full input-premium rounded-lg px-3 py-2 text-sm font-mono" />
+                            <p class="text-[10px] text-slate-500 mt-2">Saved in browser local storage.</p>
+                        </div>
+                        <div>
+                            <label for="filterDestPath" class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Dest Folder Path (Optional)</label>
+                            <input id="filterDestPath" type="text" placeholder="F:\path\to\output"
+                                class="w-full input-premium rounded-lg px-3 py-2 text-sm font-mono border border-emerald-500/20 focus:border-emerald-500/50" />
+                            <p class="text-[10px] text-emerald-500/70 mt-2">Bypasses browser download and saves directly.</p>
+                        </div>
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -99,13 +99,18 @@ def _merge_sensor_dfs(dfs, date_col, time_col):
         dt_str = copy_df[date_col].astype(str) + ' ' + copy_df[time_col].astype(str)
         merge_key = pd.to_datetime(dt_str, dayfirst=True, errors='coerce').dt.floor('min')
         copy_df['_merge_key'] = merge_key
-        copy_df.loc[copy_df['_merge_key'].isna(), '_merge_key'] = copy_df.loc[copy_df['_merge_key'].isna(), time_col].astype(str).str[:5]
+        
+        # When falling back for unparseable dates, combine date and time string so dates don't mix
+        fallback = copy_df[date_col].astype(str).str.strip() + '_' + copy_df[time_col].astype(str).str[:5]
+        copy_df.loc[copy_df['_merge_key'].isna(), '_merge_key'] = fallback.loc[copy_df['_merge_key'].isna()]
         working.append(copy_df)
 
     merged = working[0]
     for df in working[1:]:
-        df_to_merge = df.drop(columns=[date_col, time_col])
-        merged = pd.merge(merged, df_to_merge, on='_merge_key', how='outer')
+        merged = pd.merge(merged, df, on='_merge_key', how='outer', suffixes=('', '_y'))
+        merged[date_col] = merged[date_col].combine_first(merged[date_col + '_y'])
+        merged[time_col] = merged[time_col].combine_first(merged[time_col + '_y'])
+        merged.drop(columns=[date_col + '_y', time_col + '_y'], inplace=True)
 
     merged.sort_values(by='_merge_key', inplace=True)
     merged.drop(columns=['_merge_key'], inplace=True)
@@ -113,7 +118,7 @@ def _merge_sensor_dfs(dfs, date_col, time_col):
     return merged
 
 
-def _create_report_layout(writer, master_df):
+def _create_report_layout(writer, master_df, sheet_name='Report Layout'):
     if master_df.empty:
         return
 
@@ -135,9 +140,24 @@ def _create_report_layout(writer, master_df):
         return
 
     cwt_dfs, hwt_dfs, dbt_dfs, wbt_dfs = [], [], [], []
+    seen_sensors = set()
     for file_name, group in master_df.groupby('Source File'):
-        sensor_match = re.search(r'\d+', file_name)
-        sensor_no = sensor_match.group(0) if sensor_match else file_name.split('.')[0]
+        # Prefer 2+ digit numbers (077, 824) over 1-digit cell numbers.
+        # Use string sorting to preserve leading zeros like '077', but use integer sorting to pick the largest block
+        matches = re.findall(r'\d{2,}', file_name) or re.findall(r'\d+', file_name)
+        if matches:
+            base_sensor = max(matches, key=lambda x: (len(x), int(x)))
+        else:
+            base_sensor = file_name.split('.')[0]
+
+        # Prevent duplicate column bugs in pd.merge if two files still resolve to identical sensor IDs
+        sensor_no = base_sensor
+        counter = 1
+        while sensor_no in seen_sensors:
+            sensor_no = f"{base_sensor}_{counter}"
+            counter += 1
+        seen_sensors.add(sensor_no)
+
         subset = group[[date_col, time_col, val_col]].copy()
         subset.rename(columns={val_col: sensor_no}, inplace=True)
         subset[time_col] = subset[time_col].astype(str).str.split('.').str[0]
@@ -183,7 +203,9 @@ def _create_report_layout(writer, master_df):
 
     final_df = pd.DataFrame(final_df_dict)
     workbook = writer.book
-    worksheet = workbook.add_worksheet('Report Layout')
+    
+    safe_sheet_name = sheet_name[:31] # Excel limits sheet names to 31 chars
+    worksheet = workbook.add_worksheet(safe_sheet_name)
 
     title_fmt = workbook.add_format({'bold': True, 'font_size': 13, 'align': 'center', 'valign': 'vcenter', 'border': 1})
     cwt_header_fmt = workbook.add_format({'bold': True, 'align': 'center', 'valign': 'vcenter', 'border': 1, 'bg_color': '#BDD7EE'})
@@ -409,10 +431,32 @@ def generate_filtered_workbook(file_items, start_time_str, end_time_str):
     buffer = BytesIO()
     with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
         master_df.to_excel(writer, sheet_name='Filtered Data', index=False)
-        summary_df.to_excel(writer, sheet_name='Summary', index=False)
         _style_sheet(writer, 'Filtered Data', master_df)
-        _style_sheet(writer, 'Summary', summary_df)
-        _create_report_layout(writer, master_df)
+        
+        date_col = next((c for c in master_df.columns if 'date' in str(c).lower()), None)
+        if date_col:
+            dt_series = pd.to_datetime(master_df[date_col], dayfirst=True, errors='coerce')
+            unique_dt_list = dt_series.dropna().dt.normalize().unique()
+            # Sort the dates chronologically
+            unique_dt_list = sorted(unique_dt_list)
+            
+            if len(unique_dt_list) == 1:
+                # If there's exactly one date, use it as the sheet name instead of 'Consolidated'
+                d_str = unique_dt_list[0].strftime('%d-%m-%Y')
+                _create_report_layout(writer, master_df, d_str)
+            elif len(unique_dt_list) > 1:
+                # If multiple dates, split into multiple sheets
+                for dt_val in unique_dt_list:
+                    # Format as DD-MM-YYYY for display/matching
+                    d_str = dt_val.strftime('%d-%m-%Y')
+                    mask = dt_series.dt.strftime('%d-%m-%Y') == d_str
+                    date_df = master_df[mask].copy()
+                    _create_report_layout(writer, date_df, f'{d_str}')
+            else:
+                # Fallback if no valid dates could be parsed despite having a date column
+                _create_report_layout(writer, master_df, 'Consolidated')
+        else:
+            _create_report_layout(writer, master_df, 'Consolidated')
 
     safe_start = start_time.strftime('%H%M')
     safe_end = end_time.strftime('%H%M')

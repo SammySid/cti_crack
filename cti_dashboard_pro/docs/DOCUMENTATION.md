@@ -45,11 +45,12 @@ Primary outcomes supported:
 - Supports:
   - local source folder path mode (`/api/filter-excel-local`)
   - uploaded files mode (`/api/filter-excel`)
-- Filters by start/end time
+- Optional Destination path input to bypass browser download and save the output directly to disk.
+- Filters by start/end time.
 - Produces:
   - filtered data sheet
   - summary sheet
-  - consolidated report layout sheet
+  - dynamic date-based report layout sheets (e.g., `12-11-2023`, `13-11-2023`) or a `Consolidated` sheet if only one date is present.
 
 ### Responsive UX
 - Mobile drawer for controls
@@ -155,9 +156,11 @@ Request:
   - `startTime`
   - `endTime`
   - `sourcePath`
+  - `destPath` (optional)
 
 Response:
-- `200` XLSX binary
+- `200` JSON `{"message": "..."}` if `destPath` is provided (file saved directly to disk)
+- `200` XLSX binary if `destPath` is omitted
 - `400/413` JSON error
 
 ---
@@ -191,7 +194,7 @@ Supporting folders:
    - verifies Python availability
    - installs required Python packages if needed
    - starts server on `http://localhost:8000`
-3. Keep terminal open while using dashboard
+3. Keep terminal open while using dashboard. Press `Ctrl+C` for a graceful shutdown.
 
 ## Manual run
 From `Caclulator/`:

@@ -155,8 +155,25 @@ class DashboardHandler(SimpleHTTPRequestHandler):
             self._send_json_error(400, 'startTime, endTime and sourcePath are required.')
             return
 
+        dest_path = str(payload.get('destPath', '')).strip()
+
         try:
             download_name, file_bytes = generate_filtered_workbook_from_directory(source_path, start_time, end_time)
+            
+            if dest_path:
+                os.makedirs(dest_path, exist_ok=True)
+                full_save_path = os.path.join(dest_path, download_name)
+                with open(full_save_path, 'wb') as f:
+                    f.write(file_bytes)
+                
+                response_data = json.dumps({'message': f'Success! File saved directly to {dest_path}', 'isFile': False}).encode('utf-8')
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json; charset=utf-8')
+                self.send_header('Content-Length', str(len(response_data)))
+                self.end_headers()
+                self.wfile.write(response_data)
+                return
+                
         except Exception as exc:
             self._send_json_error(400, f'Failed to filter files: {exc}')
             return
@@ -253,7 +270,15 @@ def run_server(port=8000):
     print(f'Dashboard server running on http://localhost:{port}')
     print(f'Serving static files from: {web_root}')
     print('Press Ctrl+C to stop the server.')
-    server.serve_forever()
+    
+    try:
+        server.serve_forever()
+    except KeyboardInterrupt:
+        print('\n')
+        print('=' * 50)
+        print('⏹️  Dashboard server successfully stopped.')
+        print('=' * 50)
+        server.server_close()
 
 
 if __name__ == '__main__':
