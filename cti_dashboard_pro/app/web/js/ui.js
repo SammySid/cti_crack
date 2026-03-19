@@ -1,4 +1,4 @@
-import { calculations } from './calculations.js';
+// Native calculations removed for IP Security. Driven by Backend API now.
 import { charts } from './charts.js';
 import { bindEvents } from './ui/bind-events.js';
 import { switchTab } from './ui/tabs.js';
@@ -48,13 +48,7 @@ export const ui = {
     init: async () => {
         ui.loadInputs();
         ui.loadFilterSettings();
-        try {
-            await calculations.init();
-            ui.enginesReady = true;
-        } catch (error) {
-            console.error('Failed to initialize calculation engines on main thread', error);
-            ui.enginesReady = false;
-        }
+        ui.enginesReady = true;
         ui.bindEvents();
 
         // Setup the calculation Web Worker
@@ -168,26 +162,33 @@ export const ui = {
 
     bindEvents: () => bindEvents(ui),
 
-    updateFastMetrics: () => {
-        const designKaVL = calculations.calculateDemandKaVL(
-            ui.inputs.designWBT,
-            ui.inputs.designHWT,
-            ui.inputs.designCWT,
-            ui.inputs.lgRatio
-        );
-        const supplyKaVL = calculations.calculateSupplyKaVL(
-            ui.inputs.lgRatio,
-            ui.inputs.constantC,
-            ui.inputs.constantM
-        );
+    updateFastMetrics: async () => {
         const approach = ui.inputs.designCWT - ui.inputs.designWBT;
         const range = ui.inputs.designHWT - ui.inputs.designCWT;
+        const supplyKaVL = ui.inputs.constantC * Math.pow(ui.inputs.lgRatio, -ui.inputs.constantM);
 
-        // Update display values synchronously so they feel instantly snappy
         document.getElementById('displaySupply').innerText = Number.isFinite(supplyKaVL) ? supplyKaVL.toFixed(5) : '--';
-        document.getElementById('displayDemand').innerText = Number.isFinite(designKaVL) ? designKaVL.toFixed(5) : '--';
         document.getElementById('displayApproach').innerText = Number.isFinite(approach) ? approach.toFixed(2) : '--';
         document.getElementById('displayRange').innerText = Number.isFinite(range) ? range.toFixed(2) : '--';
+
+        try {
+            const resp = await fetch('/api/calculate/kavl', {
+                method: 'POST',
+                headers:{ 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    wbt: ui.inputs.designWBT,
+                    hwt: ui.inputs.designHWT,
+                    cwt: ui.inputs.designCWT,
+                    lg: ui.inputs.lgRatio
+                })
+            });
+            if (resp.ok) {
+                const res = await resp.json();
+                document.getElementById('displayDemand').innerText = (res.valid && Number.isFinite(res.kavl)) ? res.kavl.toFixed(5) : '--';
+            }
+        } catch (err) {
+            document.getElementById('displayDemand').innerText = '--';
+        }
 
         // Sync Professional Print Header
         document.getElementById('printProject').innerText = ui.inputs.projectName;

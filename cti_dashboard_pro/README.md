@@ -23,3 +23,9 @@ If you are running this locally:
 
 If you are running this on a VPS:
 - Refer to the `VPS_HOSTING_GUIDE.md` located in the root directory for instructions on deploying Python Systemd proxies.
+
+---
+
+### Engineering & Logic Guide
+For a deep dive into the "First Principles" of cooling towers, Merkel's Method, and the physics behind the dashboard, see:
+- [COOLING_TOWER_FUNDAMENTALS.md](docs/COOLING_TOWER_FUNDAMENTALS.md)

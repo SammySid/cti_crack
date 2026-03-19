@@ -4,7 +4,7 @@ setlocal EnableExtensions EnableDelayedExpansion
 set "ROOT_DIR=%~dp0"
 cd /d "%ROOT_DIR%"
 
-set "BACKEND_SCRIPT=%ROOT_DIR%app\backend\dashboard_server.py"
+set "BACKEND_SCRIPT=%ROOT_DIR%app\backend\main.py"
 set "DEFAULT_URL=http://localhost:8000"
 
 title SS Cooling Tower LTD - Dashboard Launcher
@@ -23,7 +23,7 @@ echo [0/4] Checking for existing server on port 8000...
 powershell -Command "Get-NetTCPConnection -LocalPort 8000 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }" >nul 2>&1
 
 echo [1/4] Installing/validating Python dependencies...
-"%PYTHON_EXE%" -m pip install --disable-pip-version-check --quiet --user xlsxwriter pandas openpyxl python-dateutil
+"%PYTHON_EXE%" -m pip install --disable-pip-version-check --quiet --user xlsxwriter pandas openpyxl python-dateutil fastapi uvicorn pydantic python-multipart
 if errorlevel 1 (
     echo [ERROR] Failed to install Python dependencies.
     goto :fatal
