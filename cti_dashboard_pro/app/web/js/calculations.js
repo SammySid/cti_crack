@@ -57,24 +57,41 @@ export const calculations = {
 
         let bestCWT = wbt + 1;
         let minDiff = Infinity;
+        let lowApproach = 0.01;
+        let highApproach = 80.0;
+        const tolerance = 1e-7;
 
-        for (let approach = 0.5; approach < 30; approach += 0.02) {
-            const cwtGuess = wbt + approach;
-            const hwt = cwtGuess + actualRange;
+        for (let i = 0; i < 100; i++) {
+            let midApproach = (lowApproach + highApproach) / 2;
+            let cwtGuess = wbt + midApproach;
+            let hwt = cwtGuess + actualRange;
 
-            if (hwt > 80 || cwtGuess < wbt) continue;
-
+            let demandKaVL;
             try {
-                const demandKaVL = calculations.calculateDemandKaVL(wbt, hwt, cwtGuess, actualLG);
-                if (isNaN(demandKaVL) || demandKaVL <= 0 || demandKaVL > 100) continue;
-
-                const diff = Math.abs(supplyKaVL - demandKaVL);
-                if (diff < minDiff) {
-                    minDiff = diff;
-                    bestCWT = cwtGuess;
-                }
-            } catch (e) {
+                demandKaVL = calculations.calculateDemandKaVL(wbt, hwt, cwtGuess, actualLG);
+            } catch (e) { demandKaVL = NaN; }
+            
+            if (isNaN(demandKaVL) || demandKaVL <= 0) {
+                lowApproach = midApproach;
                 continue;
+            }
+
+            let diff = demandKaVL - supplyKaVL;
+            let absDiff = Math.abs(diff);
+
+            if (absDiff < minDiff) {
+                minDiff = absDiff;
+                bestCWT = cwtGuess;
+            }
+
+            if (absDiff < tolerance) {
+                break;
+            }
+
+            if (diff > 0) {
+                lowApproach = midApproach;
+            } else {
+                highApproach = midApproach;
             }
         }
 
@@ -92,38 +109,53 @@ export const calculations = {
             return null;
         }
 
-        // We will guess the Approach (CWT - WBT). Common range is 0.5 to 30 as a fallback.
+        // We use Bisection Method to find the approach where Demand equals Supply
         // The relationship is invariant: HWT = CWT + Range 
-        // We want Demand KaV/L to exactly equal the Supply KaV/L
-        
+        let lowApproach = 0.01;
+        let highApproach = 80.0;
         let bestCwt = NaN;
         let bestDiff = Infinity;
         let matchedDemand = NaN;
+        const tolerance = 1e-7;
+        const maxIters = 100;
         
-        // Scan with a simple linear loop initially (we can use a bisect method if it's too slow but this is usually fast enough in JS)
-        // From 0.5 deg approach up to a max 30 deg approach
-        for (let approach = 0.5; approach <= 30.0; approach += 0.01) {
-            const guessCwt = wbt + approach;
-            const guessHwt = guessCwt + range;
+        for (let i = 0; i < maxIters; i++) {
+            let midApproach = (lowApproach + highApproach) / 2;
+            let guessCwt = wbt + midApproach;
+            let guessHwt = guessCwt + range;
 
+            let demandKavl;
             try {
-                // To avoid breaking the engine, ensure valid temps
-                if (guessHwt > 80 || guessCwt < wbt) continue;
-
-                const demandKavl = calculations.calculateDemandKaVL(wbt, guessHwt, guessCwt, lg);
-                if (isNaN(demandKavl) || demandKavl <= 0) continue;
-
-                const diff = Math.abs(demandKavl - supplyKavl);
-                if (diff < bestDiff) {
-                    bestDiff = diff;
-                    bestCwt = guessCwt;
-                    matchedDemand = demandKavl;
-                }
-                
-                // Since demand kaV/L decreases as approach increases, once we cross it we can optionally stop, 
-                // but diff scanning over the entire window guarantees we find the absolute minimum safely without getting stuck on local anomalies
+                demandKavl = calculations.calculateDemandKaVL(wbt, guessHwt, guessCwt, lg);
             } catch (e) {
+                demandKavl = NaN;
+            }
+            
+            if (isNaN(demandKavl) || demandKavl <= 0) {
+                // Invalid usually means approach is too low (Demand shoots to infinity)
+                lowApproach = midApproach;
                 continue;
+            }
+
+            let diff = demandKavl - supplyKavl;
+            let absDiff = Math.abs(diff);
+
+            if (absDiff < bestDiff) {
+                bestDiff = absDiff;
+                bestCwt = guessCwt;
+                matchedDemand = demandKavl;
+            }
+
+            if (absDiff < tolerance) {
+                break;
+            }
+
+            if (diff > 0) {
+                // Demand is higher than Supply. Need more driving force -> increase temperatures (approach).
+                lowApproach = midApproach;
+            } else {
+                // Demand is lower than Supply. Need less driving force -> decrease temperatures (approach).
+                highApproach = midApproach;
             }
         }
 
