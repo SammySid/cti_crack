@@ -21,7 +21,13 @@ from core.calculations import init as init_engines, get_psychrometric_props, fin
 from excel_gen import generate_excel_from_payload, sanitize_filename
 from excel_filter_service import generate_filtered_workbook, generate_filtered_workbook_from_directory
 
-app = FastAPI(title="SS Cooling Tower API")
+app = FastAPI(
+    title="SS Cooling Tower API",
+    docs_url=None,    # Disable /docs in production
+    redoc_url=None,   # Disable /redoc in production
+    openapi_url=None, # Disable /openapi.json schema dump
+)
+
 
 # Setup CORS
 app.add_middleware(
