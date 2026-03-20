@@ -29,7 +29,7 @@ VPS_HOST     = "130.162.191.58"
 VPS_USER     = "ubuntu"
 VPS_PASSWORD = "Stallion316##"
 VPS_SYNC_CMD = "/home/ubuntu/cooling-tower_pro/auto_sync.sh"
-BRANCH       = "main"
+BRANCH       = "master"
 
 REPO_ROOT = os.path.dirname(os.path.abspath(__file__))
 
