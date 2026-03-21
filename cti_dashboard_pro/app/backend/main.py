@@ -1,14 +1,13 @@
 import os
 import sys
 import tempfile
-import json
 import math
 from pathlib import Path
 from typing import List, Optional
 
 import uvicorn
-from fastapi import FastAPI, Depends, Form, UploadFile, File, Request, HTTPException
-from fastapi.responses import FileResponse, Response, JSONResponse
+from fastapi import FastAPI, Form, UploadFile, File, HTTPException
+from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
@@ -17,9 +16,18 @@ from pydantic import BaseModel
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "core"))
 
-from core.calculations import init as init_engines, get_psychrometric_props, find_cwt, solve_off_design_cwt
+from core.calculations import init as init_engines, find_cwt, solve_off_design_cwt
+from core.merkel_engine import merkel_kavl
+from core.psychro_engine import psychrometrics
 from excel_gen import generate_excel_from_payload, sanitize_filename
 from excel_filter_service import generate_filtered_workbook, generate_filtered_workbook_from_directory
+
+
+def _model_to_dict(model: BaseModel) -> dict:
+    # Support both Pydantic v1 (`dict`) and v2 (`model_dump`) at runtime.
+    if hasattr(model, "model_dump"):
+        return model.model_dump()
+    return model.dict()
 
 app = FastAPI(
     title="SS Cooling Tower API",
@@ -98,7 +106,6 @@ class KaVLRequest(BaseModel):
 # Calculation endpoints
 @app.post("/api/calculate/kavl")
 async def api_calc_kavl(req: KaVLRequest):
-    from core.merkel_engine import merkel_kavl
     try:
         res = merkel_kavl(req.hwt, req.cwt, req.wbt, req.lg)
         return res
@@ -107,8 +114,6 @@ async def api_calc_kavl(req: KaVLRequest):
 
 @app.post("/api/calculate/psychro")
 async def api_calc_psychro(req: PsychroRequest):
-    # we just need to import psychrometrics
-    from core.psychro_engine import psychrometrics
     try:
         res = psychrometrics(req.dbt, req.wbt, req.alt)
         return res
@@ -135,7 +140,7 @@ async def api_calc_curves(req: CurveRequest):
             raise ValueError("Invalid axis range")
 
         wbt = wbt_start
-        inputs_dict = req.inputs.dict()
+        inputs_dict = _model_to_dict(req.inputs)
         while wbt <= wbt_end:
             # Format wbt exactly like JS loop
             wbt_val = float(f"{wbt:.2f}")

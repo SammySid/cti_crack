@@ -5,6 +5,7 @@ from datetime import datetime
 
 import pandas as pd
 from dateutil import parser
+from typing import List, Dict, Any
 
 
 def _parse_user_time(time_str):
@@ -93,7 +94,7 @@ def _merge_sensor_dfs(dfs, date_col, time_col):
     if not dfs:
         return pd.DataFrame()
 
-    working = []
+    working: List[Any] = []
     for df in dfs:
         copy_df = df.copy()
         dt_str = copy_df[date_col].astype(str) + ' ' + copy_df[time_col].astype(str)
@@ -185,7 +186,7 @@ def _create_report_layout(writer, master_df, sheet_name='Report Layout'):
     wbt_cols = sorted([c for df in wbt_dfs for c in df.columns if c not in [date_col, time_col, '_merge_key']])
 
     max_rows = max(len(water_df), len(air_df))
-    final_df_dict = {}
+    final_df_dict: Dict[str, Any] = {}
     if not water_df.empty:
         final_df_dict['Date_W'] = water_df[date_col].tolist() + [None] * (max_rows - len(water_df))
         final_df_dict['Time_W'] = water_df[time_col].tolist() + [None] * (max_rows - len(water_df))
@@ -228,8 +229,8 @@ def _create_report_layout(writer, master_df, sheet_name='Report Layout'):
     if total_cols > 0:
         worksheet.merge_range(0, 0, 0, total_cols - 1, 'Performance Test Consolidated Report', title_fmt)
 
-    col_ptr = 0
-    start_air = 0
+    col_ptr: int = 0
+    start_air: int = 0
     if not water_df.empty:
         worksheet.write(1, col_ptr, 'Date', date_time_fmt)
         worksheet.write(1, col_ptr + 1, 'Time', date_time_fmt)
@@ -253,7 +254,7 @@ def _create_report_layout(writer, master_df, sheet_name='Report Layout'):
                 col_ptr += 1
 
     if not air_df.empty:
-        start_air = col_ptr if not water_df.empty else 0
+        start_air = int(col_ptr) if not water_df.empty else 0
         worksheet.write(1, start_air, 'Date', date_time_fmt)
         worksheet.write(1, start_air + 1, 'Time', date_time_fmt)
         worksheet.merge_range(2, start_air, 2, start_air + 1, 'Sensor No.', sensor_fmt)
@@ -376,57 +377,30 @@ def generate_filtered_workbook(file_items, start_time_str, end_time_str):
         raise ValueError('Start time must be earlier than or equal to end time.')
 
     filtered_dataframes = []
-    summary_rows = []
 
     for file_name, file_bytes in file_items:
         try:
             df, time_col = _read_excel_with_time_header(file_bytes)
             if df is None or time_col is None:
-                summary_rows.append({
-                    'File Name': file_name,
-                    'Original Rows': '-',
-                    'Filtered Rows': '-',
-                    'Status': "No 'Time' column found"
-                })
                 continue
 
-            original_rows = len(df)
             parsed_times = _parse_times(df[time_col])
             mask = (parsed_times >= start_time) & (parsed_times <= end_time)
             filtered_df = df[mask.fillna(False)].copy()
 
-            filtered_rows = len(filtered_df)
-            if filtered_rows == 0:
-                summary_rows.append({
-                    'File Name': file_name,
-                    'Original Rows': original_rows,
-                    'Filtered Rows': 0,
-                    'Status': 'No matching rows'
-                })
+            if len(filtered_df) == 0:
                 continue
 
             filtered_df.insert(0, 'Source File', file_name)
             filtered_dataframes.append(filtered_df)
-            summary_rows.append({
-                'File Name': file_name,
-                'Original Rows': original_rows,
-                'Filtered Rows': filtered_rows,
-                'Status': 'Processed'
-            })
-        except Exception as exc:
-            summary_rows.append({
-                'File Name': file_name,
-                'Original Rows': '-',
-                'Filtered Rows': '-',
-                'Status': f'Error: {exc}'
-            })
+        except Exception:
+            continue
 
     if not filtered_dataframes:
         raise ValueError('No rows matched the selected time range in uploaded files.')
 
     master_df = pd.concat(filtered_dataframes, ignore_index=True)
     master_df.dropna(axis=1, how='all', inplace=True)
-    summary_df = pd.DataFrame(summary_rows)
 
     buffer = BytesIO()
     with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
