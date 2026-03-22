@@ -97,6 +97,9 @@ Primary outcomes supported:
 - `app/backend/excel_gen.py` generates thermal report workbook from frontend payload
 - `app/backend/excel_filter_service.py` performs filtering/merge/report-layout generation
 
+> **⚠️ Python Backend Initialization Gotcha:**  
+> The Math Engines (`merkel_engine.py` and `psychro_engine.py`) load crucial binary lookup tables into module-level variables on startup. To prevent them from duplicating into uninitialized instances (which drops accuracy to generic fallbacks), you **must use relative imports** for these engines inside the `core/` folder (e.g. `from .psychro_engine import init_psychro_engine` inside `calculations.py`).
+
 ---
 
 ## 4) Data Flow
