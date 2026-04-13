@@ -637,13 +637,15 @@
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label for="filterStartTime" class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Start Time</label>
-                            <input id="filterStartTime" type="time" value="16:00"
+                            <input id="filterStartTime" type="text" placeholder="e.g. 08:00 or 8am" value="16:00"
                                 class="w-full input-premium rounded-lg px-3 py-2 text-sm font-mono" />
+                            <p class="text-[10px] text-slate-500 mt-1">Accepts: <code>08:00</code>, <code>8am</code>, <code>8:00 PM</code>, <code>20:00</code></p>
                         </div>
                         <div>
                             <label for="filterEndTime" class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">End Time</label>
-                            <input id="filterEndTime" type="time" value="17:00"
+                            <input id="filterEndTime" type="text" placeholder="e.g. 20:00 or 8pm" value="17:00"
                                 class="w-full input-premium rounded-lg px-3 py-2 text-sm font-mono" />
+                            <p class="text-[10px] text-slate-500 mt-1">Accepts: <code>20:00</code>, <code>8pm</code>, <code>8:00 PM</code>, <code>08:00</code></p>
                         </div>
                     </div>
 
