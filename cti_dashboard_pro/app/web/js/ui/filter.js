@@ -1,35 +1,79 @@
+// ── 12-hour custom time picker helpers ───────────────────────────────────────
+// Returns a string like "4:00 PM" from the three select elements.
+function _getPickerTime(hourId, minId, ampmId) {
+    const h  = document.getElementById(hourId)?.value  || '04';
+    const m  = document.getElementById(minId)?.value   || '00';
+    const ap = document.getElementById(ampmId)?.value  || 'PM';
+    return `${parseInt(h, 10)}:${m} ${ap}`;   // e.g. "4:00 PM"
+}
+
+// Parses any time string ("4:00 PM", "16:00", "4pm") and sets the selects.
+function _setPickerTime(hourId, minId, ampmId, timeStr) {
+    if (!timeStr) return;
+    const str = String(timeStr).trim().toLowerCase();
+    let hours = 4, mins = 0, ampm = 'PM';
+
+    const hasPm = str.includes('pm');
+    const hasAm = str.includes('am');
+    const is12h = hasPm || hasAm;
+    ampm = hasPm ? 'PM' : 'AM';
+
+    const timePart = str.replace(/[apm]/g, '').trim();
+    const [hStr, mStr] = timePart.split(':');
+    hours = parseInt(hStr, 10) || 0;
+    mins  = parseInt(mStr, 10) || 0;
+
+    if (!is12h) {
+        // 24h input → convert
+        ampm  = hours >= 12 ? 'PM' : 'AM';
+        hours = hours % 12 || 12;
+    } else {
+        if (hours === 0) hours = 12;
+        if (hours > 12)  hours = hours % 12 || 12;
+    }
+
+    // Snap minutes to nearest 5
+    mins = Math.round(mins / 5) * 5;
+    if (mins >= 60) mins = 55;
+
+    const hEl  = document.getElementById(hourId);
+    const mEl  = document.getElementById(minId);
+    const apEl = document.getElementById(ampmId);
+
+    if (hEl)  hEl.value  = String(hours).padStart(2, '0');
+    if (mEl)  mEl.value  = String(mins).padStart(2, '0');
+    if (apEl) apEl.value = ampm;
+}
+
+// ── UI state ─────────────────────────────────────────────────────────────────
 export function updateFilterUiState(ui, message = '') {
     const filterStatus = document.getElementById('filterStatus');
-    const panelStatus = document.getElementById('filterPanelStatus');
-    const runBtn = document.getElementById('runFilterAction');
+    const panelStatus  = document.getElementById('filterPanelStatus');
+    const runBtn       = document.getElementById('runFilterAction');
 
     if (runBtn) {
         runBtn.disabled = ui.isFiltering;
-        runBtn.classList.toggle('opacity-50', ui.isFiltering);
+        runBtn.classList.toggle('opacity-50',        ui.isFiltering);
         runBtn.classList.toggle('cursor-not-allowed', ui.isFiltering);
         runBtn.innerText = ui.isFiltering ? 'Processing...' : 'Generate Filtered Excel';
     }
 
     const resolvedMessage = message || (ui.isFiltering ? 'Processing uploaded files...' : 'Filter tool ready.');
     if (filterStatus) filterStatus.innerText = resolvedMessage;
-    if (panelStatus) panelStatus.innerText = resolvedMessage;
+    if (panelStatus)  panelStatus.innerText  = resolvedMessage;
 }
 
+// ── Process-All toggle ────────────────────────────────────────────────────────
 function _applyProcessAllState(isAll) {
-    const startInput = document.getElementById('filterStartTime');
-    const endInput = document.getElementById('filterEndTime');
-    const timeGrid = startInput?.closest('.grid');
-    if (startInput) {
-        startInput.disabled = isAll;
-        startInput.style.opacity = isAll ? '0.35' : '';
-    }
-    if (endInput) {
-        endInput.disabled = isAll;
-        endInput.style.opacity = isAll ? '0.35' : '';
-    }
-    if (timeGrid) {
-        timeGrid.style.pointerEvents = isAll ? 'none' : '';
-    }
+    ['filterStartTimeGroup', 'filterEndTimeGroup'].forEach(id => {
+        const group = document.getElementById(id);
+        if (!group) return;
+        group.querySelectorAll('select').forEach(s => {
+            s.disabled = isAll;
+        });
+        group.style.opacity      = isAll ? '0.35' : '';
+        group.style.pointerEvents = isAll ? 'none'  : '';
+    });
 }
 
 export function bindFilterProcessAllToggle() {
@@ -39,44 +83,48 @@ export function bindFilterProcessAllToggle() {
     }
 }
 
+// ── Sync stored settings → UI ─────────────────────────────────────────────────
 export function syncFilterSettingsToUi(ui) {
-    const pathInput = document.getElementById('filterSourcePath');
+    const pathInput    = document.getElementById('filterSourcePath');
     const destPathInput = document.getElementById('filterDestPath');
-    const startInput = document.getElementById('filterStartTime');
-    const endInput = document.getElementById('filterEndTime');
     const processAllChk = document.getElementById('filterProcessAll');
 
-    if (pathInput) pathInput.value = ui.filterSettings.sourcePath || '';
+    if (pathInput)    pathInput.value    = ui.filterSettings.sourcePath || '';
     if (destPathInput) destPathInput.value = ui.filterSettings.destPath || '';
-    if (startInput) startInput.value = ui.filterSettings.startTime || '16:00';
-    if (endInput) endInput.value = ui.filterSettings.endTime || '17:00';
+
+    // Restore pickers (fall back to 4:00 PM / 5:00 PM if nothing stored)
+    _setPickerTime('filterStartHour', 'filterStartMin', 'filterStartAmPm',
+        ui.filterSettings.startTime || '16:00');
+    _setPickerTime('filterEndHour',   'filterEndMin',   'filterEndAmPm',
+        ui.filterSettings.endTime   || '17:00');
+
     if (processAllChk) {
         processAllChk.checked = ui.filterSettings.processAll || false;
         _applyProcessAllState(processAllChk.checked);
     }
 }
 
+// ── Main filter action ────────────────────────────────────────────────────────
 export async function runFilterTool(ui) {
     if (ui.isFiltering) return;
 
-    const startInput = document.getElementById('filterStartTime');
-    const endInput = document.getElementById('filterEndTime');
     const sourcePathInput = document.getElementById('filterSourcePath');
-    const destPathInput = document.getElementById('filterDestPath');
-    const folderInput = document.getElementById('filterExcelFolder');
-    const filesInput = document.getElementById('filterExcelFiles');
-    const processAllChk = document.getElementById('filterProcessAll');
+    const destPathInput   = document.getElementById('filterDestPath');
+    const folderInput     = document.getElementById('filterExcelFolder');
+    const filesInput      = document.getElementById('filterExcelFiles');
+    const processAllChk   = document.getElementById('filterProcessAll');
 
     const processAll = processAllChk?.checked || false;
-    const startTime = processAll ? '' : (startInput?.value || '');
-    const endTime = processAll ? '' : (endInput?.value || '');
+    const startTime  = processAll ? '' : _getPickerTime('filterStartHour', 'filterStartMin', 'filterStartAmPm');
+    const endTime    = processAll ? '' : _getPickerTime('filterEndHour',   'filterEndMin',   'filterEndAmPm');
     const sourcePath = sourcePathInput?.value?.trim() || '';
-    const destPath = destPathInput?.value?.trim() || '';
+    const destPath   = destPathInput?.value?.trim()   || '';
+
     const folderFiles = folderInput?.files ? Array.from(folderInput.files) : [];
-    const manualFiles = filesInput?.files ? Array.from(filesInput.files) : [];
-    const files = folderFiles.length > 0 ? folderFiles : manualFiles;
+    const manualFiles = filesInput?.files  ? Array.from(filesInput.files)  : [];
+    const files       = folderFiles.length > 0 ? folderFiles : manualFiles;
     const SUPPORTED_EXT = ['.xlsx', '.xls'];
-    const excelFiles = files.filter((file) => SUPPORTED_EXT.some(ext => file.name.toLowerCase().endsWith(ext)));
+    const excelFiles  = files.filter(f => SUPPORTED_EXT.some(ext => f.name.toLowerCase().endsWith(ext)));
 
     if (!processAll && (!startTime || !endTime)) {
         ui.updateFilterUiState('Please choose both start and end time, or enable "Process All".');
@@ -87,13 +135,7 @@ export async function runFilterTool(ui) {
         return;
     }
 
-    ui.filterSettings = {
-        sourcePath,
-        destPath,
-        startTime,
-        endTime,
-        processAll
-    };
+    ui.filterSettings = { sourcePath, destPath, startTime, endTime, processAll };
     ui.saveFilterSettings();
 
     ui.isFiltering = true;
@@ -106,19 +148,16 @@ export async function runFilterTool(ui) {
         let response;
         if (sourcePath) {
             response = await fetch('/api/filter-excel-local', {
-                method: 'POST',
+                method:  'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ startTime, endTime, sourcePath, destPath })
+                body:    JSON.stringify({ startTime, endTime, sourcePath, destPath })
             });
         } else {
             const formData = new FormData();
             formData.append('startTime', startTime);
-            formData.append('endTime', endTime);
-            excelFiles.forEach((file) => formData.append('files', file, file.name));
-            response = await fetch('/api/filter-excel', {
-                method: 'POST',
-                body: formData
-            });
+            formData.append('endTime',   endTime);
+            excelFiles.forEach(f => formData.append('files', f, f.name));
+            response = await fetch('/api/filter-excel', { method: 'POST', body: formData });
         }
 
         if (!response.ok) {
@@ -128,9 +167,7 @@ export async function runFilterTool(ui) {
                 try {
                     const errorJson = JSON.parse(errorText);
                     message = errorJson.detail || errorJson.error || message;
-                } catch (parseError) {
-                    message = errorText;
-                }
+                } catch { message = errorText; }
             }
             throw new Error(message);
         }
@@ -140,14 +177,14 @@ export async function runFilterTool(ui) {
             const result = await response.json();
             finalMessage = result.message || 'Filtered master Excel securely saved to destination.';
         } else {
-            const blob = await response.blob();
+            const blob     = await response.blob();
             const fileName = ui.getDownloadFileName(response.headers.get('content-disposition')) || 'Master_Filtered.xlsx';
             ui.downloadBlob(blob, fileName);
             finalMessage = 'Filtered master Excel downloaded successfully.';
         }
-        
+
         if (folderInput) folderInput.value = '';
-        if (filesInput) filesInput.value = '';
+        if (filesInput)  filesInput.value  = '';
     } catch (error) {
         console.error('Filter export failed', error);
         finalMessage = error.message || 'Filtering failed. Please try again.';

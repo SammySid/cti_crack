@@ -635,17 +635,51 @@
                     </div>
 
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- START TIME custom 12h picker -->
                         <div>
-                            <label for="filterStartTime" class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Start Time</label>
-                            <input id="filterStartTime" type="text" placeholder="e.g. 08:00 or 8am" value="16:00"
-                                class="w-full input-premium rounded-lg px-3 py-2 text-sm font-mono" />
-                            <p class="text-[10px] text-slate-500 mt-1">Accepts: <code>08:00</code>, <code>8am</code>, <code>8:00 PM</code>, <code>20:00</code></p>
+                            <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Start Time</label>
+                            <div id="filterStartTimeGroup" class="w-full input-premium rounded-lg px-3 py-2 flex items-center gap-1">
+                                <select id="filterStartHour" class="bg-transparent text-sm font-mono text-slate-100 border-none outline-none cursor-pointer">
+                                    <option value="01">01</option><option value="02">02</option><option value="03">03</option>
+                                    <option value="04" selected>04</option><option value="05">05</option><option value="06">06</option>
+                                    <option value="07">07</option><option value="08">08</option><option value="09">09</option>
+                                    <option value="10">10</option><option value="11">11</option><option value="12">12</option>
+                                </select>
+                                <span class="text-slate-500 font-mono select-none px-0.5">:</span>
+                                <select id="filterStartMin" class="bg-transparent text-sm font-mono text-slate-100 border-none outline-none cursor-pointer">
+                                    <option value="00" selected>00</option><option value="05">05</option><option value="10">10</option>
+                                    <option value="15">15</option><option value="20">20</option><option value="25">25</option>
+                                    <option value="30">30</option><option value="35">35</option><option value="40">40</option>
+                                    <option value="45">45</option><option value="50">50</option><option value="55">55</option>
+                                </select>
+                                <select id="filterStartAmPm" class="bg-transparent text-sm font-mono text-slate-100 border-none outline-none cursor-pointer ml-1">
+                                    <option value="AM">AM</option>
+                                    <option value="PM" selected>PM</option>
+                                </select>
+                            </div>
                         </div>
+                        <!-- END TIME custom 12h picker -->
                         <div>
-                            <label for="filterEndTime" class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">End Time</label>
-                            <input id="filterEndTime" type="text" placeholder="e.g. 20:00 or 8pm" value="17:00"
-                                class="w-full input-premium rounded-lg px-3 py-2 text-sm font-mono" />
-                            <p class="text-[10px] text-slate-500 mt-1">Accepts: <code>20:00</code>, <code>8pm</code>, <code>8:00 PM</code>, <code>08:00</code></p>
+                            <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">End Time</label>
+                            <div id="filterEndTimeGroup" class="w-full input-premium rounded-lg px-3 py-2 flex items-center gap-1">
+                                <select id="filterEndHour" class="bg-transparent text-sm font-mono text-slate-100 border-none outline-none cursor-pointer">
+                                    <option value="01">01</option><option value="02">02</option><option value="03">03</option>
+                                    <option value="04">04</option><option value="05" selected>05</option><option value="06">06</option>
+                                    <option value="07">07</option><option value="08">08</option><option value="09">09</option>
+                                    <option value="10">10</option><option value="11">11</option><option value="12">12</option>
+                                </select>
+                                <span class="text-slate-500 font-mono select-none px-0.5">:</span>
+                                <select id="filterEndMin" class="bg-transparent text-sm font-mono text-slate-100 border-none outline-none cursor-pointer">
+                                    <option value="00" selected>00</option><option value="05">05</option><option value="10">10</option>
+                                    <option value="15">15</option><option value="20">20</option><option value="25">25</option>
+                                    <option value="30">30</option><option value="35">35</option><option value="40">40</option>
+                                    <option value="45">45</option><option value="50">50</option><option value="55">55</option>
+                                </select>
+                                <select id="filterEndAmPm" class="bg-transparent text-sm font-mono text-slate-100 border-none outline-none cursor-pointer ml-1">
+                                    <option value="AM">AM</option>
+                                    <option value="PM" selected>PM</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
 
