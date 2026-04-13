@@ -51,6 +51,76 @@ function _normalizeTimeText(raw) {
     return `${h}:${String(m).padStart(2, '0')} ${ampm}`;
 }
 
+/**
+ * Attaches smart typing behaviour to a time text input:
+ *  • focus         → selects all so the user can retype immediately
+ *  • input (digits only) → auto-inserts the colon as soon as the hour is complete
+ *                   e.g. type "3" → "3:"  |  type "20" → "3:20"
+ *                   type "12" → "12:"  |  type "30" → "12:30"
+ *  • input (letters present) → skipped so the user can type "pm" freely
+ *  • blur          → full normalise to "H:MM AM/PM"
+ *
+ * Guard: binding is skipped if already applied (data-mask-bound attribute).
+ */
+function _bindTimeMaskInput(el) {
+    if (!el || el.dataset.maskBound) return;
+    el.dataset.maskBound = '1';
+
+    let _deleting = false;
+
+    el.addEventListener('focus', () => el.select());
+
+    el.addEventListener('keydown', (e) => {
+        _deleting = e.key === 'Backspace' || e.key === 'Delete';
+    });
+
+    el.addEventListener('input', () => {
+        if (_deleting) return;
+
+        const raw = el.value;
+        // If user is typing letters (am/pm), skip masking — blur will normalise
+        if (/[a-z]/i.test(raw)) return;
+
+        const digits = raw.replace(/\D/g, '');
+        if (!digits) return;
+
+        const d0 = parseInt(digits[0], 10);
+        let hPart, mPart;
+
+        if (d0 >= 2) {
+            // First digit 2-9 → single-digit hour, rest are minutes
+            hPart = digits[0];
+            mPart = digits.slice(1, 3);
+        } else if (digits.length >= 2) {
+            const twoD = parseInt(digits.slice(0, 2), 10);
+            if (twoD >= 10 && twoD <= 12) {
+                // 10 / 11 / 12 → two-digit hour
+                hPart = digits.slice(0, 2);
+                mPart = digits.slice(2, 4);
+            } else {
+                // 00, 01, 13+ → treat first digit as hour
+                hPart = digits[0];
+                mPart = digits.slice(1, 3);
+            }
+        } else {
+            // Single 0 or 1 — still composing the hour, show as-is
+            el.value = digits;
+            return;
+        }
+
+        const formatted = mPart.length > 0 ? `${hPart}:${mPart}` : `${hPart}:`;
+        if (el.value !== formatted) {
+            el.value = formatted;
+            el.setSelectionRange(formatted.length, formatted.length);
+        }
+    });
+
+    el.addEventListener('blur', () => {
+        const n = _normalizeTimeText(el.value);
+        if (n) el.value = n;
+    });
+}
+
 // ── UI state ─────────────────────────────────────────────────────────────────
 export function updateFilterUiState(ui, message = '') {
     const filterStatus = document.getElementById('filterStatus');
@@ -102,14 +172,9 @@ export function syncFilterSettingsToUi(ui) {
     if (startInput) startInput.value = _normalizeTimeText(ui.filterSettings.startTime || '4:00 PM');
     if (endInput)   endInput.value   = _normalizeTimeText(ui.filterSettings.endTime   || '5:00 PM');
 
-    // Wire blur normalisation so typing "16:00" auto-converts to "4:00 PM" on focus-out
-    [startInput, endInput].forEach(el => {
-        if (!el) return;
-        el.addEventListener('blur', () => {
-            const n = _normalizeTimeText(el.value);
-            if (n) el.value = n;
-        });
-    });
+    // Wire smart mask + blur normalisation (idempotent — guard inside _bindTimeMaskInput)
+    _bindTimeMaskInput(startInput);
+    _bindTimeMaskInput(endInput);
 
     if (processAllChk) {
         processAllChk.checked = ui.filterSettings.processAll || false;
