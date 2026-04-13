@@ -1,51 +1,54 @@
-// ── 12-hour custom time picker helpers ───────────────────────────────────────
-// Returns a string like "4:00 PM" from the three select elements.
-// Always 12h format — never influenced by OS/browser locale.
-function _getPickerTime(hourId, minId, ampmId) {
-    const h  = document.getElementById(hourId)?.value  || '04';
-    const m  = document.getElementById(minId)?.value   || '00';
-    const ap = document.getElementById(ampmId)?.value  || 'PM';
-    const hNum = parseInt(h, 10) || 4;
-    const mPad = String(parseInt(m, 10) || 0).padStart(2, '0');
-    return `${hNum}:${mPad} ${ap}`;   // e.g. "4:00 PM"
-}
+// ── Time helpers — universal 12h, typeable, locale-independent ───────────────
 
-// Parses any time string ("4:00 PM", "16:00", "4pm") and sets the selects.
-function _setPickerTime(hourId, minId, ampmId, timeStr) {
-    if (!timeStr) return;
-    const str = String(timeStr).trim().toLowerCase();
-    let hours = 4, mins = 0, ampm = 'PM';
+/**
+ * Accepts any reasonable time string the user might type and returns a
+ * normalised "H:MM AM/PM" string.  Examples:
+ *   "16:00"  → "4:00 PM"
+ *   "4pm"    → "4:00 PM"
+ *   "4:30pm" → "4:30 PM"
+ *   "430"    → "4:30 AM"  (4 digits = HHMM)
+ *   "4"      → "4:00 AM"
+ *   "4:00 PM"→ "4:00 PM"  (already correct — unchanged)
+ */
+function _normalizeTimeText(raw) {
+    if (!raw) return '';
+    const str = String(raw).trim().toLowerCase().replace(/\s+/g, '');
 
     const hasPm = str.includes('pm');
     const hasAm = str.includes('am');
     const is12h = hasPm || hasAm;
-    ampm = hasPm ? 'PM' : 'AM';
 
-    const timePart = str.replace(/[apm]/g, '').trim();
-    const [hStr, mStr] = timePart.split(':');
-    hours = parseInt(hStr, 10) || 0;
-    mins  = parseInt(mStr, 10) || 0;
+    // Strip am/pm suffix letters
+    const digits = str.replace(/[apm]/g, '').trim();
 
-    if (!is12h) {
-        // 24h input → convert
-        ampm  = hours >= 12 ? 'PM' : 'AM';
-        hours = hours % 12 || 12;
+    let h, m;
+    if (digits.includes(':')) {
+        const [hStr, mStr] = digits.split(':');
+        h = parseInt(hStr, 10) || 0;
+        m = parseInt(mStr, 10) || 0;
+    } else if (digits.length >= 3) {
+        // e.g. "430" or "1600"
+        const padded = digits.padStart(4, '0');
+        h = parseInt(padded.slice(0, -2), 10) || 0;
+        m = parseInt(padded.slice(-2), 10) || 0;
     } else {
-        if (hours === 0) hours = 12;
-        if (hours > 12)  hours = hours % 12 || 12;
+        h = parseInt(digits, 10) || 0;
+        m = 0;
     }
 
-    // Snap minutes to nearest 5
-    mins = Math.round(mins / 5) * 5;
-    if (mins >= 60) mins = 55;
+    if (m > 59) m = 59;
 
-    const hEl  = document.getElementById(hourId);
-    const mEl  = document.getElementById(minId);
-    const apEl = document.getElementById(ampmId);
+    let ampm;
+    if (is12h) {
+        ampm = hasPm ? 'PM' : 'AM';
+        if (h === 0) h = 12;
+        if (h > 12)  h = h % 12 || 12;
+    } else {
+        ampm = h >= 12 ? 'PM' : 'AM';
+        h = h % 12 || 12;
+    }
 
-    if (hEl)  hEl.value  = String(hours).padStart(2, '0');
-    if (mEl)  mEl.value  = String(mins).padStart(2, '0');
-    if (apEl) apEl.value = ampm;
+    return `${h}:${String(m).padStart(2, '0')} ${ampm}`;
 }
 
 // ── UI state ─────────────────────────────────────────────────────────────────
@@ -68,14 +71,12 @@ export function updateFilterUiState(ui, message = '') {
 
 // ── Process-All toggle ────────────────────────────────────────────────────────
 function _applyProcessAllState(isAll) {
-    ['filterStartTimeGroup', 'filterEndTimeGroup'].forEach(id => {
-        const group = document.getElementById(id);
-        if (!group) return;
-        group.querySelectorAll('select').forEach(s => {
-            s.disabled = isAll;
-        });
-        group.style.opacity      = isAll ? '0.35' : '';
-        group.style.pointerEvents = isAll ? 'none'  : '';
+    ['filterStartTime', 'filterEndTime'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.disabled           = isAll;
+        el.style.opacity      = isAll ? '0.35' : '';
+        el.style.pointerEvents = isAll ? 'none'  : '';
     });
 }
 
@@ -88,18 +89,27 @@ export function bindFilterProcessAllToggle() {
 
 // ── Sync stored settings → UI ─────────────────────────────────────────────────
 export function syncFilterSettingsToUi(ui) {
-    const pathInput    = document.getElementById('filterSourcePath');
+    const pathInput     = document.getElementById('filterSourcePath');
     const destPathInput = document.getElementById('filterDestPath');
+    const startInput    = document.getElementById('filterStartTime');
+    const endInput      = document.getElementById('filterEndTime');
     const processAllChk = document.getElementById('filterProcessAll');
 
-    if (pathInput)    pathInput.value    = ui.filterSettings.sourcePath || '';
-    if (destPathInput) destPathInput.value = ui.filterSettings.destPath || '';
+    if (pathInput)     pathInput.value     = ui.filterSettings.sourcePath || '';
+    if (destPathInput) destPathInput.value = ui.filterSettings.destPath   || '';
 
-    // Restore pickers (fall back to 4:00 PM / 5:00 PM if nothing stored)
-    _setPickerTime('filterStartHour', 'filterStartMin', 'filterStartAmPm',
-        ui.filterSettings.startTime || '16:00');
-    _setPickerTime('filterEndHour',   'filterEndMin',   'filterEndAmPm',
-        ui.filterSettings.endTime   || '17:00');
+    // Restore saved times, normalising to 12h display regardless of what was stored
+    if (startInput) startInput.value = _normalizeTimeText(ui.filterSettings.startTime || '4:00 PM');
+    if (endInput)   endInput.value   = _normalizeTimeText(ui.filterSettings.endTime   || '5:00 PM');
+
+    // Wire blur normalisation so typing "16:00" auto-converts to "4:00 PM" on focus-out
+    [startInput, endInput].forEach(el => {
+        if (!el) return;
+        el.addEventListener('blur', () => {
+            const n = _normalizeTimeText(el.value);
+            if (n) el.value = n;
+        });
+    });
 
     if (processAllChk) {
         processAllChk.checked = ui.filterSettings.processAll || false;
@@ -118,8 +128,10 @@ export async function runFilterTool(ui) {
     const processAllChk   = document.getElementById('filterProcessAll');
 
     const processAll = processAllChk?.checked || false;
-    const startTime  = processAll ? '' : _getPickerTime('filterStartHour', 'filterStartMin', 'filterStartAmPm');
-    const endTime    = processAll ? '' : _getPickerTime('filterEndHour',   'filterEndMin',   'filterEndAmPm');
+    const rawStart   = document.getElementById('filterStartTime')?.value?.trim() || '';
+    const rawEnd     = document.getElementById('filterEndTime')?.value?.trim()   || '';
+    const startTime  = processAll ? '' : (_normalizeTimeText(rawStart) || rawStart);
+    const endTime    = processAll ? '' : (_normalizeTimeText(rawEnd)   || rawEnd);
     const sourcePath = sourcePathInput?.value?.trim() || '';
     const destPath   = destPathInput?.value?.trim()   || '';
 
