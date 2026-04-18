@@ -219,6 +219,65 @@ async function _calcAtc(design, test) {
     return resp.json();
 }
 
+// ── Calculation walkthrough builder ───────────────────────────────────────
+
+function _buildCalcHtml(d, t, r) {
+    if (r.adj_flow == null || r.pred_cwt == null) return '';
+    const f2 = v => (v != null ? Number(v).toFixed(2) : '—');
+    const f1 = v => (v != null ? Number(v).toFixed(1) : '—');
+    const f4 = v => (v != null ? Number(v).toFixed(4) : '—');
+
+    const sfColor  = r.shortfall >= 0 ? 'text-rose-400' : 'text-emerald-400';
+    const capColor = r.capability >= 100 ? 'text-emerald-400' : r.capability >= 95 ? 'text-amber-400' : 'text-rose-400';
+
+    // Combined flow correction = (P_fan_design/P_fan_test)^(1/3) × (ρ_test/ρ_design)^(1/3)
+    const totalCorr  = r.adj_flow / t.flow;
+    const avgTestT   = (t.hwt + t.cwt) / 2;
+    const avgDesignT = (d.hwt + d.cwt) / 2;
+
+    return `
+<div class="mt-1 pt-3 border-t border-violet-500/15 space-y-3 text-[10px] font-mono">
+  <p class="text-[8px] font-black uppercase tracking-widest text-violet-400/60 mb-1">— ATC-105 Calculation Steps —</p>
+
+  <div class="space-y-0.5">
+    <p class="text-[8px] font-bold uppercase tracking-widest text-violet-400/80">① Test Range</p>
+    <p class="text-slate-400">HWT − CWT = <span class="text-slate-300">${f2(t.hwt)}</span> − <span class="text-slate-300">${f2(t.cwt)}</span> = <span class="text-white font-bold">${f2(r.test_range)} °C</span></p>
+    <p class="text-[9px] text-slate-600">Actual temperature drop across the tower during this test.</p>
+  </div>
+
+  <div class="space-y-0.5">
+    <p class="text-[8px] font-bold uppercase tracking-widest text-violet-400/80">② Adjusted Water Flow</p>
+    <p class="text-slate-400">Mean test water = (${f2(t.hwt)} + ${f2(t.cwt)}) / 2 = <span class="text-slate-300">${f2(avgTestT)} °C</span></p>
+    <p class="text-slate-400">Mean design water = (${f2(d.hwt)} + ${f2(d.cwt)}) / 2 = <span class="text-slate-300">${f2(avgDesignT)} °C</span></p>
+    <p class="text-slate-400">Correction = (P_fan_des/P_fan_test)^⅓ × (ρ_test/ρ_des)^⅓ = <span class="text-slate-300">${f4(totalCorr)}</span></p>
+    <p class="text-slate-400 pl-2 text-[9px] text-slate-500">= (${f2(d.fan_power)}/${f2(t.fan_power)})^⅓ × Kell-density-ratio^⅓</p>
+    <p class="text-slate-400">Q_adj = ${f1(t.flow)} × ${f4(totalCorr)} = <span class="text-white font-bold">${f1(r.adj_flow)} m³/hr</span></p>
+    <p class="text-[9px] text-slate-600">Normalises flow to design fan power and water density conditions.</p>
+  </div>
+
+  <div class="space-y-0.5">
+    <p class="text-[8px] font-bold uppercase tracking-widest text-violet-400/80">③ Predicted CWT — Cross Plot 1</p>
+    <p class="text-slate-400">Merkel KaV/L computed at: WBT=${f2(t.wbt)}°C · HWT=${f2(t.hwt)}°C · CWT=${f2(t.cwt)}°C · L/G=${f2(d.lg)}</p>
+    <p class="text-slate-400">At Q_adj = ${f1(r.adj_flow)} m³/hr on Cross Plot 1:</p>
+    <p class="text-slate-400">→ Pred. CWT = <span class="text-cyan-300 font-bold">${f2(r.pred_cwt)} °C</span></p>
+    <p class="text-[9px] text-slate-600">CWT a 100%-capable tower should reach at this adjusted flow.</p>
+  </div>
+
+  <div class="space-y-0.5">
+    <p class="text-[8px] font-bold uppercase tracking-widest text-violet-400/80">④ Shortfall</p>
+    <p class="text-slate-400">Test CWT − Pred. CWT = <span class="text-slate-300">${f2(t.cwt)}</span> − <span class="text-slate-300">${f2(r.pred_cwt)}</span> = <span class="${sfColor} font-bold">${f2(r.shortfall)} °C</span></p>
+    <p class="text-[9px] text-slate-600">+ve = actual CWT higher than tower should achieve → underperforming.</p>
+  </div>
+
+  <div class="space-y-0.5">
+    <p class="text-[8px] font-bold uppercase tracking-widest text-violet-400/80">⑤ Capability — Cross Plot 2</p>
+    <p class="text-slate-400">pred_flow = flow on Cross Plot 2 at CWT = ${f2(t.cwt)} °C</p>
+    <p class="text-slate-400">(Q_adj / pred_flow) × 100 = <span class="${capColor} font-bold">${f1(r.capability)} %</span></p>
+    <p class="text-[9px] text-slate-600">≥100% = adjusted flow is sufficient → tower meets specification.</p>
+  </div>
+</div>`;
+}
+
 // ── Results preview (all 3 tests, no PDF) ─────────────────────────────────
 
 export async function previewAllTests(ui) {
@@ -305,6 +364,26 @@ export async function previewAllTests(ui) {
         if (pvCum) { pvCum.innerText = d31.text; pvCum.className = `text-2xl font-black font-mono ${d31.cls}`; }
 
         if (panel) panel.classList.remove('hidden');
+
+        // Inject calculation breakdowns and wire toggle buttons
+        [
+            ['pv1', design, t1, r1],
+            ['pv2', design, t2, r2],
+            ['pv3', design, t3, r3],
+        ].forEach(([prefix, d, t, r]) => {
+            const calcDiv = document.getElementById(`${prefix}-calc`);
+            const calcBtn = document.getElementById(`${prefix}-calc-btn`);
+            if (!calcDiv || !calcBtn) return;
+            calcDiv.innerHTML = _buildCalcHtml(d, t, r);
+            calcBtn.classList.remove('hidden');
+            calcBtn.classList.add('inline-flex');
+            calcBtn.onclick = () => {
+                const collapsed = calcDiv.classList.toggle('hidden');
+                calcBtn.querySelector('span').textContent = collapsed ? '∑ Calc' : '∑ Hide';
+                calcBtn.style.opacity = collapsed ? '' : '1';
+                calcBtn.style.borderColor = collapsed ? '' : 'rgb(167 139 250 / 0.6)';
+            };
+        });
 
         // Also update the live Test-3 preview card at top of Step 3
         ['atc-prev-range','atc-prev-adjflow','atc-prev-predcwt','atc-prev-shortfall','atc-prev-capability'].forEach(id => {
