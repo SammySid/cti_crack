@@ -122,13 +122,15 @@ function _getDesign(ui) {
         flow:             designFlow,
         fan_power:        _n('rep-design-fanpow', 117),
         lg:               _n('rep-design-lg',     ui?.inputs?.lgRatio ?? 1.5),
+        constant_c:       _n('rep-design-c',      ui?.inputs?.constantC ?? 1.2),
+        constant_m:       _n('rep-design-m',      ui?.inputs?.constantM ?? 0.6),
         density_override: _n('rep-density-override', 0) || null,
     };
 }
 
 // ── Build ATC-105 API payload for one test ─────────────────────────────────
-// Constant C and m are NOT exposed as user inputs — sensible engineering
-// defaults (1.2 / 0.6) are used throughout for consistency.
+// C and M come from Step 3 design fields (synced from Thermal Analysis tab),
+// making the cross-plots tower-specific rather than using generic defaults.
 
 function _buildPayloadForTest(design, test) {
     return {
@@ -143,8 +145,8 @@ function _buildPayloadForTest(design, test) {
         test_flow:              test.flow,
         test_fan_power:         test.fan_power,
         lg_ratio:               design.lg,
-        constant_c:             1.2,
-        constant_m:             0.6,
+        constant_c:             design.constant_c,
+        constant_m:             design.constant_m,
         density_ratio_override: design.density_override,
     };
 }
@@ -194,6 +196,8 @@ export function syncDesignFromThermal(ui) {
         'rep-design-hwt':  'designHWT',
         'rep-design-flow': 'designWaterFlow',
         'rep-design-lg':   'lgRatio',
+        'rep-design-c':    'constantC',
+        'rep-design-m':    'constantM',
     };
     Object.entries(map).forEach(([repId, uiKey]) => {
         const el = document.getElementById(repId);
@@ -257,10 +261,11 @@ function _buildCalcHtml(d, t, r) {
 
   <div class="space-y-0.5">
     <p class="text-[8px] font-bold uppercase tracking-widest text-violet-400/80">③ Predicted CWT — Cross Plot 1</p>
+    <p class="text-slate-400">Tower curve: KaV/L = C × (L/G)^−m = <span class="text-violet-300">${f2(d.constant_c)}</span> × (L/G)^−<span class="text-violet-300">${f2(d.constant_m)}</span></p>
     <p class="text-slate-400">Merkel KaV/L computed at: WBT=${f2(t.wbt)}°C · HWT=${f2(t.hwt)}°C · CWT=${f2(t.cwt)}°C · L/G=${f2(d.lg)}</p>
     <p class="text-slate-400">At Q_adj = ${f1(r.adj_flow)} m³/hr on Cross Plot 1:</p>
     <p class="text-slate-400">→ Pred. CWT = <span class="text-cyan-300 font-bold">${f2(r.pred_cwt)} °C</span></p>
-    <p class="text-[9px] text-slate-600">CWT a 100%-capable tower should reach at this adjusted flow.</p>
+    <p class="text-[9px] text-slate-600">Cross-plot built from this tower's own C &amp; M — synced from Thermal Analysis.</p>
   </div>
 
   <div class="space-y-0.5">
