@@ -65,7 +65,7 @@ export async function generateReport(ui) {
         }
     };
 
-    try:
+    try {
         const response = await fetch('/api/generate-pdf-report', {
             method: 'POST',
             headers: {
