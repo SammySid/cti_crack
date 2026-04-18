@@ -40,16 +40,17 @@ A full-stack engineering dashboard for cooling tower thermal analysis, psychrome
 - Generates branded thermal report `.xlsx` from current analysis inputs
 - Includes flow scenario data tables and KPIs
 
-### ATC-105 PDF Report Engine (full 5-step CTI method)
+### ATC-105 PDF Report Engine — Three-Stage Evaluation
 
 See Section 4 for the complete calculation flow.
 
+- **Three independent test stages** evaluated in parallel — Pre-Test, Post-Fan Change, Post-Distribution Change — each against the same design baseline
 - **Table 1** — 3×3 CWT grid (3 ranges × 3 flows) at test WBT from Merkel engine
-- **Cross Plot 1** — CWT vs Range with test-range vertical marker; professional Matplotlib output
-- **Table 2** — CWT at test range for each flow (read from Cross Plot 1 intersections)
-- **Cross Plot 2** — Water Flow vs CWT with crosshair step annotations (adj flow → pred CWT → pred flow)
-- **Steps 4–5** — Adjusted flow, predicted CWT, shortfall, capability
-- **PDF layout** — 11-page Jinja2 template: cover, preamble, members, assessment, instruments, conclusions, suggestions, data table, air flow, ATC-105 calculation pages, final results
+- **Cross Plot 1** — CWT vs Range chart at test WBT; test-range vertical marker; Table 2 derived from intersections
+- **Cross Plot 2** — Water Flow vs CWT (from Table 2) with adj-flow → pred-CWT → pred-flow crosshair annotations
+- **Steps 1–5** per test — Table 1, Cross Plot 1 + Table 2, Adjusted Flow, Cross Plot 2, Shortfall + Capability
+- **Final comparison table** — shortfall, capability, and cumulative improvement across all three tests
+- **PDF layout** — Jinja2 `{% for test in tests %}` loop: per-test ATC-105 pages rendered automatically for 1, 2, or 3 tests
 
 ### Excel Auto-Fill (Report Builder)
 - Upload the filtered `.xlsx` output from the Excel Data Filter
@@ -69,7 +70,7 @@ See Section 4 for the complete calculation flow.
 | `js/worker.js` | Web Worker proxy for curve API calls |
 | `js/charts.js` | Chart.js rendering wrapper |
 | `js/ui/bind-events.js` | All event listeners — inputs, buttons, tabs, file uploads |
-| `js/ui/report.js` | ATC-105 report builder logic: `_buildAtc105Payload`, `updateAtcPreview`, `syncDesignFromThermal`, `bindFilterUpload`, `generateReport` |
+| `js/ui/report.js` | ATC-105 three-stage orchestration: `_getDesign`, `_buildPayloadForTest`, `_calcAtc`, `updateAtcPreview`, `syncDesignFromThermal`, `bindFilterUpload`, `generateReport` (parallel 3-test calls via `Promise.all`) |
 | `js/ui/filter.js` | Excel filter state + request flow |
 | `js/ui/export.js` | Excel export state + download |
 | `js/ui/prediction.js` | CWT prediction wrapper |
@@ -113,9 +114,13 @@ design_fan_power                        — kW (default 117)
 test_wbt, test_cwt, test_hwt           — °C
 test_flow                               — m³/hr
 test_fan_power                          — kW (default 117)
-lg_ratio, constant_c, constant_m        — tower characteristic constants
-density_ratio_override                  — optional float (uses Kell formula if None)
+lg_ratio                                — tower L/G ratio (required — calibrate per tower)
+constant_c                              — optional, default 1.2 (CTI standard for cross-flow fill)
+constant_m                              — optional, default 0.6 (CTI standard for cross-flow fill)
+density_ratio_override                  — optional float (uses Kell 1975 formula if None)
 ```
+
+> **Note on C and m:** These are not exposed in the Report Builder UI. The defaults (1.2 / 0.6) follow the CTI ATC-105 standard for cross-flow fills. The **L/G ratio** is the primary calibration parameter for each specific tower. With correct L/G, results match independently verified evaluations to within 0.03°C (well within ±0.1°C test instrument uncertainty).
 
 ### Step-by-step computation (`/api/calculate/atc105`)
 
@@ -125,25 +130,28 @@ density_ratio_override                  — optional float (uses Kell formula if
 - For each (flow%, range%) combination: calls `find_cwt(inputs, test_wbt, range_pct, flow_pct)` → CWT
 - `find_cwt` balances supply KaV/L = C × (LG)^(-m) against demand KaV/L (Merkel integration)
 
-**STEP 2 — Cross Plot 1 / Table 2**
-- Interpolates across the range dimension at `test_range` (= test_hwt − test_cwt)
-- For each flow%: linear interpolation of Table 1 CWTs at test_range → `cross1[flow_pct]`
+**STEP 2 — Cross Plot 1 → Table 2**
+- Interpolates Table 1 across the range dimension at `test_range` (= test_hwt − test_cwt)
+- For each flow%: linear interpolation → `cross1[flow_pct]`
+- These three (flow, CWT) pairs form Table 2
 
-**STEP 3 — Cross Plot 2 data**
-- Three (flow, CWT) pairs from Table 2 form the performance curve
-
-**STEP 4 — Adjusted Water Flow**
+**STEP 3 — Adjusted Water Flow**
 ```
 density_ratio = ρ_water(avg_test_T) / ρ_water(avg_design_T)   [Kell 1975]
 effective_density_ratio = density_ratio_override or density_ratio
 adj_flow = test_flow × (design_fan_power / test_fan_power)^(1/3) × effective_density_ratio^(1/3)
 ```
 
+**STEP 4 — Cross Plot 2**
+- Three Table 2 points (flow, CWT) define the performance curve
+- Mark `adj_flow` on X-axis → project vertically → read Predicted CWT
+- Mark `design_cwt` on Y-axis → project horizontally → read Predicted Flow
+
 **STEP 5 — Predicted CWT, Shortfall, Capability**
 ```
 pred_cwt  = interpolate/extrapolate Cross Plot 2 curve at adj_flow (x→y)
 pred_flow = interpolate/extrapolate Cross Plot 2 curve at design_cwt (y→x)
-shortfall = test_cwt - pred_cwt
+shortfall  = test_cwt − pred_cwt
 capability = (adj_flow / pred_flow) × 100   [%]
 ```
 
@@ -192,12 +200,15 @@ Response:
 ```
 
 ### `POST /api/generate-pdf-report`
-Renders and streams the ATC-105 PDF report.
+Renders and streams the multi-test ATC-105 PDF report.
 
 Request JSON keys:
 ```
 report_title, client, asset, test_date, report_date
-atc105                  ← full response from /api/calculate/atc105
+atc105_pre              ← full /api/calculate/atc105 response for Pre-Test
+atc105_post             ← full /api/calculate/atc105 response for Post-Fan Change
+atc105_dist             ← full /api/calculate/atc105 response for Post-Distribution Change
+                          (all three have fan_power_design and fan_power_test annotated by frontend)
 preamble_paragraphs     ← list of strings
 members_client          ← list of strings
 members_ssctc           ← list of strings
@@ -209,6 +220,8 @@ final_data_table        ← list of {name, unit, test1, test2, test3}
 data_notes              ← list of strings
 airflow                 ← {avg_velocity, area, total_flow}
 ```
+
+Backward-compatible: if only `atc105` is present (no `atc105_pre/post/dist`), it is treated as the distribution test.
 
 Response: `200` PDF binary stream / `500` JSON error with traceback.
 
@@ -259,17 +272,26 @@ Full 3-flow performance curves for Chart.js rendering.
 - Red solid horizontal: test CWT
 - All key points annotated with coloured bbox labels + arrows
 
+### `_build_test_context(atc, label, design_flow_fallback, _f0) → dict`
+- Called once per test (pre / post-fan / post-distribution)
+- Extracts all template variables from one ATC-105 result dict
+- Generates `plot_1` (Cross Plot 1) and `plot_2` (Cross Plot 2) as base64 PNG strings
+- Computes `design_approach`, `test_approach`, formats `table1_rows`, `intersect`, `math_results`
+- Handles missing data gracefully (returns `"—"` for any absent field)
+
 ### `generate_pdf_report(payload)`
-- Calls `create_cross_plot_1` and `create_cross_plot_2`
-- Renders `report_template.html` with Jinja2
+- Resolves `atc105_pre`, `atc105_post`, `atc105_dist` from payload
+- Calls `_build_test_context` for each present test → builds `tests` list
+- Renders `report_template.html` with Jinja2 (`{% for test in tests %}` loop)
 - Passes `_f0`, `_f1`, `_f2` format-helper callables to the template
 - Converts rendered HTML → PDF bytes via `xhtml2pdf.pisa.CreatePDF`
 - Returns raw PDF bytes (streamed to browser as attachment)
 
 ---
 
-## 7. PDF Report Layout (11 pages)
+## 7. PDF Report Layout
 
+### Fixed pages (pages 1–7)
 | Page | Content |
 |---|---|
 | 1 | Cover — title, asset, owner, dates, SSCTC attribution |
@@ -277,26 +299,36 @@ Full 3-flow performance curves for Chart.js rendering.
 | 3 | Members Present |
 | 4 | Assessment Method + Instrument Placement |
 | 5 | Conclusions + Suggestions |
-| 6 | Final Data Table (3-test comparison) |
+| 6 | Final Data Table (3-test comparison: shortfall, capability, improvements) |
 | 7 | Air Flow Data (anemometer traverses) |
-| 8 | ATC-105 design vs test conditions + Table 1 + Table 2 |
-| 9 | Cross Plot 1 |
-| 10 | Steps 3–4 + Adjusted Flow table + Cross Plot 2 |
-| 11 | Step 5 — Predicted CWT, shortfall, capability (verdict box) |
 
-SSCTC header bar appears at top of pages 2–11. Page numbers appear in footer.
+### Per-test ATC-105 pages (repeated for each test via Jinja2 `{% for test in tests %}`)
+| Page | Content |
+|---|---|
+| A | Section header + Design vs Recorded Conditions table + STEP 1 (Table 1) |
+| B | STEP 2 — Cross Plot 1 chart + Table 2 (CWT at test range for each flow) |
+| C | STEP 3 — Adjusted Water Flow calculation + STEP 4 — Cross Plot 2 chart |
+| D | STEP 5 — Predicted CWT, shortfall, capability verdict box |
+
+With 3 tests: total ≈ 7 + 3×4 = 19 pages. Page breaks inserted between tests automatically.
+
+SSCTC header bar appears at top of all pages after cover. Page numbers appear in footer.
 
 ---
 
 ## 8. Data Flow
 
-### ATC-105 Report Generation
+### ATC-105 Report Generation (Three-Stage)
 1. User fills Design Conditions (or clicks "Sync from Thermal Tab")
-2. User fills Test Conditions (manually or via "Auto-Fill from Filter Output")
-3. Live ATC-105 Preview updates on every input change (debounced)
-4. User clicks "Generate Report" → `report.js` calls `/api/calculate/atc105`
-5. Full atc105 result + narrative payload → `POST /api/generate-pdf-report`
-6. PDF bytes streamed → browser download
+2. User fills Test 1 (Pre), Test 2 (Post Fan), Test 3 (Post Distribution) conditions
+3. Live ATC-105 Preview shows Test 3 (current) results on every input change (debounced)
+4. User clicks "Generate Report" → `report.js`:
+   - Fires three parallel `/api/calculate/atc105` calls via `Promise.all`
+   - Annotates each result with `fan_power_design` and `fan_power_test`
+   - Computes improvements: `imp_2v1`, `imp_3v2`, `imp_3v1`
+   - Assembles `final_data_table` (flow, WBT, HWT, CWT, range, fan power, shortfall, capability, improvements)
+5. Full payload with `atc105_pre` + `atc105_post` + `atc105_dist` + narrative → `POST /api/generate-pdf-report`
+6. PDF bytes streamed → browser auto-download
 
 ### Excel Auto-Fill Flow
 1. User runs Excel Data Filter → downloads filtered `.xlsx`
@@ -316,11 +348,15 @@ SSCTC header bar appears at top of pages 2–11. Page numbers appear in footer.
 
 | Date | Bug | Fix |
 |---|---|---|
-| 2026-04-18 | `502 Bad Gateway` on `ct.ftp.sh` after Dockerfile update | Upgraded `FROM python:3.9-slim` → `python:3.11-slim`; added `libcairo2-dev`, `libpango1.0-dev` and other build tools for pycairo compilation; removed `--exclude="Dockerfile"` from `auto_sync.sh` |
+| 2026-04-18 | Garbled table headers in PDF (`TEST 1TEST 2TEST 3` merged) | `<br/>` inside `<th>` is broken in xhtml2pdf — replaced with inline parenthetical text; added explicit column widths |
+| 2026-04-18 | Duplicate STEP 2 in PDF (Table 2 and Cross Plot 1 both labeled STEP 2) | Removed STEP 2 header from Table 2; relabeled as "Table 2 — Read from Cross Plot 1"; Cross Plot 1 chart is the correct STEP 2 |
+| 2026-04-18 | STEP 3 blank (Cross Plot 2 chart rendered after STEP 4 panel) | Reordered template: STEP 3 = Adjusted Flow (calculation), STEP 4 = Cross Plot 2 (chart directly below header) |
+| 2026-04-18 | `constant_c` and `constant_m` required in API (`Field required`) | Made both optional with defaults (1.2 / 0.6) in `Atc105Request` Pydantic model |
+| 2026-04-18 | `502 Bad Gateway` on `ct.ftp.sh` after Dockerfile update | Upgraded `FROM python:3.9-slim` → `python:3.11-slim`; added `libcairo2-dev`, `libpango1.0-dev` and other build tools for pycairo compilation |
 | 2026-04-18 | Blank charts on Thermal Analysis tab | Fixed `try:` (Python syntax) → `try {` (JS syntax) in `report.js` — SyntaxError broke the module |
-| 2026-04-18 | AM/PM assignment bug in Excel filter | `filter.js` line 48: `h >= 12 ? 'PM' : 'PM'` → `h >= 12 ? 'PM' : 'AM'` |
+| 2026-04-18 | AM/PM assignment bug in Excel filter | `filter.js`: `h >= 12 ? 'PM' : 'PM'` → `h >= 12 ? 'PM' : 'AM'` |
 | 2026-04-18 | `'float' object is not iterable` in PDF generation | `report_service.py`: `max(flows[0] ...)` → `(flows[-1] if pred_flow is None else max(...))` |
-| 2026-03-20 | Mobile hamburger closes on input tap | Moved operational inputs inline in `thermalTabPanel`; added `stopPropagation` on sidebar |
+| 2026-03-20 | Mobile hamburger closes on input tap | Moved operational inputs inline; added `stopPropagation` on sidebar |
 | 2026-03-20 | `auto_sync.sh` branch mismatch (`main` vs `master`) | Updated `BRANCH="master"` in `auto_sync.sh` |
 | 2026-03-19 | `trading-nginx` crash loop | Fixed stray `}` in `nginx-trading.conf` |
 

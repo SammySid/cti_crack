@@ -117,10 +117,10 @@ class Atc105Request(BaseModel):
     test_hwt: float
     test_flow: float           # m3/hr
     test_fan_power: float = 117.0    # kW
-    # Thermal model constants (from Thermal Analysis tab)
+    # Thermal model constants — C and m use sensible defaults if not supplied
     lg_ratio: float
-    constant_c: float
-    constant_m: float
+    constant_c: float = 1.2
+    constant_m: float = 0.6
     # Optional: override density ratio with value from ATC-105 standard tables
     # (default None → auto-computed from Kell 1975 water density formula)
     density_ratio_override: float | None = None

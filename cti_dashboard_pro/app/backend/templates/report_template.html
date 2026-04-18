@@ -265,7 +265,7 @@
         </p>
         <p style="font-size: 9.5pt; color: #475569; margin: 0; font-weight: bold;
                   letter-spacing: 0.05em;">
-            POST TEST — SINGLE CELL AFTER DISTRIBUTION SYSTEM &amp; FAN CHANGE
+            PRE-TEST / POST FAN CHANGE / POST DISTRIBUTION CHANGE — THREE-STAGE SINGLE CELL ASSESSMENT
         </p>
     </div>
 
@@ -315,7 +315,7 @@
                     <strong style="color: #475569;">ASSESSMENT METHOD</strong>
                 </td>
                 <td style="padding: 7px 0; font-weight: bold; color: #0f172a; font-size: 9.5pt;">
-                    CTI ATC-105 Merkel Method
+                    CTI ATC-105 Merkel Method — Applied independently to each of 3 test stages
                 </td>
             </tr>
         </table>
@@ -432,7 +432,7 @@
 <div class="page-break"></div>
 
 <!-- ════════════════════════════════════════════════════════════════════════════
-     PAGE 6 : FINAL DATA TABLE (PRE / POST COMPARISON)
+     PAGE 6 : FINAL DATA TABLE — ALL THREE TESTS vs DESIGN
  ═══════════════════════════════════════════════════════════════════════════════ -->
 <div class="ssctc-hdr">
     <table>
@@ -444,15 +444,20 @@
 </div>
 {% if final_data_table %}
 <div class="section-bar">FINAL DATA AND CONCLUSION OF PRE AND POST TEST</div>
+<p class="body" style="font-size:8pt; color:#475569;">
+    All three tests have been independently evaluated against the same Design baseline using the
+    CTI ATC-105 five-step method. CWT Deviation from Design and Capability are computed values,
+    not raw measurements.
+</p>
 
 <table class="data-table avoid-break">
     <thead>
         <tr>
             <th style="width:34%; text-align:left; padding: 7px 8px;">Parameter</th>
             <th style="width:8%;">Unit</th>
-            <th>TEST 1<br/><span style="font-weight:normal; font-size:7pt;">Pre-Test</span></th>
-            <th>TEST 2<br/><span style="font-weight:normal; font-size:7pt;">Post Fan Change</span></th>
-            <th>TEST 3<br/><span style="font-weight:normal; font-size:7pt;">Post Distr. Change</span></th>
+            <th style="width:18%;">TEST 1 (Pre-Test)</th>
+            <th style="width:18%;">TEST 2 (Post Fan Change)</th>
+            <th style="width:18%;">TEST 3 (Post Distr. Change)</th>
         </tr>
     </thead>
     <tbody>
@@ -526,8 +531,14 @@
 {% endif %}
 
 <!-- ════════════════════════════════════════════════════════════════════════════
-     PAGE 8 : ATC-105 DESIGN CONDITIONS
+     PAGES 8 ONWARDS : ATC-105 ANALYSIS — ONE FULL SECTION PER TEST
+     Each test: Design vs Test table, Steps 1-5, Cross Plot 1, Cross Plot 2,
+     and Shortfall / Capability conclusion.
  ═══════════════════════════════════════════════════════════════════════════════ -->
+
+{% for test in tests %}
+
+<!-- ── Test section header ─────────────────────────────────────────────────── -->
 <div class="ssctc-hdr">
     <table>
         <tr>
@@ -536,9 +547,9 @@
         </tr>
     </table>
 </div>
-<div class="section-bar">ATC-105 PERFORMANCE EVALUATION — CTI METHOD</div>
+<div class="section-bar">ATC-105 PERFORMANCE EVALUATION — {{ test.label }}</div>
 
-<!-- Design vs Test conditions summary -->
+<!-- Design vs Recorded Test conditions -->
 <table class="data-table avoid-break" style="max-width: 540px; margin-bottom: 18px;">
     <thead>
         <tr>
@@ -549,11 +560,12 @@
         </tr>
     </thead>
     <tbody>
-        <tr><td class="left">Water Flow Rate</td>      <td>M³/hr</td><td>{{ design_flow }}</td><td>{{ test_flow if test_flow else "—" }}</td></tr>
-        <tr><td class="left">Hot Water Temperature</td> <td>Deg C</td><td>{{ design_hwt }}</td><td>{{ test_hwt if test_hwt else "—" }}</td></tr>
-        <tr><td class="left">Cold Water Temperature</td><td>Deg C</td><td>{{ design_cwt }}</td><td>{{ test_cwt }}</td></tr>
-        <tr><td class="left">Wet Bulb Temperature</td>  <td>Deg C</td><td>{{ design_wbt }}</td><td>{{ test_wbt }}</td></tr>
-        <tr><td class="left">Range</td>                <td>Deg C</td><td>{{ design_range }}</td><td>{{ test_range }}</td></tr>
+        <tr><td class="left">Water Flow Rate</td>       <td>M3/hr</td><td>{{ test.design_flow }}</td><td>{{ test.test_flow }}</td></tr>
+        <tr><td class="left">Hot Water Temperature</td>  <td>Deg C</td><td>{{ test.design_hwt }}</td><td>{{ test.test_hwt }}</td></tr>
+        <tr><td class="left">Cold Water Temperature</td> <td>Deg C</td><td>{{ test.design_cwt }}</td><td>{{ test.test_cwt }}</td></tr>
+        <tr><td class="left">Wet Bulb Temperature</td>   <td>Deg C</td><td>{{ test.design_wbt }}</td><td>{{ test.test_wbt }}</td></tr>
+        <tr><td class="left">Range (HWT - CWT)</td>      <td>Deg C</td><td>{{ test.design_range }}</td><td>{{ test.test_range }}</td></tr>
+        <tr><td class="left">Approach (CWT - WBT)</td>   <td>Deg C</td><td>{{ test.design_approach }}</td><td>{{ test.test_approach }}</td></tr>
     </tbody>
 </table>
 
@@ -562,31 +574,30 @@
     <tr>
         <td class="step-num">STEP 1</td>
         <td class="step-title">
-            Table 1 — CWT vs Range at Test WBT = {{ test_wbt }}°C
+            Table 1 — CWT vs Range at Test WBT = {{ test.test_wbt }}°C
             &nbsp;&nbsp;&middot;&nbsp;&nbsp;
-            Design Range = {{ design_range }}°C
+            Design Range = {{ test.design_range }}°C
         </td>
     </tr>
 </table>
 <p class="step-desc">
-    Performance curves at 90%, 100% and 110% water flow are plotted. A vertical line is drawn
-    at the test range of {{ test_range }}°C to intersect each flow curve.
-    The CWT values at each intersection are recorded in Table 1 below.
+    Performance curves at 90%, 100% and 110% water flow are evaluated at Test WBT = {{ test.test_wbt }}°C.
+    CWT values at 80%, 100% and 120% of design range are computed for each flow condition.
 </p>
 
-{% if table1_rows %}
+{% if test.table1_rows %}
 <table class="data-table avoid-break">
     <thead>
         <tr>
             <th style="text-align:left; width:12%;">Range (%)</th>
             <th style="width:14%;">Range (°C)</th>
-            <th style="color:#c4b5fd;">CWT @ 90% Flow<br/><span style="font-weight:normal; font-size:7pt;">({{ flow_90 }} m³/hr)</span></th>
-            <th style="color:#86efac;">CWT @ 100% Flow<br/><span style="font-weight:normal; font-size:7pt;">({{ flow_100 }} m³/hr)</span></th>
-            <th style="color:#93c5fd;">CWT @ 110% Flow<br/><span style="font-weight:normal; font-size:7pt;">({{ flow_110 }} m³/hr)</span></th>
+            <th style="color:#c4b5fd;">CWT @ 90% Flow ({{ test.flow_90 }} m3/hr)</th>
+            <th style="color:#86efac;">CWT @ 100% Flow ({{ test.flow_100 }} m3/hr)</th>
+            <th style="color:#93c5fd;">CWT @ 110% Flow ({{ test.flow_110 }} m3/hr)</th>
         </tr>
     </thead>
     <tbody>
-        {% for row in table1_rows %}
+        {% for row in test.table1_rows %}
         <tr {% if loop.index == 2 %}class="highlight"{% endif %}>
             <td class="left">{{ row.range_pct }}</td>
             <td>{{ row.range_abs }}</td>
@@ -599,41 +610,62 @@
 </table>
 {% endif %}
 
-<!-- ── STEP 2 ──────────────────────────────────────────────────────────────── -->
-<table class="step-hdr avoid-break">
+<div class="page-break"></div>
+
+<!-- ── STEP 2 — Cross Plot 1 (chart first, then Table 2 derived from it) ── -->
+<div class="ssctc-hdr">
+    <table>
+        <tr>
+            <td class="hdr-brand">SS COOLING TOWER CONSULTANTS</td>
+            <td class="hdr-sub">Thermal Design · CT Assessment &amp; Upgrade · CT Testing · www.ssctc.org</td>
+        </tr>
+    </table>
+</div>
+
+<table class="step-hdr">
     <tr>
         <td class="step-num">STEP 2</td>
         <td class="step-title">
-            Table 2 — CWT vs Water Flow at Test Range = {{ test_range }}°C
-            &nbsp;&nbsp;&middot;&nbsp;&nbsp;
-            Cross Plot 1 Intersections
+            Cross Plot 1 — CWT vs Range at Test WBT = {{ test.test_wbt }}°C &nbsp;[{{ test.label }}]
         </td>
     </tr>
 </table>
 <p class="step-desc">
-    From Cross Plot 1 — draw a vertical line at the test range of {{ test_range }}°C to read
-    CWT at each of the three water flow conditions. These values form the data points for Cross Plot 2.
+    CWT (Y-axis) vs Range (X-axis) at 90%, 100% and 110% water flow, evaluated at Test WBT = {{ test.test_wbt }}°C.
+    Draw a vertical line at test range {{ test.test_range }}°C to read the CWT at each flow — these three
+    intersection points form Table 2 and are used in Cross Plot 2.
 </p>
-<table class="data-table avoid-break" style="max-width: 500px;">
+
+<div class="plot-frame">
+    <img src="data:image/png;base64,{{ test.plot_1 }}" />
+</div>
+<p class="plot-caption">
+    CROSS PLOT 1 [{{ test.label }}] — CWT vs RANGE at Test WBT = {{ test.test_wbt }}°C
+    &nbsp;&middot;&nbsp; Test Range (red vertical line) = {{ test.test_range }}°C
+</p>
+
+<!-- Table 2 — derived from Cross Plot 1 intersections -->
+<div class="section-bar-light" style="margin-top:18px;">
+    TABLE 2 — CWT at Test Range = {{ test.test_range }}°C (Read from Cross Plot 1)
+</div>
+<table class="data-table avoid-break" style="max-width: 500px; margin-top:6px;">
     <thead>
         <tr>
             <th style="text-align:left;">Flow Condition</th>
-            <th>Water Flow (m³/hr)</th>
+            <th>Water Flow (m3/hr)</th>
             <th>CWT at Test Range (°C)</th>
         </tr>
     </thead>
     <tbody>
-        <tr><td class="left">90% Flow (Purple)</td> <td>{{ intersect.f90_flow  }}</td><td>{{ intersect.f90_cwt  }}</td></tr>
-        <tr><td class="left">100% Flow (Green)</td> <td>{{ intersect.f100_flow }}</td><td>{{ intersect.f100_cwt }}</td></tr>
-        <tr><td class="left">110% Flow (Blue)</td>  <td>{{ intersect.f110_flow }}</td><td>{{ intersect.f110_cwt }}</td></tr>
+        <tr><td class="left">90% Flow (Purple)</td>  <td>{{ test.intersect.f90_flow  }}</td><td>{{ test.intersect.f90_cwt  }}</td></tr>
+        <tr><td class="left">100% Flow (Green)</td>  <td>{{ test.intersect.f100_flow }}</td><td>{{ test.intersect.f100_cwt }}</td></tr>
+        <tr><td class="left">110% Flow (Blue)</td>   <td>{{ test.intersect.f110_flow }}</td><td>{{ test.intersect.f110_cwt }}</td></tr>
     </tbody>
 </table>
 
 <div class="page-break"></div>
 
-<!-- ════════════════════════════════════════════════════════════════════════════
-     PAGE 9 : CROSS PLOT 1
- ═══════════════════════════════════════════════════════════════════════════════ -->
+<!-- ── STEP 3 — Adjusted Flow  +  STEP 4 — Cross Plot 2 ─────────────────── -->
 <div class="ssctc-hdr">
     <table>
         <tr>
@@ -643,72 +675,21 @@
     </table>
 </div>
 
-<table class="step-hdr">
-    <tr>
-        <td class="step-num">STEP 2</td>
-        <td class="step-title">
-            CROSS PLOT 1 — CWT vs Range at Test WBT = {{ test_wbt }}°C
-        </td>
-    </tr>
-</table>
-<p class="step-desc">
-    CWT (Y-axis) vs Range (X-axis) for 90%, 100% and 110% water flow curves.
-    The vertical red line marks the test range of {{ test_range }}°C.
-    Intersection points yield the Table 2 values used in Cross Plot 2.
-</p>
-
-<div class="plot-frame">
-    <img src="data:image/png;base64,{{ plot_1 }}" />
-</div>
-<p class="plot-caption">
-    FIGURE 1 — Cross Plot 1: CWT vs RANGE at Test WBT = {{ test_wbt }}°C
-    &nbsp;&middot;&nbsp; Test Range (red vertical line) = {{ test_range }}°C
-</p>
-
-<div class="page-break"></div>
-
-<!-- ════════════════════════════════════════════════════════════════════════════
-     PAGE 10 : STEP 3 + STEP 4 + CROSS PLOT 2
- ═══════════════════════════════════════════════════════════════════════════════ -->
-<div class="ssctc-hdr">
-    <table>
-        <tr>
-            <td class="hdr-brand">SS COOLING TOWER CONSULTANTS</td>
-            <td class="hdr-sub">Thermal Design · CT Assessment &amp; Upgrade · CT Testing · www.ssctc.org</td>
-        </tr>
-    </table>
-</div>
-
-<!-- STEP 3 -->
 <table class="step-hdr">
     <tr>
         <td class="step-num">STEP 3</td>
         <td class="step-title">
-            Cross Plot 2 — Water Flow (X-axis) vs CWT (Y-axis) from Table 2 Data
+            Calculation of Adjusted Water Flow (Q<sub>adj</sub>) &nbsp;[{{ test.label }}]
         </td>
     </tr>
 </table>
 <p class="step-desc">
-    Using the three data points from Table 2, plot CWT on the Y-axis and Water Flow on the X-axis.
-    Extend the curve to cover the adjusted water flow range.
+    Correct the test water flow for fan power and air density differences between
+    design and test conditions. The adjusted flow is then marked on Cross Plot 2.
 </p>
 
-<!-- STEP 4 -->
-<table class="step-hdr">
-    <tr>
-        <td class="step-num">STEP 4</td>
-        <td class="step-title">
-            Calculation of Adjusted Water Flow (Q<sub>adj</sub>)
-        </td>
-    </tr>
-</table>
-<p class="step-desc">
-    The test water flow is corrected for fan power and air density differences between
-    design and test conditions to obtain the adjusted flow used in Cross Plot 2.
-</p>
-
-<div class="result-panel" style="max-width:520px; margin-bottom:14px;">
-    <h4>Step 4 — Input Parameters &amp; Adjusted Flow Calculation</h4>
+<div class="result-panel" style="max-width:520px; margin-bottom:18px;">
+    <h4>Step 3 — Input Parameters &amp; Adjusted Flow Calculation</h4>
     <table class="data-table">
         <tr>
             <th style="text-align:left; width:5%;">Ref</th>
@@ -716,39 +697,60 @@
             <th>Value</th>
             <th>Unit</th>
         </tr>
-        <tr><td>a</td><td class="left">Fan Power Design (W<sub>d</sub>)</td>  <td>{{ math_results.fan_power_design if math_results.fan_power_design else "117" }}</td><td>kW</td></tr>
-        <tr><td>b</td><td class="left">Fan Power Test (W<sub>t</sub>)</td>    <td>{{ math_results.fan_power_test if math_results.fan_power_test else "117" }}</td><td>kW</td></tr>
-        <tr><td>c</td><td class="left">Hot Water Temperature (Test)</td>       <td>{{ math_results.test_hwt if math_results.test_hwt else test_hwt }}</td><td>Deg C</td></tr>
-        <tr><td>d</td><td class="left">Cold Water Temperature (Test)</td>      <td>{{ test_cwt }}</td><td>Deg C</td></tr>
-        <tr><td>e</td><td class="left">Range (Test)</td>                       <td>{{ test_range }}</td><td>Deg K</td></tr>
-        <tr><td>f</td><td class="left">WBT (Test)</td>                         <td>{{ test_wbt }}</td><td>Deg C</td></tr>
-        <tr><td>g</td><td class="left">Approach (Test)</td>                    <td>{{ math_results.test_approach if math_results.test_approach else test_approach if test_approach else "—" }}</td><td>Deg C</td></tr>
-        <tr><td>h</td><td class="left">Test Flow (Q<sub>wt</sub>)</td>         <td>{{ _f0(math_results.test_flow) if math_results.test_flow else test_flow }}</td><td>M³/hr</td></tr>
-        <tr><td>i</td><td class="left">Density Ratio (&#961;<sub>test</sub>/&#961;<sub>design</sub>)</td><td>{{ math_results.density_ratio }}</td><td>—</td></tr>
+        <tr><td>a</td><td class="left">Fan Power Design (W<sub>d</sub>)</td>
+            <td>{{ test.math_results.fan_power_design if test.math_results.fan_power_design else "—" }}</td><td>kW</td></tr>
+        <tr><td>b</td><td class="left">Fan Power Test (W<sub>t</sub>)</td>
+            <td>{{ test.math_results.fan_power_test if test.math_results.fan_power_test else "—" }}</td><td>kW</td></tr>
+        <tr><td>c</td><td class="left">Hot Water Temperature (Test)</td>
+            <td>{{ test.math_results.test_hwt }}</td><td>Deg C</td></tr>
+        <tr><td>d</td><td class="left">Cold Water Temperature (Test)</td>
+            <td>{{ test.test_cwt }}</td><td>Deg C</td></tr>
+        <tr><td>e</td><td class="left">Range (Test)</td>
+            <td>{{ test.test_range }}</td><td>Deg K</td></tr>
+        <tr><td>f</td><td class="left">WBT (Test)</td>
+            <td>{{ test.test_wbt }}</td><td>Deg C</td></tr>
+        <tr><td>g</td><td class="left">Approach (Test)</td>
+            <td>{{ test.test_approach }}</td><td>Deg C</td></tr>
+        <tr><td>h</td><td class="left">Test Water Flow (Q<sub>wt</sub>)</td>
+            <td>{{ _f0(test.math_results.test_flow) }}</td><td>M3/hr</td></tr>
+        <tr><td>i</td><td class="left">Density Ratio (test / design)</td>
+            <td>{{ test.math_results.density_ratio }}</td><td>—</td></tr>
         <tr class="highlight">
             <td colspan="2" class="left" style="font-weight:bold;">
-                Adjusted Flow Q<sub>adj</sub> = Q<sub>wt</sub> &times; (W<sub>d</sub>/W<sub>t</sub>)<sup>&#8531;</sup> &times; &#961;<sup>&#8531;</sup>
+                Q<sub>adj</sub> = Q<sub>wt</sub> &times; (W<sub>d</sub>/W<sub>t</sub>)<sup>1/3</sup> &times; (density ratio)<sup>1/3</sup>
             </td>
-            <td style="font-weight:bold; font-size:10pt;">{{ _f2(math_results.adj_flow) }}</td>
-            <td>m³/hr</td>
+            <td style="font-weight:bold; font-size:10pt;">{{ _f2(test.math_results.adj_flow) }}</td>
+            <td>m3/hr</td>
         </tr>
     </table>
 </div>
 
-<!-- Cross Plot 2 -->
+<table class="step-hdr">
+    <tr>
+        <td class="step-num">STEP 4</td>
+        <td class="step-title">
+            Cross Plot 2 — Water Flow vs CWT &nbsp;[{{ test.label }}]
+        </td>
+    </tr>
+</table>
+<p class="step-desc">
+    Plot the three Table 2 points (Water Flow on X-axis, CWT on Y-axis). Mark Q<sub>adj</sub>
+    on the X-axis and project vertically to the curve to read the Predicted CWT. Project
+    horizontally at Design CWT ({{ test.design_cwt }}°C) to read the Predicted Water Flow.
+</p>
+
 <div class="plot-frame">
-    <img src="data:image/png;base64,{{ plot_2 }}" />
+    <img src="data:image/png;base64,{{ test.plot_2 }}" />
 </div>
 <p class="plot-caption">
-    FIGURE 2 — Cross Plot 2: Water Flow vs CWT @ Design WBT &amp; Design Range
-    &nbsp;&middot;&nbsp; Adjusted Flow = {{ _f2(math_results.adj_flow) }} m³/hr
+    CROSS PLOT 2 [{{ test.label }}] — Water Flow vs CWT
+    &nbsp;&middot;&nbsp; Adjusted Flow = {{ _f2(test.math_results.adj_flow) }} m3/hr
+    &nbsp;&middot;&nbsp; Predicted CWT = {{ _f2(test.math_results.pred_cwt) }}°C
 </p>
 
 <div class="page-break"></div>
 
-<!-- ════════════════════════════════════════════════════════════════════════════
-     PAGE 11 : STEP 5 — FINAL ATC-105 RESULTS
- ═══════════════════════════════════════════════════════════════════════════════ -->
+<!-- ── STEP 5 — Final Results ─────────────────────────────────────────────── -->
 <div class="ssctc-hdr">
     <table>
         <tr>
@@ -757,19 +759,19 @@
         </tr>
     </table>
 </div>
-<div class="section-bar">FINAL ATC-105 MATHEMATICAL RESULTS</div>
+<div class="section-bar">FINAL ATC-105 RESULTS — {{ test.label }}</div>
 
 <table class="step-hdr">
     <tr>
         <td class="step-num">STEP 5</td>
         <td class="step-title">
-            Predicted CWT, Performance Shortfall and Cooling Tower Capability
+            Predicted CWT, Performance Shortfall and Capability — {{ test.label }}
         </td>
     </tr>
 </table>
 <p class="step-desc">
     Mark the Adjusted Water Flow on the X-axis of Cross Plot 2 and project vertically to
-    intersect the performance curve. Read off the Predicted CWT at that intersection.
+    intersect the performance curve. Read the Predicted CWT horizontally from that point.
 </p>
 
 <table class="data-table avoid-break" style="max-width: 560px; margin-top: 10px;">
@@ -784,21 +786,21 @@
     <tbody>
         <tr>
             <td>i</td>
-            <td class="left">Adjusted Water Flow in Cross Plot 2 X-axis</td>
-            <td>{{ _f2(math_results.adj_flow) }}</td>
-            <td>m³/hr</td>
+            <td class="left">Adjusted Water Flow (X-axis of Cross Plot 2)</td>
+            <td>{{ _f2(test.math_results.adj_flow) }}</td>
+            <td>m3/hr</td>
         </tr>
         <tr>
             <td>ii</td>
             <td class="left">Project vertical line → intersect curve → read CWT</td>
             <td colspan="2" style="font-size:8pt; color:#475569; text-align:left; padding-left:8px;">
-                See Cross Plot 2 — orange vertical line
+                See Cross Plot 2 — orange vertical line at adjusted flow
             </td>
         </tr>
         <tr class="highlight">
             <td>iii</td>
             <td class="left"><strong>Predicted (Expected) Cold Water Temperature</strong></td>
-            <td><strong>{{ _f2(math_results.pred_cwt) }}</strong></td>
+            <td><strong>{{ _f2(test.math_results.pred_cwt) }}</strong></td>
             <td>Deg C</td>
         </tr>
         <tr>
@@ -810,67 +812,70 @@
         <tr class="highlight">
             <td>v</td>
             <td class="left"><strong>Total Predicted CWT (incl. tolerance)</strong></td>
-            <td><strong>{{ _f2(math_results.pred_cwt) }}</strong></td>
+            <td><strong>{{ _f2(test.math_results.pred_cwt) }}</strong></td>
             <td>Deg C</td>
         </tr>
         <tr>
             <td>vi</td>
             <td class="left">Test Cold Water Temperature (Recorded site data)</td>
-            <td>{{ test_cwt }}</td>
+            <td>{{ test.test_cwt }}</td>
             <td>Deg C</td>
         </tr>
         <tr>
             <td>vii</td>
             <td class="left">Predicted Water Flow (at Design CWT on Cross Plot 2)</td>
-            <td>{{ _f2(math_results.pred_flow) }}</td>
-            <td>m³/hr</td>
+            <td>{{ _f2(test.math_results.pred_flow) }}</td>
+            <td>m3/hr</td>
         </tr>
     </tbody>
 </table>
 
 <!-- Conclusion box -->
 <div class="conclusion-panel">
-    <p style="font-size: 8.5pt; color: #374151; margin: 0 0 6px 0; font-weight: bold;
+    <p style="font-size: 8.5pt; color: #374151; margin: 0 0 4px 0; font-weight: bold;
               letter-spacing: 0.06em; text-transform: uppercase;">
-        Conclusion
+        Conclusion — {{ test.label }}
     </p>
-    <p class="shortfall-num">{{ _f2(math_results.shortfall) }} °C</p>
+    <p class="shortfall-num">{{ _f2(test.math_results.shortfall) }} °C</p>
     <p style="font-size: 10pt; color: #374151; margin: 3px 0 12px 0;">
         <strong>Cooling Tower Shortfall in Performance</strong><br/>
         <span style="font-size: 8pt; color: #6b7280;">
-            Test CWT ({{ test_cwt }}°C) is higher than Predicted CWT
-            ({{ _f2(math_results.pred_cwt) }}°C) by {{ _f2(math_results.shortfall) }}°C
+            Test CWT ({{ test.test_cwt }}°C) is higher than Predicted CWT
+            ({{ _f2(test.math_results.pred_cwt) }}°C) by {{ _f2(test.math_results.shortfall) }}°C
         </span>
     </p>
-
     <div style="border-top: 1px solid #fca5a5; padding-top: 12px; margin-top: 4px;">
-        <p class="capability-num">{{ math_results.capability }} %</p>
+        <p class="capability-num">{{ test.math_results.capability }} %</p>
         <p style="font-size: 9.5pt; font-weight: bold; color: #1d4ed8; margin: 3px 0 5px 0;">
             COOLING TOWER CAPABILITY
         </p>
         <p style="font-size: 8pt; color: #6b7280; margin: 0;">
-            Capability (%) = (Adjusted Water Flow / Predicted Water Flow) &times; 100<br/>
-            = {{ _f2(math_results.adj_flow) }} / {{ _f2(math_results.pred_flow) }} &times; 100
+            Capability (%) = (Adjusted Water Flow / Predicted Water Flow) x 100<br/>
+            = {{ _f2(test.math_results.adj_flow) }} / {{ _f2(test.math_results.pred_flow) }} x 100
         </p>
     </div>
 </div>
 
-<!-- Hence statement -->
 <div style="margin-top: 16px; border: 1.5px solid #1e3a5f; background-color: #eff6ff;
             padding: 12px 18px; font-size: 9.5pt; page-break-inside: avoid;">
     <p style="margin: 0 0 6px 0; font-weight: bold; color: #1e3a5f;">
-        &#8756; Hence, cooling tower shortfall in performance is
-        <span style="color: #b91c1c; font-size: 11pt;">{{ _f2(math_results.shortfall) }} °C</span>
+        [{{ test.label }}] — Shortfall =
+        <span style="color: #b91c1c; font-size: 11pt;">{{ _f2(test.math_results.shortfall) }} °C</span>
         &nbsp;&nbsp;&middot;&nbsp;&nbsp;
-        Capability = <span style="color: #1d4ed8; font-size: 11pt;">{{ math_results.capability }} %</span>
+        Capability = <span style="color: #1d4ed8; font-size: 11pt;">{{ test.math_results.capability }} %</span>
     </p>
     <p style="margin: 0; font-size: 8.5pt; color: #475569; line-height: 1.6;">
-        In this case, the Test Cold Water Temperature is higher than the Predicted Cold Water
-        Temperature by {{ _f2(math_results.shortfall) }}°C. The Adjusted Water Flow is marked on
-        the X-axis of Cross Plot 2 and projected upward to intersect the Flow vs CWT performance
-        curve. Cooling Tower Capability (%) = Adjusted Water Flow / Predicted Water Flow &times; 100.
+        Test CWT is {{ _f2(test.math_results.shortfall) }}°C above the Predicted CWT.
+        Capability (%) = Adjusted Flow / Predicted Flow x 100
+        = {{ _f2(test.math_results.adj_flow) }} / {{ _f2(test.math_results.pred_flow) }} x 100.
     </p>
 </div>
+
+{% if not loop.last %}
+<div class="page-break"></div>
+{% endif %}
+
+{% endfor %}
 
 </body>
 </html>
