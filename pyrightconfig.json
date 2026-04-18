@@ -1,0 +1,15 @@
+{
+  "pythonVersion": "3.12",
+  "typeCheckingMode": "off",
+  "extraPaths": [
+    "cti_dashboard_pro/app/backend"
+  ],
+  "exclude": [
+    "**/__pycache__",
+    "**/*.pyc",
+    "official/",
+    "tools/",
+    ".venv/",
+    "venv/"
+  ]
+}

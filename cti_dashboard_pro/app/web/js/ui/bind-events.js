@@ -85,7 +85,7 @@ export function bindEvents(ui) {
     // ── ATC-105 Report Builder: live preview on input change ─────────────
     const atcInputIds = [
         'rep-design-wbt','rep-design-cwt','rep-design-hwt','rep-design-flow','rep-design-fanpow',
-        'rep-design-lg','rep-design-c','rep-design-m',
+        'rep-design-lg','rep-density-override',
         'rep-test-wbt','rep-cwt','rep-hwt','rep-flow','rep-test-fanpow',
     ];
     const debouncedAtcPreview = ui.debounce(() => updateAtcPreview(ui), 500);
