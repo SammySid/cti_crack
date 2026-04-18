@@ -121,6 +121,9 @@ class Atc105Request(BaseModel):
     lg_ratio: float
     constant_c: float
     constant_m: float
+    # Optional: override density ratio with value from ATC-105 standard tables
+    # (default None → auto-computed from Kell 1975 water density formula)
+    density_ratio_override: float | None = None
 
 # Calculation endpoints
 @app.post("/api/calculate/kavl")
@@ -269,9 +272,12 @@ async def api_calc_atc105(req: Atc105Request):
         density_design = _water_density(avg_design_T)
         density_ratio  = density_test / density_design
 
+        # Use override if supplied (e.g., value from ATC-105 standard lookup tables)
+        effective_density_ratio = req.density_ratio_override if req.density_ratio_override else density_ratio
+
         adj_flow = (req.test_flow
                     * (req.design_fan_power / req.test_fan_power) ** (1 / 3)
-                    * density_ratio ** (1 / 3))
+                    * effective_density_ratio ** (1 / 3))
 
         # ── STEP 5: Predict CWT at adj_flow, find pred_flow at design CWT ────
         valid_pairs = [(f, c) for f, c in zip(cp2_flows, cp2_cwts) if c is not None]
@@ -319,7 +325,8 @@ async def api_calc_atc105(req: Atc105Request):
             # Density correction details
             "density_test":    round(density_test,   4),
             "density_design":  round(density_design, 4),
-            "density_ratio":   round(density_ratio,  6),
+            "density_ratio":   round(density_ratio,  6),          # auto-computed (Kell 1975)
+            "density_ratio_used": round(effective_density_ratio, 6),  # actual value used in adj_flow
             # Top-level summary
             "adj_flow":    round(adj_flow, 2),
             "pred_cwt":    pred_cwt,

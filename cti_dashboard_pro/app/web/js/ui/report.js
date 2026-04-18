@@ -172,6 +172,8 @@ function _buildAtc105Payload(ui) {
         lg_ratio:  lg,
         constant_c: c,
         constant_m: m,
+        // Optional: density ratio override from ATC-105 standard tables
+        density_ratio_override: _n('rep-density-override', null) || null,
     };
 }
 

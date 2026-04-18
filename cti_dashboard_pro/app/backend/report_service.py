@@ -92,7 +92,7 @@ def create_cross_plot_2(cp2: dict):
 
     # Build extended smooth curve via linear interpolation / extrapolation
     f_min = min(flows) * 0.85
-    f_max = max(flows[0] if pred_flow is None else max(flows + [pred_flow])) * 1.10
+    f_max = (flows[-1] if pred_flow is None else max(list(flows) + [pred_flow])) * 1.10
     xs = np.linspace(f_min, f_max, 300)
 
     # Piecewise-linear interpolation helper (numpy)
