@@ -333,6 +333,15 @@ async def api_calc_atc105(req: Atc105Request):
             "pred_flow":   pred_flow,
             "shortfall":   shortfall,
             "capability":  capability,
+            # Pass through request inputs for report template
+            "design_wbt":  req.design_wbt,
+            "design_cwt":  req.design_cwt,
+            "design_hwt":  req.design_hwt,
+            "design_flow": req.design_flow,
+            "test_wbt":    req.test_wbt,
+            "test_cwt":    req.test_cwt,
+            "test_hwt":    req.test_hwt,
+            "test_flow":   req.test_flow,
         }
     except Exception as exc:
         import traceback
@@ -534,7 +543,8 @@ def api_generate_pdf_report(payload: dict):
             headers={"Content-Disposition": "attachment; filename=CTI_Performance_Report_ATC105.pdf"}
         )
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"PDF Generation Failed: {str(e)}")
+        import traceback
+        raise HTTPException(status_code=500, detail=f"PDF Generation Failed: {str(e)}\n{traceback.format_exc()}")
 
 # Serve UI
 app.mount("/css", StaticFiles(directory=str(WEB_ROOT / "css")), name="css")

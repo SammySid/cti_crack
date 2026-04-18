@@ -80,5 +80,13 @@
   "pred_cwt": 28.604,
   "pred_flow": 5283.71,
   "shortfall": 3.796,
-  "capability": 70.4
+  "capability": 70.4,
+  "design_wbt": 29.0,
+  "design_cwt": 33.0,
+  "design_hwt": 43.0,
+  "design_flow": 3863.6,
+  "test_wbt": 21.7,
+  "test_cwt": 32.4,
+  "test_hwt": 42.13,
+  "test_flow": 3680.0
 }
