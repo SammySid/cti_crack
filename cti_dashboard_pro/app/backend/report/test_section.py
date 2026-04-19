@@ -129,7 +129,7 @@ def _page_a(ctx: dict, label: str, styles: dict) -> list:
         '(80%, 100%, 120% of design range) at the recorded Test Wet Bulb Temperature.',
         styles['StepDesc'],
     )
-    items.append(KeepTogether([Spacer(1, 4), s1_hdr, Spacer(1, 4), s1_desc]))
+    items.append(KeepTogether([Spacer(1, 6), s1_hdr, Spacer(1, 9), s1_desc]))
     items.append(Spacer(1, 6))
 
     # Table 1
@@ -164,7 +164,7 @@ def _page_b(ctx: dict, label: str, styles: dict) -> list:
         'These three (Flow, CWT) pairs form Table 2.',
         styles['StepDesc'],
     )
-    items.append(KeepTogether([s2_hdr, Spacer(1, 4), s2_desc]))
+    items.append(KeepTogether([s2_hdr, Spacer(1, 9), s2_desc]))
     items.append(Spacer(1, 8))
 
     # Cross Plot 1 image
@@ -216,7 +216,7 @@ def _page_c(ctx: dict, label: str, styles: dict) -> list:
         'The density ratio accounts for atmospheric variation in air mass flow delivered by the fan.',
         styles['StepDesc'],
     )
-    items.append(KeepTogether([s3_hdr, Spacer(1, 4), s3_desc]))
+    items.append(KeepTogether([s3_hdr, Spacer(1, 9), s3_desc]))
     items.append(Spacer(1, 6))
 
     # Calc panel
@@ -256,7 +256,7 @@ def _page_c(ctx: dict, label: str, styles: dict) -> list:
         'the Design CWT \u2014 this is the Predicted Flow used in Step 5.',
         styles['StepDesc'],
     )
-    items.append(KeepTogether([s4_hdr, Spacer(1, 4), s4_desc]))
+    items.append(KeepTogether([s4_hdr, Spacer(1, 9), s4_desc]))
     items.append(Spacer(1, 8))
 
     # Cross Plot 2 image
@@ -298,7 +298,7 @@ def _page_d(ctx: dict, label: str, styles: dict) -> list:
         'Capability % = (Q_adj / Predicted Flow) \u00d7 100.',
         styles['StepDesc'],
     )
-    items.append(KeepTogether([s5_hdr, Spacer(1, 4), s5_desc]))
+    items.append(KeepTogether([s5_hdr, Spacer(1, 9), s5_desc]))
     items.append(Spacer(1, 8))
 
     # Step 5 results table (7 rows: i–vii)

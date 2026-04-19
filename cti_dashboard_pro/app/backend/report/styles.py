@@ -74,8 +74,8 @@ def build_styles() -> dict:
     S['StepDesc'] = ParagraphStyle(
         'StepDesc', parent=base['Normal'],
         fontName='Helvetica', fontSize=8.5,
-        textColor=BODY_COLOR, leading=13,
-        leftIndent=12, spaceAfter=4,
+        textColor=BODY_COLOR, leading=14,
+        leftIndent=14, spaceBefore=4, spaceAfter=8,
     )
 
     # Table header (white on NAVY)
