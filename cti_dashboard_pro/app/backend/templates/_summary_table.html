@@ -1,0 +1,56 @@
+{# _summary_table.html
+   Final Data and Conclusion table — all 3 tests vs Design (one page).
+   Variables: final_data_table, data_notes
+#}
+{% include '_page_header.html' %}
+
+{% if final_data_table %}
+<div class="sec-bar">FINAL DATA AND CONCLUSION OF PRE AND POST TEST</div>
+<p class="body" style="font-size: 7.5pt; color: #475569;">
+    All three tests have been independently evaluated against the same Design baseline
+    using the CTI ATC-105 five-step method. CWT Deviation from Design and Capability
+    are computed values, not raw measurements.
+</p>
+
+<table class="data-tbl avoid-break">
+    <colgroup>
+        <col style="width: 31%;"/>
+        <col style="width: 9%;"/>
+        <col style="width: 19%;"/>
+        <col style="width: 19%;"/>
+        <col style="width: 22%;"/>
+    </colgroup>
+    <thead>
+        <tr>
+            <th style="text-align: left; padding: 6px 6px;">Parameter</th>
+            <th>Unit</th>
+            <th>TEST 1 Pre-Test</th>
+            <th>TEST 2 Post Fan</th>
+            <th>TEST 3 Post Distr.</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in final_data_table %}
+        <tr>
+            <td class="td-left">{{ row.name }}</td>
+            <td>{{ row.unit }}</td>
+            <td>{{ row.test1 }}</td>
+            <td>{{ row.test2 }}</td>
+            <td style="font-weight: bold; background-color: #eff6ff;">{{ row.test3 }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+{% if data_notes %}
+<div class="notes-panel">
+    <p class="notes-title">Notes / Mathematical Findings:</p>
+    <ol>
+        {% for n in data_notes %}<li>{{ n }}</li>{% endfor %}
+    </ol>
+</div>
+{% endif %}
+
+{% endif %}
+
+<div class="page-break"></div>

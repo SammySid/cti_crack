@@ -71,7 +71,7 @@ def create_cross_plot_1(cp1: dict, label: str = ""):
     v110 = cp1.get("f110_cwt")
 
     title_suffix = f" — {label}" if label else ""
-    fig, ax = plt.subplots(figsize=(11, 6.5))
+    fig, ax = plt.subplots(figsize=(10, 4.6))
     fig.patch.set_facecolor('white')
     _style_ax(ax,
         title=f"CROSS PLOT 1 — CWT vs RANGE at Test WBT{title_suffix}",
@@ -192,7 +192,7 @@ def create_cross_plot_2(cp2: dict, label: str = ""):
         return cwts[-1] + slope_r * (flow_val - flows[-1])
 
     title_suffix = f" — {label}" if label else ""
-    fig, ax = plt.subplots(figsize=(11, 6.5))
+    fig, ax = plt.subplots(figsize=(10, 4.6))
     fig.patch.set_facecolor('white')
     _style_ax(ax,
         title=f"CROSS PLOT 2 — WATER FLOW vs CWT (Design WBT & Design Range){title_suffix}",
@@ -541,7 +541,11 @@ def generate_pdf_report(payload: dict):
     }
 
     template_dir = os.path.join(os.path.dirname(__file__), "templates")
-    env = Environment(loader=FileSystemLoader(template_dir))
+    env = Environment(
+        loader=FileSystemLoader(template_dir),
+        trim_blocks=True,    # strip newline after block tags  → cleaner output
+        lstrip_blocks=True,  # strip leading whitespace before block tags
+    )
 
     try:
         template = env.get_template("report_template.html")

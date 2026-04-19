@@ -1,0 +1,93 @@
+{# _cover.html
+   Cover page — company stripe, report title, asset identifier, metadata table.
+   Variables: report_title, asset, client, test_date, report_date
+#}
+<div style="margin-top: 45px; text-align: center;">
+
+    <!-- Company stripe -->
+    <div style="background-color: #1e3a5f; padding: 16px 28px; margin-bottom: 0;">
+        <p style="color: white; font-size: 9pt; letter-spacing: 0.13em;
+                  margin: 0 0 4px 0; font-weight: bold;">
+            SS COOLING TOWER CONSULTANTS
+        </p>
+        <p style="color: #bfdbfe; font-size: 7pt; margin: 0; letter-spacing: 0.02em;">
+            Thermal Design &nbsp;&middot;&nbsp; CT Assessment &amp; Upgrade &nbsp;&middot;&nbsp;
+            CT Testing &nbsp;&middot;&nbsp; Technical Management &amp; Training
+        </p>
+    </div>
+
+    <!-- Report title block -->
+    <div style="border: 1.5px solid #1e3a5f; border-top: none; padding: 26px 28px 18px;">
+        <p style="font-size: 15pt; font-weight: bold; color: #0f172a;
+                  margin: 0 0 7px 0; letter-spacing: 0.01em; line-height: 1.3;">
+            {{ report_title }}
+        </p>
+        <p style="font-size: 8.5pt; color: #475569; margin: 0; font-weight: bold;
+                  letter-spacing: 0.04em;">
+            PRE-TEST / POST FAN CHANGE / POST DISTRIBUTION CHANGE &mdash;
+            THREE-STAGE SINGLE CELL ASSESSMENT
+        </p>
+    </div>
+
+    <!-- Asset identifier -->
+    <div style="background-color: #dbeafe; border: 1.5px solid #1e3a5f;
+                border-top: none; padding: 10px 28px;">
+        <p style="font-size: 13pt; font-weight: bold; color: #1e3a5f; margin: 0;">
+            {{ asset }}
+        </p>
+    </div>
+
+    <!-- Metadata table -->
+    <div style="margin-top: 30px; text-align: left; border: 1px solid #cbd5e1;
+                padding: 16px 22px;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <tr style="border-bottom: 1px solid #f1f5f9;">
+                <td style="width: 44%; padding: 6px 0; font-size: 8pt; vertical-align: top;">
+                    <strong style="color: #475569;">OWNER / CLIENT</strong>
+                </td>
+                <td style="padding: 6px 0; font-weight: bold; color: #0f172a; font-size: 9pt;">
+                    {{ client }}
+                </td>
+            </tr>
+            <tr style="border-bottom: 1px solid #f1f5f9;">
+                <td style="padding: 6px 0; font-size: 8pt; vertical-align: top;">
+                    <strong style="color: #475569;">TESTING AGENCY &amp; EQUIPMENT PROVIDER</strong>
+                </td>
+                <td style="padding: 6px 0; font-weight: bold; color: #0f172a; font-size: 9pt;">
+                    SS COOLING TOWER CONSULTANTS (SSCTC)
+                </td>
+            </tr>
+            <tr style="border-bottom: 1px solid #f1f5f9;">
+                <td style="padding: 6px 0; font-size: 8pt;">
+                    <strong style="color: #475569;">DATE OF TEST</strong>
+                </td>
+                <td style="padding: 6px 0; font-weight: bold; color: #0f172a; font-size: 9pt;">
+                    {{ test_date }}
+                </td>
+            </tr>
+            <tr style="border-bottom: 1px solid #f1f5f9;">
+                <td style="padding: 6px 0; font-size: 8pt;">
+                    <strong style="color: #475569;">REPORT DATE</strong>
+                </td>
+                <td style="padding: 6px 0; font-weight: bold; color: #0f172a; font-size: 9pt;">
+                    {{ report_date }}
+                </td>
+            </tr>
+            <tr>
+                <td style="padding: 6px 0; font-size: 8pt;">
+                    <strong style="color: #475569;">ASSESSMENT METHOD</strong>
+                </td>
+                <td style="padding: 6px 0; font-weight: bold; color: #0f172a; font-size: 9pt;">
+                    CTI ATC-105 Merkel Method &mdash; Applied independently to each of 3 test stages
+                </td>
+            </tr>
+        </table>
+    </div>
+
+    <!-- Cover footer address -->
+    <div style="margin-top: 40px; border-top: 1px solid #e2e8f0; padding-top: 8px;
+                font-size: 7pt; color: #94a3b8; text-align: center;">
+        7 Uma Sada &ndash; RCHS, CA Road, Chembur, Mumbai &ndash; 400071
+        &nbsp;&middot;&nbsp; www.ssctc.org
+    </div>
+</div>

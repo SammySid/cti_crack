@@ -1,0 +1,74 @@
+{# _narrative.html
+   Pages: Preamble, Members Present, Assessment Method,
+          Instrument Placement, Conclusions, Suggestions.
+   Variables: preamble_paragraphs, members_client, members_ssctc,
+              assessment_method, instrument_placement, conclusions, suggestions,
+              client
+#}
+
+<!-- ── Preamble ──────────────────────────────────────────────────────────── -->
+{% include '_page_header.html' %}
+<div class="sec-bar">PREAMBLE</div>
+{% for p in preamble_paragraphs %}
+<p class="body">{{ p }}</p>
+{% endfor %}
+
+<div class="page-break"></div>
+
+<!-- ── Members Present ───────────────────────────────────────────────────── -->
+{% include '_page_header.html' %}
+<div class="sec-bar">MEMBERS PRESENT FOR THE TEST</div>
+
+{% if members_client %}
+<div class="sec-bar-sub">CLIENT &mdash; {{ client }}</div>
+<ul class="mbr-list">
+    {% for m in members_client %}<li>{{ m }}</li>{% endfor %}
+</ul>
+{% endif %}
+
+{% if members_ssctc %}
+<div class="sec-bar-sub" style="margin-top: 14px;">SS COOLING TOWER CONSULTANTS (SSCTC)</div>
+<ul class="mbr-list">
+    {% for m in members_ssctc %}<li>{{ m }}</li>{% endfor %}
+</ul>
+{% endif %}
+
+<div class="page-break"></div>
+
+<!-- ── Assessment Method & Instrument Placement ──────────────────────────── -->
+{% include '_page_header.html' %}
+
+{% if assessment_method %}
+<div class="sec-bar">ASSESSMENT METHOD &amp; ANALYSIS</div>
+{% for a in assessment_method %}
+<p class="body">{{ a }}</p>
+{% endfor %}
+{% endif %}
+
+{% if instrument_placement %}
+<div class="sec-bar">INSTRUMENT PLACEMENT AND READINGS</div>
+{% for inst in instrument_placement %}
+<p class="body">{{ inst }}</p>
+{% endfor %}
+{% endif %}
+
+<div class="page-break"></div>
+
+<!-- ── Conclusions & Suggestions ────────────────────────────────────────── -->
+{% include '_page_header.html' %}
+
+{% if conclusions %}
+<div class="sec-bar">CONCLUSION AND REMARKS</div>
+<ol class="rpt-list">
+    {% for c in conclusions %}<li>{{ c }}</li>{% endfor %}
+</ol>
+{% endif %}
+
+{% if suggestions %}
+<div class="sec-bar" style="margin-top: 18px;">SUGGESTIONS AND SPECIAL NOTES</div>
+<ol class="rpt-list">
+    {% for s in suggestions %}<li>{{ s }}</li>{% endfor %}
+</ol>
+{% endif %}
+
+<div class="page-break"></div>
