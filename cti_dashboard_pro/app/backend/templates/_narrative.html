@@ -1,12 +1,8 @@
 {# _narrative.html — Preamble, Members, Assessment, Conclusions
-   Space-optimised: merges thin sections to eliminate blank half-pages.
+   Smart layout: NO forced page-breaks between sections.
+   WeasyPrint will flow content naturally and only break when a page is full.
+   We only force a page break AFTER all narrative is done (before analysis section).
 
-   Page layout:
-     Page 1 — Preamble + Members Present (combined if space allows)
-     Page 2 — Assessment Method + Instrument Placement
-     Page 3 — Conclusion & Remarks + Suggestions
-
-   Page breaks: standard CSS break-before:page via .page-break div
    Variables: preamble_paragraphs, members_client, members_ssctc,
               assessment_method, instrument_placement, conclusions, suggestions, client
 #}
@@ -18,7 +14,7 @@
 <p class="body">{{ p }}</p>
 {% endfor %}
 
-<!-- ── Members Present (on same page as preamble if preamble is short) ──── -->
+<!-- ── Members Present — flows directly after preamble ──────────────────── -->
 <div class="sec-bar" style="margin-top: 20px;">MEMBERS PRESENT FOR THE TEST</div>
 
 {% if members_client %}
@@ -35,42 +31,37 @@
 </ul>
 {% endif %}
 
-<div class="page-break"></div>
-
-<!-- ── Assessment Method & Instrument Placement ─────────────────────────── -->
-{% include '_page_header.html' %}
-
+<!-- ── Assessment Method — flows after members ──────────────────────────── -->
 {% if assessment_method %}
-<div class="sec-bar">ASSESSMENT METHOD &amp; ANALYSIS</div>
+<div class="sec-bar" style="margin-top: 20px;">ASSESSMENT METHOD &amp; ANALYSIS</div>
 {% for a in assessment_method %}
 <p class="body">{{ a }}</p>
 {% endfor %}
 {% endif %}
 
+<!-- ── Instrument Placement — flows after assessment ────────────────────── -->
 {% if instrument_placement %}
-<div class="sec-bar" style="margin-top: 18px;">INSTRUMENT PLACEMENT AND READINGS</div>
+<div class="sec-bar" style="margin-top: 16px;">INSTRUMENT PLACEMENT AND READINGS</div>
 {% for inst in instrument_placement %}
 <p class="body">{{ inst }}</p>
 {% endfor %}
 {% endif %}
 
-<div class="page-break"></div>
-
-<!-- ── Conclusions & Suggestions ────────────────────────────────────────── -->
-{% include '_page_header.html' %}
-
+<!-- ── Conclusions — flows after instrument section ─────────────────────── -->
 {% if conclusions %}
-<div class="sec-bar">CONCLUSION AND REMARKS</div>
+<div class="sec-bar" style="margin-top: 20px;">CONCLUSION AND REMARKS</div>
 <ol class="rpt-list">
     {% for c in conclusions %}<li>{{ c }}</li>{% endfor %}
 </ol>
 {% endif %}
 
+<!-- ── Suggestions — flows last ─────────────────────────────────────────── -->
 {% if suggestions %}
-<div class="sec-bar" style="margin-top: 18px;">SUGGESTIONS AND SPECIAL NOTES</div>
+<div class="sec-bar" style="margin-top: 16px;">SUGGESTIONS AND SPECIAL NOTES</div>
 <ol class="rpt-list">
     {% for s in suggestions %}<li>{{ s }}</li>{% endfor %}
 </ol>
 {% endif %}
 
+<!-- One page-break at the END of all narrative to start analysis fresh -->
 <div class="page-break"></div>
