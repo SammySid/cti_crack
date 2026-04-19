@@ -12,7 +12,8 @@
 | **Psychrometric Calculator** | Full Hyland-Wexler psychrometrics (DP, HR, RH, H, SV, density) with altitude correction |
 | **Excel Data Filter** | Filters multi-file time-series `.xlsx` datasets by time window; interpolates, merges, exports consolidated workbook |
 | **Excel Report Export** | Generates branded professional thermal report `.xlsx` from current analysis inputs |
-| **ATC-105 PDF Report Engine** | Three-stage CTI ATC-105 evaluation (Pre-Test, Post-Fan Change, Post-Distribution Change) — full 5-step analysis per test, professional cross-plots, comparison table, and multi-test PDF report |
+| **ATC-105 PDF Report Engine** | Three-stage CTI ATC-105 evaluation (Pre-Test, Post-Fan Change, Post-Distribution Change) — full 5-step analysis per test, professional cross-plots, comparison table, and multi-test PDF report (ReportLab Platypus) |
+| **Results Preview** | Full in-browser report preview before PDF generation: Cross Plot 1 + Cross Plot 2 charts (Chart.js), 6-step calculation walkthrough, capability/trend charts, and comparison table — identical data to the PDF |
 | **Excel Auto-Fill** | Upload filtered Excel output directly into the report builder to auto-populate test condition fields |
 
 ---
@@ -45,7 +46,7 @@ After running the Excel Data Filter tool, click **"Upload Filter Output → Auto
 ## Quick Start (Local)
 
 ```bash
-pip install fastapi uvicorn pydantic python-multipart pandas openpyxl xlsxwriter python-dateutil jinja2 xhtml2pdf matplotlib
+pip install fastapi uvicorn pydantic python-multipart pandas openpyxl xlsxwriter python-dateutil matplotlib reportlab
 ```
 
 Then from `cti_dashboard_pro/`:

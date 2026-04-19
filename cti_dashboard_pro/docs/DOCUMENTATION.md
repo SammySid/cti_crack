@@ -1,6 +1,6 @@
 # CTI Dashboard Pro — Complete Technical Documentation
 
-> **Last updated:** 2026-04-18
+> **Last updated:** 2026-04-19
 
 ---
 
@@ -11,7 +11,7 @@ A full-stack engineering dashboard for cooling tower thermal analysis, psychrome
 **Stack:**
 - Frontend: Single-page HTML/CSS/JS (Tailwind CDN, Chart.js, modular ES6)
 - Backend: Python 3.11 + FastAPI + Uvicorn
-- PDF reports: Jinja2 + xhtml2pdf + Matplotlib
+- PDF reports: ReportLab Platypus + Matplotlib (two-pass build for accurate page numbers)
 - Deployment: Docker (python:3.11-slim) on Oracle UK VPS via `auto_sync.sh`
 
 ---
@@ -50,7 +50,13 @@ See Section 4 for the complete calculation flow.
 - **Cross Plot 2** — Water Flow vs CWT (from Table 2) with adj-flow → pred-CWT → pred-flow crosshair annotations
 - **Steps 1–5** per test — Table 1, Cross Plot 1 + Table 2, Adjusted Flow, Cross Plot 2, Shortfall + Capability
 - **Final comparison table** — shortfall, capability, and cumulative improvement across all three tests
-- **PDF layout** — Jinja2 `{% for test in tests %}` loop: per-test ATC-105 pages rendered automatically for 1, 2, or 3 tests
+- **PDF layout** — ReportLab Platypus: per-test pages built programmatically with running header/footer + two-pass "Page X of Y"
+
+### Results Preview (Report Builder)
+- **Run Preview** button fires three parallel `/api/calculate/atc105` calls and renders a complete in-browser report document before the user generates the PDF
+- Shows: document header (title, client, asset, dates), design conditions, all 3 test sections (each with measured inputs, 6-step ATC-105 calculation walkthrough, Cross Plot 1 chart, Cross Plot 2 chart, normalised results), improvement progression + trend charts, and the full multi-test comparison table
+- Cross Plot 1 and Cross Plot 2 charts are rendered with Chart.js scatter type using the same `cross_plot_1` and `cross_plot_2` data returned by the API — identical to the Matplotlib charts in the PDF
+- Colour-coded verdict badges (PASS / MARGINAL / FAIL) and improvement deltas update automatically
 
 ### Excel Auto-Fill (Report Builder)
 - Upload the filtered `.xlsx` output from the Excel Data Filter
@@ -70,7 +76,7 @@ See Section 4 for the complete calculation flow.
 | `js/worker.js` | Web Worker proxy for curve API calls |
 | `js/charts.js` | Chart.js rendering wrapper |
 | `js/ui/bind-events.js` | All event listeners — inputs, buttons, tabs, file uploads |
-| `js/ui/report.js` | ATC-105 three-stage orchestration: `_getDesign`, `_buildPayloadForTest`, `_calcAtc`, `updateAtcPreview`, `syncDesignFromThermal`, `bindFilterUpload`, `generateReport` (parallel 3-test calls via `Promise.all`) |
+| `js/ui/report.js` | ATC-105 three-stage orchestration: `_getDesign`, `_calcAtc`, `updateAtcPreview`, `previewAllTests` (full in-browser preview with Chart.js CP1/CP2 charts), `syncDesignFromThermal`, `bindFilterUpload`, `generateReport` |
 | `js/ui/filter.js` | Excel filter state + request flow |
 | `js/ui/export.js` | Excel export state + download |
 | `js/ui/prediction.js` | CWT prediction wrapper |
@@ -83,7 +89,7 @@ See Section 4 for the complete calculation flow.
 | File | Purpose |
 |---|---|
 | `backend/main.py` | FastAPI app: all endpoints + `Atc105Request` Pydantic model |
-| `backend/report_service.py` | `create_cross_plot_1`, `create_cross_plot_2`, `generate_pdf_report` |
+| `backend/report_service.py` | `create_cross_plot_1`, `create_cross_plot_2`, `generate_pdf_report` (ReportLab Platypus — two-pass) |
 | `backend/excel_gen.py` | Thermal report `.xlsx` builder |
 | `backend/excel_filter_service.py` | Time-window filter service |
 | `backend/core/calculations.py` | `find_cwt`, `calculate_demand_kavl`, `calculate_supply_kavl` |
@@ -91,7 +97,6 @@ See Section 4 for the complete calculation flow.
 | `backend/core/psychro_engine.py` | 🔒 Psychrometrics — **DO NOT MODIFY** |
 | `backend/core/data/merkel_poly.bin` | 29.8 KB Chebyshev coefficients |
 | `backend/core/data/psychro_f_alt.bin` | 2D probed enhancement factor table |
-| `backend/templates/report_template.html` | Jinja2 PDF template (11 pages) |
 
 ### ⚠️ Critical — Python Backend Import Rule
 The Math Engines load binary lookup tables into **module-level globals** at startup. To prevent Python's `sys.modules` from creating two isolated engine instances (which causes lookup tables to be empty during API calls), **always use relative imports** inside `core/`:
@@ -272,20 +277,12 @@ Full 3-flow performance curves for Chart.js rendering.
 - Red solid horizontal: test CWT
 - All key points annotated with coloured bbox labels + arrows
 
-### `_build_test_context(atc, label, design_flow_fallback, _f0) → dict`
-- Called once per test (pre / post-fan / post-distribution)
-- Extracts all template variables from one ATC-105 result dict
-- Generates `plot_1` (Cross Plot 1) and `plot_2` (Cross Plot 2) as base64 PNG strings
-- Computes `design_approach`, `test_approach`, formats `table1_rows`, `intersect`, `math_results`
-- Handles missing data gracefully (returns `"—"` for any absent field)
-
 ### `generate_pdf_report(payload)`
 - Resolves `atc105_pre`, `atc105_post`, `atc105_dist` from payload
-- Calls `_build_test_context` for each present test → builds `tests` list
-- Renders `report_template.html` with Jinja2 (`{% for test in tests %}` loop)
-- Passes `_f0`, `_f1`, `_f2` format-helper callables to the template
-- Converts rendered HTML → PDF bytes via `xhtml2pdf.pisa.CreatePDF`
-- Returns raw PDF bytes (streamed to browser as attachment)
+- Builds Matplotlib Cross Plot 1 and Cross Plot 2 charts per test (PNG bytes → embedded in ReportLab)
+- Assembles the full PDF programmatically with ReportLab Platypus — cover page, preamble, members, method, conclusions, final data table, airflow page, then one 4-page ATC-105 block per test
+- Two-pass build (first pass counts pages, second pass renders "Page X of Y" in the footer)
+- Returns raw PDF bytes (streamed to browser as an attachment)
 
 ---
 
@@ -302,7 +299,7 @@ Full 3-flow performance curves for Chart.js rendering.
 | 6 | Final Data Table (3-test comparison: shortfall, capability, improvements) |
 | 7 | Air Flow Data (anemometer traverses) |
 
-### Per-test ATC-105 pages (repeated for each test via Jinja2 `{% for test in tests %}`)
+### Per-test ATC-105 pages (one block per test, built programmatically by ReportLab)
 | Page | Content |
 |---|---|
 | A | Section header + Design vs Recorded Conditions table + STEP 1 (Table 1) |
@@ -321,8 +318,9 @@ SSCTC header bar appears at top of all pages after cover. Page numbers appear in
 ### ATC-105 Report Generation (Three-Stage)
 1. User fills Design Conditions (or clicks "Sync from Thermal Tab")
 2. User fills Test 1 (Pre), Test 2 (Post Fan), Test 3 (Post Distribution) conditions
-3. Live ATC-105 Preview shows Test 3 (current) results on every input change (debounced)
-4. User clicks "Generate Report" → `report.js`:
+3. Live ATC-105 mini-preview (Step 3 panel) shows Test 3 results on every input change (debounced)
+4. User clicks **Run Preview** → `previewAllTests()` fires 3 parallel API calls and renders a complete in-browser report document with Cross Plot 1 + Cross Plot 2 charts per test, improvement progression, and comparison table
+5. User clicks **Generate PDF Report** → `report.js`:
    - Fires three parallel `/api/calculate/atc105` calls via `Promise.all`
    - Annotates each result with `fan_power_design` and `fan_power_test`
    - Computes improvements: `imp_2v1`, `imp_3v2`, `imp_3v1`
@@ -348,9 +346,7 @@ SSCTC header bar appears at top of all pages after cover. Page numbers appear in
 
 | Date | Bug | Fix |
 |---|---|---|
-| 2026-04-18 | Garbled table headers in PDF (`TEST 1TEST 2TEST 3` merged) | `<br/>` inside `<th>` is broken in xhtml2pdf — replaced with inline parenthetical text; added explicit column widths |
-| 2026-04-18 | Duplicate STEP 2 in PDF (Table 2 and Cross Plot 1 both labeled STEP 2) | Removed STEP 2 header from Table 2; relabeled as "Table 2 — Read from Cross Plot 1"; Cross Plot 1 chart is the correct STEP 2 |
-| 2026-04-18 | STEP 3 blank (Cross Plot 2 chart rendered after STEP 4 panel) | Reordered template: STEP 3 = Adjusted Flow (calculation), STEP 4 = Cross Plot 2 (chart directly below header) |
+| 2026-04-19 | Results Preview showed only a minimal 3-card summary with no charts or step breakdowns | Redesigned as a full in-browser report document: document header, legend, executive summary (capability bar chart), design conditions, 3 test cards (each with CP1/CP2 Chart.js charts + 6-step walkthrough table + results strip), improvement progression (trend line chart), and comparison table |
 | 2026-04-18 | `constant_c` and `constant_m` required in API (`Field required`) | Made both optional with defaults (1.2 / 0.6) in `Atc105Request` Pydantic model |
 | 2026-04-18 | `502 Bad Gateway` on `ct.ftp.sh` after Dockerfile update | Upgraded `FROM python:3.9-slim` → `python:3.11-slim`; added `libcairo2-dev`, `libpango1.0-dev` and other build tools for pycairo compilation |
 | 2026-04-18 | Blank charts on Thermal Analysis tab | Fixed `try:` (Python syntax) → `try {` (JS syntax) in `report.js` — SyntaxError broke the module |
@@ -372,7 +368,7 @@ start_dashboard.bat   # validates Python, installs deps, starts server
 ### Manual
 ```bash
 cd cti_dashboard_pro
-pip install fastapi uvicorn pydantic python-multipart pandas openpyxl xlsxwriter python-dateutil jinja2 xhtml2pdf matplotlib
+pip install fastapi uvicorn pydantic python-multipart pandas openpyxl xlsxwriter python-dateutil matplotlib reportlab
 python -m uvicorn app.backend.main:app --host 127.0.0.1 --port 8000
 ```
 Open `http://localhost:8000`.

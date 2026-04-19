@@ -223,86 +223,287 @@ async function _calcAtc(design, test) {
     return resp.json();
 }
 
-// ── Calculation walkthrough builder ───────────────────────────────────────
+// ── Preview chart registry — destroyed on each re-run ─────────────────────────
+const _pvCharts = {};
 
-function _buildCalcHtml(d, t, r) {
-    if (r.adj_flow == null || r.pred_cwt == null) return '';
-    const f2 = v => (v != null ? Number(v).toFixed(2) : '—');
-    const f1 = v => (v != null ? Number(v).toFixed(1) : '—');
-    const f4 = v => (v != null ? Number(v).toFixed(4) : '—');
-
-    const sfColor  = r.shortfall >= 0 ? 'text-rose-400' : 'text-emerald-400';
-    const capColor = r.capability >= 100 ? 'text-emerald-400' : r.capability >= 95 ? 'text-amber-400' : 'text-rose-400';
-
-    // Combined flow correction = (P_fan_design/P_fan_test)^(1/3) × (ρ_test/ρ_design)^(1/3)
-    const totalCorr  = r.adj_flow / t.flow;
-    const avgTestT   = (t.hwt + t.cwt) / 2;
-    const avgDesignT = (d.hwt + d.cwt) / 2;
-
-    return `
-<div class="mt-1 pt-3 border-t border-violet-500/15 space-y-3 text-[10px] font-mono">
-  <p class="text-[8px] font-black uppercase tracking-widest text-violet-400/60 mb-1">— ATC-105 Calculation Steps —</p>
-
-  <div class="space-y-0.5">
-    <p class="text-[8px] font-bold uppercase tracking-widest text-violet-400/80">① Test Range</p>
-    <p class="text-slate-400">HWT − CWT = <span class="text-slate-300">${f2(t.hwt)}</span> − <span class="text-slate-300">${f2(t.cwt)}</span> = <span class="text-white font-bold">${f2(r.test_range)} °C</span></p>
-    <p class="text-[9px] text-slate-600">Actual temperature drop across the tower during this test.</p>
-  </div>
-
-  <div class="space-y-0.5">
-    <p class="text-[8px] font-bold uppercase tracking-widest text-violet-400/80">② Adjusted Water Flow</p>
-    <p class="text-slate-400">Mean test water = (${f2(t.hwt)} + ${f2(t.cwt)}) / 2 = <span class="text-slate-300">${f2(avgTestT)} °C</span></p>
-    <p class="text-slate-400">Mean design water = (${f2(d.hwt)} + ${f2(d.cwt)}) / 2 = <span class="text-slate-300">${f2(avgDesignT)} °C</span></p>
-    <p class="text-slate-400">Correction = (P_fan_des/P_fan_test)^⅓ × (ρ_test/ρ_des)^⅓ = <span class="text-slate-300">${f4(totalCorr)}</span></p>
-    <p class="text-slate-400 pl-2 text-[9px] text-slate-500">= (${f2(d.fan_power)}/${f2(t.fan_power)})^⅓ × Kell-density-ratio^⅓</p>
-    <p class="text-slate-400">Q_adj = ${f1(t.flow)} × ${f4(totalCorr)} = <span class="text-white font-bold">${f1(r.adj_flow)} m³/hr</span></p>
-    <p class="text-[9px] text-slate-600">Normalises flow to design fan power and water density conditions.</p>
-  </div>
-
-  <div class="space-y-0.5">
-    <p class="text-[8px] font-bold uppercase tracking-widest text-violet-400/80">③ Predicted CWT — Cross Plot 2</p>
-    <p class="text-slate-400">Tower curve: KaV/L = C × (L/G)^−m = <span class="text-violet-300">${f2(d.constant_c)}</span> × (L/G)^−<span class="text-violet-300">${f2(d.constant_m)}</span></p>
-    <p class="text-slate-400">Table 2 built at Test WBT (${f2(t.wbt)}°C) and Test Range — 3 flow × 3 range points</p>
-    <p class="text-slate-400">At Q_adj = ${f1(r.adj_flow)} m³/hr on Cross Plot 2 (Water Flow vs CWT):</p>
-    <p class="text-slate-400">→ Pred. CWT = <span class="text-cyan-300 font-bold">${f2(r.pred_cwt)} °C</span></p>
-    <p class="text-[9px] text-slate-600">Performance curve built from this tower's own C &amp; M — synced from Thermal Analysis.</p>
-  </div>
-
-  <div class="space-y-0.5">
-    <p class="text-[8px] font-bold uppercase tracking-widest text-violet-400/80">④ Shortfall</p>
-    <p class="text-slate-400">Test CWT − Pred. CWT = <span class="text-slate-300">${f2(t.cwt)}</span> − <span class="text-slate-300">${f2(r.pred_cwt)}</span> = <span class="${sfColor} font-bold">${f2(r.shortfall)} °C</span></p>
-    <p class="text-[9px] text-slate-600">+ve = actual CWT higher than tower should achieve → underperforming.</p>
-  </div>
-
-  <div class="space-y-0.5">
-    <p class="text-[8px] font-bold uppercase tracking-widest text-violet-400/80">⑤ Capability — Cross Plot 2 (ATC-105 Appendix C)</p>
-    <p class="text-slate-400">Horizontal from Test CWT (${f2(t.cwt)} °C) → intersects curve → pred_flow</p>
-    <p class="text-slate-400">(Q_adj / pred_flow) × 100 = <span class="${capColor} font-bold">${f1(r.capability)} %</span></p>
-    <p class="text-[9px] text-slate-600">≥100% = adjusted flow exceeds predicted flow → tower meets specification.</p>
-  </div>
-</div>`;
+function _pvChart(id, config) {
+    if (_pvCharts[id]) { _pvCharts[id].destroy(); delete _pvCharts[id]; }
+    const canvas = document.getElementById(id);
+    if (!canvas) return;
+    _pvCharts[id] = new Chart(canvas, config);
 }
 
-// ── Results preview (all 3 tests, no PDF) ─────────────────────────────────
+const _pvTheme = {
+    grid:  'rgba(148,163,184,0.10)',
+    tick:  '#475569',
+    label: '#64748b',
+    text:  '#94a3b8',
+};
 
+// ── Cross Plot 1: CWT vs Range (3 flow curves + test-range marker) ─────────────
+function _pvRenderCp1(canvasId, cp1, testWbt) {
+    const ranges = cp1.ranges_abs.map(Number);
+    const y90    = cp1.cwt_90.map(Number);
+    const y100   = cp1.cwt_100.map(Number);
+    const y110   = cp1.cwt_110.map(Number);
+    const testR  = Number(cp1.test_range);
+
+    const allY = [...y90, ...y100, ...y110].filter(isFinite);
+    const yMin = Math.floor(Math.min(...allY) - 0.5);
+    const yMax = Math.ceil(Math.max(...allY)  + 0.5);
+    const xMin = Math.min(...ranges) - 0.3;
+    const xMax = Math.max(...ranges) + 0.3;
+
+    const intPts = [
+        cp1.f90_cwt  != null ? { x: testR, y: Number(cp1.f90_cwt)  } : null,
+        cp1.f100_cwt != null ? { x: testR, y: Number(cp1.f100_cwt) } : null,
+        cp1.f110_cwt != null ? { x: testR, y: Number(cp1.f110_cwt) } : null,
+    ].filter(Boolean);
+
+    _pvChart(canvasId, {
+        type: 'scatter',
+        data: { datasets: [
+            { label: '90% Flow',  data: ranges.map((x,i) => ({x, y: y90[i]})),  borderColor: '#7c3aed', backgroundColor: '#7c3aed', showLine: true, borderWidth: 2, pointRadius: 3, tension: 0.3, fill: false },
+            { label: '100% Flow', data: ranges.map((x,i) => ({x, y: y100[i]})), borderColor: '#16a34a', backgroundColor: '#16a34a', showLine: true, borderWidth: 2, pointRadius: 3, tension: 0.3, fill: false },
+            { label: '110% Flow', data: ranges.map((x,i) => ({x, y: y110[i]})), borderColor: '#2563eb', backgroundColor: '#2563eb', showLine: true, borderWidth: 2, pointRadius: 3, tension: 0.3, fill: false },
+            { label: `Test Range ${testR.toFixed(2)}°C`, data: [{x:testR,y:yMin},{x:testR,y:yMax}], borderColor: '#dc2626', showLine: true, borderWidth: 1.5, borderDash: [4,3], pointRadius: 0, fill: false },
+            { label: 'CP1 → CP2 Points', data: intPts, borderColor: '#f59e0b', backgroundColor: '#f59e0b', showLine: false, pointRadius: 5, pointStyle: 'circle' },
+        ]},
+        options: {
+            responsive: true, maintainAspectRatio: false, animation: false,
+            plugins: {
+                legend: { display: true, position: 'top', align: 'start', labels: { color: _pvTheme.text, usePointStyle: true, font: { size: 9 }, padding: 8 } },
+                tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: (${ctx.parsed.x?.toFixed(2)}, ${ctx.parsed.y?.toFixed(2)})` } },
+            },
+            scales: {
+                x: { type: 'linear', min: xMin, max: xMax, title: { display: true, text: 'Range (°C)', color: _pvTheme.label, font: { size: 9 } }, grid: { color: _pvTheme.grid }, ticks: { color: _pvTheme.tick, font: { size: 9 } } },
+                y: { min: yMin, max: yMax,                  title: { display: true, text: 'CWT (°C)',   color: _pvTheme.label, font: { size: 9 } }, grid: { color: _pvTheme.grid }, ticks: { color: _pvTheme.tick, font: { size: 9 } } },
+            },
+        },
+    });
+}
+
+// ── Cross Plot 2: Flow vs CWT (tower performance curve + crosshair annotations) ─
+function _pvRenderCp2(canvasId, cp2) {
+    const flows    = cp2.flows.map(Number);
+    const cwts     = cp2.cwts.map(Number);
+    const adjFlow  = Number(cp2.adj_flow);
+    const predCwt  = Number(cp2.pred_cwt);
+    const testCwt  = Number(cp2.test_cwt);
+    const predFlow = cp2.pred_flow != null ? Number(cp2.pred_flow) : null;
+
+    const allX = [adjFlow, predFlow ?? adjFlow, ...flows];
+    const allY = [predCwt, testCwt, ...cwts];
+    const xMin = Math.min(...allX) * 0.94;
+    const xMax = Math.max(...allX) * 1.05;
+    const yMin = Math.min(...allY) - 0.5;
+    const yMax = Math.max(...allY) + 0.5;
+
+    const datasets = [
+        { label: 'Tower Perf. Curve', data: flows.map((x,i) => ({x, y:cwts[i]})), borderColor: '#06b6d4', backgroundColor: '#06b6d430', showLine: true, borderWidth: 2.5, pointRadius: 5, fill: false, tension: 0 },
+        { label: `Q_adj = ${adjFlow.toFixed(1)} m³/hr`, data: [{x:adjFlow,y:yMin},{x:adjFlow,y:predCwt}], borderColor: '#ea580c', showLine: true, borderWidth: 1.5, borderDash: [5,3], pointRadius: 0, fill: false },
+        { label: `Pred. CWT = ${predCwt.toFixed(2)} °C`, data: [{x:xMin,y:predCwt},{x:adjFlow,y:predCwt}], borderColor: '#06b6d4', showLine: true, borderWidth: 1.5, borderDash: [5,3], pointRadius: 0, fill: false },
+        { label: `Test CWT = ${testCwt.toFixed(2)} °C`, data: predFlow != null ? [{x:xMin,y:testCwt},{x:predFlow,y:testCwt}] : [], borderColor: '#dc2626', showLine: true, borderWidth: 1.5, borderDash: [5,3], pointRadius: 0, fill: false },
+        { label: 'Adj.Flow → Pred.CWT', data: [{x:adjFlow,y:predCwt}], borderColor: '#ea580c', backgroundColor: '#ea580c', showLine: false, pointRadius: 7, pointStyle: 'crossRot' },
+    ];
+    if (predFlow != null) {
+        datasets.push({ label: `Pred. Flow = ${predFlow.toFixed(0)} m³/hr`, data: [{x:predFlow,y:yMin},{x:predFlow,y:testCwt}], borderColor: '#16a34a', showLine: true, borderWidth: 1.5, borderDash: [5,3], pointRadius: 0, fill: false });
+        datasets.push({ label: 'Test CWT → Pred.Flow', data: [{x:predFlow,y:testCwt}], borderColor: '#dc2626', backgroundColor: '#dc2626', showLine: false, pointRadius: 7 });
+    }
+
+    _pvChart(canvasId, {
+        type: 'scatter',
+        data: { datasets },
+        options: {
+            responsive: true, maintainAspectRatio: false, animation: false,
+            plugins: {
+                legend: {
+                    display: true, position: 'top', align: 'start',
+                    labels: { color: _pvTheme.text, usePointStyle: true, font: { size: 9 }, padding: 8,
+                        filter: item => !['Adj.Flow → Pred.CWT','Test CWT → Pred.Flow'].includes(item.text) },
+                },
+                tooltip: { callbacks: { label: ctx => `${ctx.dataset.label}: (${ctx.parsed.x?.toFixed(1)}, ${ctx.parsed.y?.toFixed(2)})` } },
+            },
+            scales: {
+                x: { type: 'linear', min: xMin, max: xMax, title: { display: true, text: 'Water Flow (m³/hr)', color: _pvTheme.label, font: { size: 9 } }, grid: { color: _pvTheme.grid }, ticks: { color: _pvTheme.tick, font: { size: 9 } } },
+                y: { min: yMin, max: yMax,                  title: { display: true, text: 'CWT (°C)',           color: _pvTheme.label, font: { size: 9 } }, grid: { color: _pvTheme.grid }, ticks: { color: _pvTheme.tick, font: { size: 9 } } },
+            },
+        },
+    });
+}
+
+// ── Capability bar chart ───────────────────────────────────────────────────────
+function _pvRenderCapChart(caps) {
+    const colors = caps.map(v => v >= 100 ? '#16a34a' : v >= 95 ? '#d97706' : '#dc2626');
+    _pvChart('pv-cap-chart', {
+        type: 'bar',
+        data: {
+            labels: ['Test 1 — Pre-Baseline', 'Test 2 — Post Fan Pitch', 'Test 3 — Post Fill Dist.'],
+            datasets: [{ label: 'Capability (%)', data: caps, backgroundColor: colors.map(c => c + '40'), borderColor: colors, borderWidth: 2, borderRadius: 4 }],
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false, animation: false,
+            plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => `Capability: ${ctx.parsed.y.toFixed(1)}%` } } },
+            scales: {
+                x: { grid: { color: _pvTheme.grid }, ticks: { color: _pvTheme.tick, font: { size: 9 } } },
+                y: { min: Math.min(80, ...caps) - 3, max: Math.max(110, ...caps) + 2, grid: { color: _pvTheme.grid }, ticks: { color: _pvTheme.tick, font: { size: 9 }, callback: v => v + '%' } },
+            },
+        },
+    });
+}
+
+// ── Trend line: shortfall + capability across 3 tests ─────────────────────────
+function _pvRenderTrendChart(shortfalls, caps) {
+    _pvChart('pv-trend-chart', {
+        type: 'line',
+        data: {
+            labels: ['Test 1 (Pre)', 'Test 2 (Post Fan)', 'Test 3 (Post Fill)'],
+            datasets: [
+                { label: 'Shortfall (°C)', data: shortfalls, borderColor: '#f59e0b', backgroundColor: '#f59e0b18', fill: true, borderWidth: 2, pointRadius: 5, tension: 0.3, yAxisID: 'y' },
+                { label: 'Capability (%)', data: caps,       borderColor: '#06b6d4', backgroundColor: 'transparent', borderWidth: 2, pointRadius: 5, tension: 0.3, yAxisID: 'y2', borderDash: [4,3] },
+            ],
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false, animation: false,
+            plugins: { legend: { position: 'top', align: 'end', labels: { color: _pvTheme.text, usePointStyle: true, font: { size: 9 }, padding: 12 } } },
+            scales: {
+                x:  { grid: { color: _pvTheme.grid }, ticks: { color: _pvTheme.tick, font: { size: 9 } } },
+                y:  { position: 'left',  title: { display: true, text: 'Shortfall (°C)', color: _pvTheme.label, font: { size: 9 } }, grid: { color: _pvTheme.grid }, ticks: { color: _pvTheme.tick, font: { size: 9 } } },
+                y2: { position: 'right', title: { display: true, text: 'Capability (%)', color: _pvTheme.label, font: { size: 9 } }, grid: { display: false }, ticks: { color: _pvTheme.tick, font: { size: 9 }, callback: v => v + '%' } },
+            },
+        },
+    });
+}
+
+// ── Verdict / colour helpers ───────────────────────────────────────────────────
+function _capVerdict(v)   { return v >= 100 ? 'PASS' : v >= 95 ? 'MARGINAL' : 'FAIL'; }
+function _capBadgeCls(v)  { return v >= 100 ? 'border-emerald-500/30 bg-emerald-500/10 text-emerald-400' : v >= 95 ? 'border-amber-500/30 bg-amber-500/10 text-amber-400' : 'border-rose-500/30 bg-rose-500/10 text-rose-400'; }
+function _capTextCls(v)   { return v >= 100 ? 'text-emerald-400' : v >= 95 ? 'text-amber-400' : 'text-rose-400'; }
+function _sfTextCls(v)    { return v  > 0   ? 'text-rose-400'    : v  < 0  ? 'text-emerald-400' : 'text-slate-400'; }
+
+// ── Per-test calculation walkthrough table (injected as innerHTML) ─────────────
+function _buildPvCalcTable(d, t, r) {
+    const f2 = v => v != null ? Number(v).toFixed(2) : '—';
+    const f1 = v => v != null ? Number(v).toFixed(1) : '—';
+    const sfCls  = r.shortfall  > 0 ? 'text-rose-400'    : 'text-emerald-400';
+    const capCls = r.capability >= 100 ? 'text-emerald-400' : r.capability >= 95 ? 'text-amber-400' : 'text-rose-400';
+
+    const rows = [
+        ['①', 'Test Range',              'Actual temperature drop across the tower.',                                       `HWT − CWT = ${f2(t.hwt)} − ${f2(t.cwt)}`,                             `<span class="text-slate-200 font-bold">${f2(r.test_range)} °C</span>`],
+        ['②', 'Adjusted Water Flow',     'Normalise measured flow to design fan power &amp; water density (Kell 1975).',   `${f1(t.flow)} × (${f2(d.fan_power)}/${f2(t.fan_power)})^⅓ × ρ^⅓`,    `<span class="text-slate-200 font-bold">${f1(r.adj_flow)} m³/hr</span>`],
+        ['③', 'Cross Plot 1 → Table 2',  'Build 3×3 CWT grid at test WBT. Interpolate at actual test range % across 3 flows → 3 CP2 curve points.',  `test_range_pct = ${f2(r.test_range_pct)}% → see CP1 chart`,   `<span class="text-slate-400">3 pts →</span>`],
+        ['④', 'Pred. CWT (Cross Plot 2)','Plot Flow vs CWT from CP1 intersections. Read Predicted CWT at Q_adj on the performance curve.',            `Q_adj = ${f1(r.adj_flow)} m³/hr → on curve`,                  `<span class="text-cyan-300 font-bold">${f2(r.pred_cwt)} °C</span>`],
+        ['⑤', 'Shortfall',               '+ve = underperforming. −ve = tower exceeds spec.',                                                          `Test CWT ${f2(t.cwt)} − Pred. CWT ${f2(r.pred_cwt)}`,         `<span class="${sfCls} font-bold">${r.shortfall > 0 ? '+' : ''}${f2(r.shortfall)} °C</span>`],
+        ['⑥', 'Capability (ATC-105 §C)', '≥ 100% = tower meets contractual thermal rating.',                                                          `Q_adj / Q_pred_at_testCWT × 100 = ${f1(r.adj_flow)} / ${f1(r.pred_flow)} × 100`, `<span class="${capCls} font-bold">${f1(r.capability)} %</span>`],
+    ];
+
+    return `<table class="w-full divide-y divide-white/5">
+        <thead class="bg-slate-900/60">
+            <tr>
+                <th class="px-3 py-2 text-left text-[8px] font-black uppercase tracking-widest text-slate-600 w-6">#</th>
+                <th class="px-3 py-2 text-left text-[8px] font-black uppercase tracking-widest text-slate-500">Step</th>
+                <th class="px-3 py-2 text-left text-[8px] font-black uppercase tracking-widest text-slate-500 hidden md:table-cell">What It Means</th>
+                <th class="px-3 py-2 text-left text-[8px] font-black uppercase tracking-widest text-slate-500 hidden lg:table-cell">Formula / Working</th>
+                <th class="px-3 py-2 text-right text-[8px] font-black uppercase tracking-widest text-slate-500">Result</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-white/[0.04]">
+            ${rows.map(([n, step, meaning, formula, result]) => `
+            <tr class="hover:bg-white/[0.02]">
+                <td class="px-3 py-2.5 text-[10px] font-mono text-slate-600">${n}</td>
+                <td class="px-3 py-2.5 text-[10px] font-mono text-slate-300 font-bold whitespace-nowrap">${step}</td>
+                <td class="px-3 py-2.5 text-[10px] text-slate-500 hidden md:table-cell leading-relaxed">${meaning}</td>
+                <td class="px-3 py-2.5 text-[9px] font-mono text-slate-400 hidden lg:table-cell">${formula}</td>
+                <td class="px-3 py-2.5 text-[10px] font-mono text-right">${result}</td>
+            </tr>`).join('')}
+        </tbody>
+    </table>`;
+}
+
+// ── Multi-test comparison table (injected as innerHTML) ────────────────────────
+function _buildComparisonTable(t1, t2, t3, r1, r2, r3) {
+    const f2 = v => v != null ? Number(v).toFixed(2) : '—';
+    const f1 = v => v != null ? Number(v).toFixed(1) : '—';
+    const imp21 = r1.shortfall != null && r2.shortfall != null ? (r1.shortfall - r2.shortfall).toFixed(2) : '—';
+    const imp32 = r2.shortfall != null && r3.shortfall != null ? (r2.shortfall - r3.shortfall).toFixed(2) : '—';
+    const imp31 = r1.shortfall != null && r3.shortfall != null ? (r1.shortfall - r3.shortfall).toFixed(2) : '—';
+
+    const capCls = v => { const n = parseFloat(v); return n >= 100 ? 'text-emerald-400' : n >= 95 ? 'text-amber-400' : 'text-rose-400'; };
+    const sfCls  = v => { const n = parseFloat(v); return n > 0 ? 'text-rose-400' : n < 0 ? 'text-emerald-400' : 'text-slate-400'; };
+    const impCls = v => { const n = parseFloat(v); return n > 0 ? 'text-emerald-400' : n < 0 ? 'text-rose-400' : 'text-slate-400'; };
+
+    const rows = [
+        ['Water Flow',                   'm³/hr', f1(t1.flow),       f1(t2.flow),       f1(t3.flow),       ''],
+        ['WBT — Wet Bulb Temp.',         '°C',    f2(t1.wbt),        f2(t2.wbt),        f2(t3.wbt),        ''],
+        ['HWT — Hot Water Temp.',        '°C',    f2(t1.hwt),        f2(t2.hwt),        f2(t3.hwt),        ''],
+        ['CWT — Cold Water Temp.',       '°C',    f2(t1.cwt),        f2(t2.cwt),        f2(t3.cwt),        ''],
+        ['Fan Power at Motor Inlet',     'kW',    f2(t1.fan_power),  f2(t2.fan_power),  f2(t3.fan_power),  ''],
+        ['Range (HWT−CWT)',              '°C',    f2(r1.test_range), f2(r2.test_range), f2(r3.test_range), ''],
+        ['Approach (CWT−WBT)',           '°C',    f2(t1.cwt-t1.wbt),f2(t2.cwt-t2.wbt),f2(t3.cwt-t3.wbt),''],
+        ['Adjusted Water Flow',          'm³/hr', f1(r1.adj_flow),   f1(r2.adj_flow),   f1(r3.adj_flow),   ''],
+        ['Predicted CWT (CP2)',          '°C',    f2(r1.pred_cwt),   f2(r2.pred_cwt),   f2(r3.pred_cwt),   ''],
+        ['CWT Shortfall (Deviation)',    '°C',    `${r1.shortfall > 0 ? '+' : ''}${f2(r1.shortfall)}`, `${r2.shortfall > 0 ? '+' : ''}${f2(r2.shortfall)}`, `${r3.shortfall > 0 ? '+' : ''}${f2(r3.shortfall)}`, 'sf'],
+        ['Capability',                   '%',     f1(r1.capability), f1(r2.capability), f1(r3.capability), 'cap'],
+        ['Improvement vs Previous Test', '°C',    '—',               imp21 !== '—' ? `+${imp21}` : '—', imp32 !== '—' ? `+${imp32}` : '—', 'imp'],
+        ['Cumulative Improvement vs T1', '°C',    '—',               imp21 !== '—' ? `+${imp21}` : '—', imp31 !== '—' ? `+${imp31}` : '—', 'imp'],
+    ];
+
+    const rowHtml = rows.map(([param, unit, v1, v2, v3, type]) => {
+        const bg   = type === 'sf' ? 'bg-yellow-500/5' : type === 'imp' ? 'bg-emerald-500/5' : '';
+        const c1   = type === 'cap' ? capCls(v1) : type === 'sf' ? sfCls(v1)  : type === 'imp' ? impCls(v1) : 'text-slate-300';
+        const c2   = type === 'cap' ? capCls(v2) : type === 'sf' ? sfCls(v2)  : type === 'imp' ? impCls(v2) : 'text-slate-300';
+        const c3   = type === 'cap' ? capCls(v3) : type === 'sf' ? sfCls(v3)  : type === 'imp' ? impCls(v3) : 'text-slate-300';
+        return `<tr class="hover:bg-white/[0.02] ${bg}">
+            <td class="px-3 py-2 text-[10px] font-mono text-slate-400">${param}</td>
+            <td class="px-3 py-2 text-[10px] font-mono text-center text-slate-600">${unit}</td>
+            <td class="px-3 py-2 text-[10px] font-mono text-right ${c1}">${v1}</td>
+            <td class="px-3 py-2 text-[10px] font-mono text-right ${c2}">${v2}</td>
+            <td class="px-3 py-2 text-[10px] font-mono text-right ${c3} font-bold">${v3}</td>
+        </tr>`;
+    }).join('');
+
+    return `<thead>
+            <tr class="border-b border-white/10 bg-slate-900/60">
+                <th class="px-3 py-2.5 text-left text-[8px] font-black uppercase tracking-widest text-slate-500">Parameter</th>
+                <th class="px-3 py-2.5 text-center text-[8px] font-black uppercase tracking-widest text-slate-500">Unit</th>
+                <th class="px-3 py-2.5 text-right text-[8px] font-black uppercase tracking-widest text-slate-400">Test 1<br><span class="text-slate-600 font-normal normal-case tracking-normal">Pre-Baseline</span></th>
+                <th class="px-3 py-2.5 text-right text-[8px] font-black uppercase tracking-widest text-slate-400">Test 2<br><span class="text-slate-600 font-normal normal-case tracking-normal">Post Fan Pitch</span></th>
+                <th class="px-3 py-2.5 text-right text-[8px] font-black uppercase tracking-widest text-cyan-400">Test 3 ★<br><span class="text-slate-600 font-normal normal-case tracking-normal">Post Fill Dist.</span></th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-white/[0.04]">${rowHtml}</tbody>`;
+}
+
+// ── Design conditions grid (injected as innerHTML) ─────────────────────────────
+function _buildDesignGrid(design) {
+    const f2 = v => v != null ? Number(v).toFixed(2) : '—';
+    const items = [
+        ['WBT °C',      f2(design.wbt),              'Design wet-bulb temperature'],
+        ['CWT °C',      f2(design.cwt),              'Target cold water temperature'],
+        ['HWT °C',      f2(design.hwt),              'Design hot water temperature'],
+        ['Flow m³/hr',  Number(design.flow).toFixed(1), 'Water flow at 100% design'],
+        ['Fan Power kW',f2(design.fan_power),         'Design fan shaft power'],
+        ['L/G Ratio',   f2(design.lg),               'Liquid-to-gas ratio'],
+    ];
+    return items.map(([label, val, title]) =>
+        `<div class="rounded-lg bg-slate-900/60 border border-white/5 p-2.5 text-center" title="${title}">
+            <p class="text-[8px] font-black uppercase tracking-widest text-slate-600 mb-0.5">${label}</p>
+            <p class="text-sm font-black font-mono text-slate-200">${val}</p>
+        </div>`
+    ).join('');
+}
+
+// ── Results preview — full in-browser report document ─────────────────────────
 export async function previewAllTests(ui) {
     const btn      = document.getElementById('previewAllTestsBtn');
     const panel    = document.getElementById('previewResultsPanel');
     const errorEl  = document.getElementById('previewError');
     const origHtml = btn.innerHTML;
 
-    const _set = (id, val) => { const el = document.getElementById(id); if (el) el.innerText = val; };
+    const _set  = (id, val) => { const el = document.getElementById(id); if (el) el.innerHTML = val; };
+    const _text = (id, val) => { const el = document.getElementById(id); if (el) el.innerText  = val; };
 
-    const _imp = (delta) => {
-        if (delta == null || !isFinite(delta)) return { text: '—', cls: 'text-slate-500' };
-        const sign = delta >= 0 ? '+' : '';
-        const cls  = delta > 0 ? 'text-emerald-400' : delta < 0 ? 'text-rose-400' : 'text-slate-400';
-        return { text: `${sign}${delta.toFixed(2)} °C`, cls };
-    };
-
-    btn.innerHTML = `<svg class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Calculating…`;
+    btn.innerHTML = `<svg class="animate-spin w-4 h-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg> Calculating…`;
     btn.disabled = true;
     if (errorEl) errorEl.classList.add('hidden');
 
@@ -318,103 +519,120 @@ export async function previewAllTests(ui) {
             _calcAtc(design, t1), _calcAtc(design, t2), _calcAtc(design, t3),
         ]);
 
-        // Populate TEST 1
-        _set('pv1-range',    r1.test_range  != null ? `${r1.test_range.toFixed(2)} °C`  : '—');
-        _set('pv1-flow',     r1.adj_flow    != null ? `${r1.adj_flow.toFixed(1)} m³/hr` : '—');
-        _set('pv1-cwt',      r1.pred_cwt    != null ? `${r1.pred_cwt.toFixed(2)} °C`    : '—');
-        _set('pv1-shortfall',r1.shortfall   != null ? `${r1.shortfall.toFixed(2)} °C`   : '—');
-        _set('pv1-cap',      r1.capability  != null ? `${r1.capability.toFixed(1)} %`   : '—');
+        // ── Document header ────────────────────────────────────────────────────
+        _text('pv-doc-title',    _v('rep-title',       'CT PERFORMANCE EVALUATION REPORT'));
+        _text('pv-doc-client',   _v('rep-client',      '—'));
+        _text('pv-doc-asset',    _v('rep-asset',       '—'));
+        _text('pv-doc-repdate',  _v('rep-report-date', '—'));
+        _text('pv-doc-testdate', _v('rep-test-date',   '—'));
 
-        // Colour capability
-        ['pv1-cap','pv2-cap','pv3-cap'].forEach(id => {
-            const el = document.getElementById(id); if (!el) return;
-            const v = parseFloat(el.innerText);
-            el.className = `font-mono font-bold ${v >= 100 ? 'text-emerald-400' : v >= 95 ? 'text-amber-400' : 'text-rose-400'}`;
+        const overallEl = document.getElementById('pv-overall-verdict');
+        if (overallEl) {
+            overallEl.textContent = r3.capability >= 100 ? 'OVERALL: PASS' : r3.capability >= 95 ? 'OVERALL: MARGINAL' : 'OVERALL: FAIL';
+            overallEl.className   = `px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border ${_capBadgeCls(r3.capability)}`;
+        }
+
+        // ── Executive summary ──────────────────────────────────────────────────
+        [[r1,'pv-cap1','pv-verdict1'],[r2,'pv-cap2','pv-verdict2'],[r3,'pv-cap3','pv-verdict3']].forEach(([r, capId, verdId]) => {
+            const capEl  = document.getElementById(capId);
+            if (capEl)  { capEl.textContent  = `${r.capability?.toFixed(1) ?? '—'} %`;  capEl.className  = `text-2xl font-black font-mono ${_capTextCls(r.capability)}`; }
+            const verdEl = document.getElementById(verdId);
+            if (verdEl) { verdEl.textContent = _capVerdict(r.capability); verdEl.className = `text-[9px] font-black uppercase mt-0.5 ${_capTextCls(r.capability)}`; }
+        });
+        _pvRenderCapChart([r1.capability, r2.capability, r3.capability]);
+
+        // ── Design conditions ──────────────────────────────────────────────────
+        const designGrid = document.getElementById('pv-design-grid');
+        if (designGrid) designGrid.innerHTML = _buildDesignGrid(design);
+        _text('pv-design-note', `Merkel constants: C = ${design.constant_c}, m = ${design.constant_m} · Design range = ${(design.hwt - design.cwt).toFixed(2)} °C · 90% flow = ${(design.flow * 0.9).toFixed(1)} · 100% = ${design.flow.toFixed(1)} · 110% = ${(design.flow * 1.1).toFixed(1)} m³/hr · Density: Kell (1975)`);
+
+        // ── Per-test sections ──────────────────────────────────────────────────
+        const f2 = v => v != null ? Number(v).toFixed(2) : '—';
+        const f1 = v => v != null ? Number(v).toFixed(1) : '—';
+
+        [['1', t1, r1], ['2', t2, r2], ['3', t3, r3]].forEach(([p, t, r]) => {
+            // Measured inputs
+            _text(`pv${p}-in-wbt`,    `${f2(t.wbt)} °C`);
+            _text(`pv${p}-in-hwt`,    `${f2(t.hwt)} °C`);
+            _text(`pv${p}-in-cwt`,    `${f2(t.cwt)} °C`);
+            _text(`pv${p}-in-flow`,   `${f1(t.flow)} m³/hr`);
+            _text(`pv${p}-in-fanpow`, `${f2(t.fan_power)} kW`);
+
+            // Calc walkthrough table
+            const calcDiv = document.getElementById(`pv${p}-calc-table`);
+            if (calcDiv) calcDiv.innerHTML = _buildPvCalcTable(design, t, r);
+
+            // CP1 WBT label
+            _text(`pv${p}-cp1-wbt`, `${f2(t.wbt)} °C`);
+
+            // Charts
+            if (r.cross_plot_1) _pvRenderCp1(`pv${p}-cp1`, r.cross_plot_1, t.wbt);
+            if (r.cross_plot_2) _pvRenderCp2(`pv${p}-cp2`, r.cross_plot_2);
+
+            // Results strip
+            _text(`pv${p}-range`, `${f2(r.test_range)} °C`);
+            _text(`pv${p}-flow`,  `${f1(r.adj_flow)} m³/hr`);
+            _text(`pv${p}-cwt`,   `${f2(r.pred_cwt)} °C`);
+
+            const sfEl = document.getElementById(`pv${p}-shortfall`);
+            if (sfEl) { sfEl.textContent = `${r.shortfall > 0 ? '+' : ''}${f2(r.shortfall)} °C`; sfEl.className = `text-sm font-black font-mono ${_sfTextCls(r.shortfall)}`; }
+
+            const capEl = document.getElementById(`pv${p}-cap`);
+            if (capEl) { capEl.textContent = `${f1(r.capability)} %`; capEl.className = `text-sm font-black font-mono ${_capTextCls(r.capability)}`; }
+
+            const badge = document.getElementById(`pv${p}-verdict-badge`);
+            if (badge) { badge.textContent = _capVerdict(r.capability); badge.className = `px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border ${_capBadgeCls(r.capability)}`; }
         });
 
-        // Populate TEST 2
-        _set('pv2-range',    r2.test_range  != null ? `${r2.test_range.toFixed(2)} °C`  : '—');
-        _set('pv2-flow',     r2.adj_flow    != null ? `${r2.adj_flow.toFixed(1)} m³/hr` : '—');
-        _set('pv2-cwt',      r2.pred_cwt    != null ? `${r2.pred_cwt.toFixed(2)} °C`    : '—');
-        _set('pv2-shortfall',r2.shortfall   != null ? `${r2.shortfall.toFixed(2)} °C`   : '—');
-        _set('pv2-cap',      r2.capability  != null ? `${r2.capability.toFixed(1)} %`   : '—');
+        // ── Improvement deltas ─────────────────────────────────────────────────
+        const imp21 = r1.shortfall != null && r2.shortfall != null ? r1.shortfall - r2.shortfall : null;
+        const imp32 = r2.shortfall != null && r3.shortfall != null ? r2.shortfall - r3.shortfall : null;
+        const imp31 = r1.shortfall != null && r3.shortfall != null ? r1.shortfall - r3.shortfall : null;
 
-        // Populate TEST 3
-        _set('pv3-range',    r3.test_range  != null ? `${r3.test_range.toFixed(2)} °C`  : '—');
-        _set('pv3-flow',     r3.adj_flow    != null ? `${r3.adj_flow.toFixed(1)} m³/hr` : '—');
-        _set('pv3-cwt',      r3.pred_cwt    != null ? `${r3.pred_cwt.toFixed(2)} °C`    : '—');
-        _set('pv3-shortfall',r3.shortfall   != null ? `${r3.shortfall.toFixed(2)} °C`   : '—');
-        _set('pv3-cap',      r3.capability  != null ? `${r3.capability.toFixed(1)} %`   : '—');
+        const _setImp = (id, val, large = false) => {
+            const el = document.getElementById(id); if (!el || val == null) return;
+            const sign = val >= 0 ? '+' : '';
+            el.textContent = `${sign}${val.toFixed(2)} °C`;
+            el.className   = `${large ? 'text-2xl' : 'text-xl'} font-black font-mono ${val >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+        };
+        _setImp('pv-imp21',     imp21);
+        _setImp('pv-imp32',     imp32);
+        _setImp('pv-cumulative',imp31, true);
 
-        // Re-colour capability after all are set
-        [['pv1-cap', r1.capability], ['pv2-cap', r2.capability], ['pv3-cap', r3.capability]].forEach(([id, v]) => {
-            const el = document.getElementById(id); if (!el || v == null) return;
-            el.className = `font-mono font-bold ${v >= 100 ? 'text-emerald-400' : v >= 95 ? 'text-amber-400' : 'text-rose-400'}`;
-        });
+        const _setTestImp = (id, val) => {
+            const el = document.getElementById(id); if (!el || val == null) return;
+            el.textContent = `${val >= 0 ? '+' : ''}${val.toFixed(2)} °C`;
+            el.className   = `text-[11px] font-black font-mono ${val >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
+        };
+        _setTestImp('pv2-imp', imp21);
+        _setTestImp('pv3-imp', imp32);
 
-        // Re-colour shortfall: positive = underperforming (rose), negative = exceeding spec (emerald)
-        [['pv1-shortfall', r1.shortfall], ['pv2-shortfall', r2.shortfall], ['pv3-shortfall', r3.shortfall]].forEach(([id, v]) => {
-            const el = document.getElementById(id); if (!el || v == null) return;
-            el.className = `font-mono font-bold ${v > 0 ? 'text-rose-400' : v < 0 ? 'text-emerald-400' : 'text-slate-400'}`;
-        });
+        // ── Trend chart ────────────────────────────────────────────────────────
+        _pvRenderTrendChart([r1.shortfall, r2.shortfall, r3.shortfall], [r1.capability, r2.capability, r3.capability]);
 
-        // Improvement deltas
-        const imp21 = (r1.shortfall != null && r2.shortfall != null) ? r1.shortfall - r2.shortfall : null;
-        const imp32 = (r2.shortfall != null && r3.shortfall != null) ? r2.shortfall - r3.shortfall : null;
-        const imp31 = (r1.shortfall != null && r3.shortfall != null) ? r1.shortfall - r3.shortfall : null;
+        // ── Comparison table ───────────────────────────────────────────────────
+        const compWrapper = document.getElementById('pv-comparison-table');
+        if (compWrapper) compWrapper.innerHTML = _buildComparisonTable(t1, t2, t3, r1, r2, r3);
 
-        const d21 = _imp(imp21); const d32 = _imp(imp32); const d31 = _imp(imp31);
-
-        const pv2imp = document.getElementById('pv2-imp');
-        if (pv2imp) { pv2imp.innerText = d21.text; pv2imp.className = `text-[11px] font-mono font-black ${d21.cls}`; }
-
-        const pv3imp = document.getElementById('pv3-imp');
-        if (pv3imp) { pv3imp.innerText = d32.text; pv3imp.className = `text-[11px] font-mono font-black ${d32.cls}`; }
-
-        const pvCum = document.getElementById('pv-cumulative');
-        if (pvCum) { pvCum.innerText = d31.text; pvCum.className = `text-2xl font-black font-mono ${d31.cls}`; }
-
+        // ── Show preview panel ────────────────────────────────────────────────
         if (panel) panel.classList.remove('hidden');
 
-        // Inject calculation breakdowns and wire toggle buttons
-        [
-            ['pv1', design, t1, r1],
-            ['pv2', design, t2, r2],
-            ['pv3', design, t3, r3],
-        ].forEach(([prefix, d, t, r]) => {
-            const calcDiv = document.getElementById(`${prefix}-calc`);
-            const calcBtn = document.getElementById(`${prefix}-calc-btn`);
-            if (!calcDiv || !calcBtn) return;
-            calcDiv.innerHTML = _buildCalcHtml(d, t, r);
-            calcBtn.classList.remove('hidden');
-            calcBtn.classList.add('inline-flex');
-            calcBtn.onclick = () => {
-                const collapsed = calcDiv.classList.toggle('hidden');
-                calcBtn.querySelector('span').textContent = collapsed ? '∑ Calc' : '∑ Hide';
-                calcBtn.style.opacity = collapsed ? '' : '1';
-                calcBtn.style.borderColor = collapsed ? '' : 'rgb(167 139 250 / 0.6)';
-            };
-        });
-
-        // Also update the live Test-3 preview card at top of Step 3
-        ['atc-prev-range','atc-prev-adjflow','atc-prev-predcwt','atc-prev-shortfall','atc-prev-capability'].forEach(id => {
-            const el = document.getElementById(id); if (!el) return;
-        });
-        const pv = document.getElementById('atcPreview');
-        if (pv) {
-            _set('atc-prev-range',      r3.test_range  != null ? `${r3.test_range.toFixed(2)} °C` : '—');
-            _set('atc-prev-adjflow',    r3.adj_flow    != null ? r3.adj_flow.toFixed(1)           : '—');
-            _set('atc-prev-predcwt',    r3.pred_cwt    != null ? r3.pred_cwt.toFixed(2)           : '—');
-            _set('atc-prev-shortfall',  r3.shortfall   != null ? r3.shortfall.toFixed(2)          : '—');
-            _set('atc-prev-capability', r3.capability  != null ? `${r3.capability.toFixed(1)} %`  : '—');
-            pv.classList.remove('hidden');
+        // ── Update live Test-3 mini-preview card in Step 3 ───────────────────
+        const pvCard = document.getElementById('atcPreview');
+        if (pvCard) {
+            _text('atc-prev-range',      r3.test_range  != null ? `${r3.test_range.toFixed(2)} °C` : '—');
+            _text('atc-prev-adjflow',    r3.adj_flow    != null ? r3.adj_flow.toFixed(1)            : '—');
+            _text('atc-prev-predcwt',    r3.pred_cwt    != null ? r3.pred_cwt.toFixed(2)            : '—');
+            _text('atc-prev-shortfall',  r3.shortfall   != null ? r3.shortfall.toFixed(2)           : '—');
+            _text('atc-prev-capability', r3.capability  != null ? `${r3.capability.toFixed(1)} %`   : '—');
+            pvCard.classList.remove('hidden');
         }
 
     } catch (err) {
         if (errorEl) { errorEl.innerText = `Preview failed: ${err.message}`; errorEl.classList.remove('hidden'); }
     } finally {
         btn.innerHTML = origHtml;
-        btn.disabled = false;
+        btn.disabled  = false;
     }
 }
 
