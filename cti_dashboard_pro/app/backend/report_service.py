@@ -32,11 +32,11 @@ from reportlab.lib.pagesizes import A4
 from reportlab.lib.colors import HexColor
 from reportlab.lib import colors
 
-from .report.styles import build_styles
-from .report.cover import draw_cover_canvas
-from .report.narrative import build_narrative
-from .report.summary_table import build_summary_table
-from .report.test_section import build_test_section
+from report.styles import build_styles
+from report.cover import draw_cover_canvas
+from report.narrative import build_narrative
+from report.summary_table import build_summary_table
+from report.test_section import build_test_section
 
 A4_W, A4_H = A4
 
