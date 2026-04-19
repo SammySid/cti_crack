@@ -4,18 +4,22 @@
    Variables: preamble_paragraphs, members_client, members_ssctc,
               assessment_method, instrument_placement, conclusions, suggestions,
               client
+
+   Page breaks: <pdf:nextpage /> is the xhtml2pdf native hard-break tag.
+   Never use <div class="page-break"> for section boundaries — it is CSS-only
+   and unreliable when the HTML structure is large.
 #}
 
-<!-- ── Preamble ──────────────────────────────────────────────────────────── -->
+<!-- ── Preamble ─────────────────────────────────────────────────────────── -->
 {% include '_page_header.html' %}
 <div class="sec-bar">PREAMBLE</div>
 {% for p in preamble_paragraphs %}
 <p class="body">{{ p }}</p>
 {% endfor %}
 
-<div class="page-break"></div>
+<pdf:nextpage />
 
-<!-- ── Members Present ───────────────────────────────────────────────────── -->
+<!-- ── Members Present ──────────────────────────────────────────────────── -->
 {% include '_page_header.html' %}
 <div class="sec-bar">MEMBERS PRESENT FOR THE TEST</div>
 
@@ -33,9 +37,9 @@
 </ul>
 {% endif %}
 
-<div class="page-break"></div>
+<pdf:nextpage />
 
-<!-- ── Assessment Method & Instrument Placement ──────────────────────────── -->
+<!-- ── Assessment Method & Instrument Placement ─────────────────────────── -->
 {% include '_page_header.html' %}
 
 {% if assessment_method %}
@@ -52,7 +56,7 @@
 {% endfor %}
 {% endif %}
 
-<div class="page-break"></div>
+<pdf:nextpage />
 
 <!-- ── Conclusions & Suggestions ────────────────────────────────────────── -->
 {% include '_page_header.html' %}
@@ -71,4 +75,4 @@
 </ol>
 {% endif %}
 
-<div class="page-break"></div>
+<pdf:nextpage />

@@ -90,9 +90,9 @@
 </table>
 {% endif %}
 
-<div class="page-break"></div>
+<pdf:nextpage />
 
-<!-- ═══════════════════════════════════════════════════════════════════════════
+<!-- ══════════════════════════════════════════════════════════════════════════
      PAGE B : Step 2 — Cross Plot 1  +  Table 2
  ═══════════════════════════════════════════════════════════════════════════ -->
 {% include '_page_header.html' %}
@@ -145,7 +145,7 @@
     </tbody>
 </table>
 
-<div class="page-break"></div>
+<pdf:nextpage />
 
 <!-- ═══════════════════════════════════════════════════════════════════════════
      PAGE C : Step 3 (Adjusted Flow) + Step 4 (Cross Plot 2) — same page
@@ -236,7 +236,7 @@
     &nbsp;&middot;&nbsp; Predicted CWT = {{ _f2(test.math_results.pred_cwt) }}&deg;C
 </p>
 
-<div class="page-break"></div>
+<pdf:nextpage />
 
 <!-- ═══════════════════════════════════════════════════════════════════════════
      PAGE D : Step 5 — Final Results + Unified Result Card

@@ -6,27 +6,27 @@
 
     {#
       ── Template Architecture ─────────────────────────────────────────────
-      This file is the root orchestrator.  All CSS lives in _base.html.
-      Each logical section is a self-contained partial:
-
-        _base.html           → CSS design-system + PDF @page setup + running footer
-        _page_header.html    → Reusable page-top strip (brand + tagline)
-        _cover.html          → Cover page (company stripe, title, metadata table)
-        _narrative.html      → Preamble, Members, Methodology, Conclusions
+        _base.html           → <style> CSS design-system only (no HTML tags)
+        _page_header.html    → Reusable brand/tagline strip (included per page)
+        _cover.html          → Cover page
+        _narrative.html      → Preamble, Members Present, Methodology, Conclusions
         _summary_table.html  → Final 3-test comparison table
-        _test_section.html   → Full ATC-105 analysis for ONE test (4 pages each)
+        _test_section.html   → Full ATC-105 analysis for ONE test (4 pages)
 
       Naming convention:
-        _<name>.html  → partial (never rendered standalone, always included)
-        report_template.html → entry-point (the only file passed to jinja env.get_template)
+        _<name>.html          → partial (never rendered standalone)
+        report_template.html  → sole entry-point passed to Jinja2 env.get_template()
+
+      Page-break strategy:
+        <pdf:nextpage/>  → hard page break (xhtml2pdf native tag, 100% reliable)
+        page-break CSS   → soft hint only; NOT used for critical section breaks
     #}
 
-    {# Inline the base CSS — xhtml2pdf requires styles in the same document #}
     {% include '_base.html' %}
 </head>
 <body>
 
-{# ── PDF Running Footer (referenced by @page frame in _base.html) ────────── #}
+<!-- ══ PDF Running Footer — referenced by @page footer_frame in _base.html ═══ -->
 <div id="pageFooterContent">
     <div style="border-top: 1px solid #cbd5e1; padding-top: 2px;
                 font-size: 6.5pt; color: #64748b; text-align: right;">
@@ -35,24 +35,33 @@
     </div>
 </div>
 
-{# ── COVER ────────────────────────────────────────────────────────────────── #}
+<!-- ══ COVER PAGE ════════════════════════════════════════════════════════════ -->
 {% include '_cover.html' %}
 
-<div class="page-break"></div>
+<pdf:nextpage />
 
-{# ── NARRATIVE PAGES (Preamble → Conclusions) ────────────────────────────── #}
+<!-- ══ NARRATIVE (Preamble → Members → Methodology → Conclusions) ═══════════ -->
 {% include '_narrative.html' %}
 
-{# ── FINAL COMPARISON TABLE ──────────────────────────────────────────────── #}
+<!-- ══ FINAL 3-TEST COMPARISON TABLE ════════════════════════════════════════ -->
 {% include '_summary_table.html' %}
 
-{# ── ATC-105 PER-TEST ANALYSIS (3 × 4 pages each) ───────────────────────── #}
+<!-- ══ ATC-105 PER-TEST ANALYSIS — 3 tests × ~4 pages each ═════════════════ -->
 {% for test in tests %}
     {% include '_test_section.html' %}
     {% if not loop.last %}
-    <div class="page-break"></div>
+    <pdf:nextpage />
     {% endif %}
 {% endfor %}
+
+<!-- ══ END OF REPORT MARKER ══════════════════════════════════════════════════ -->
+<div class="eor-marker">
+    <p style="font-size: 9pt; font-weight: bold; color: #1e3a5f; letter-spacing: 0.06em;">
+        &#x2014; END OF REPORT &#x2014;
+    </p>
+    <p>SS COOLING TOWER CONSULTANTS &nbsp;&middot;&nbsp; www.ssctc.org</p>
+    <p>CTI ATC-105 Merkel Method &nbsp;&middot;&nbsp; {{ report_date }}</p>
+</div>
 
 </body>
 </html>
