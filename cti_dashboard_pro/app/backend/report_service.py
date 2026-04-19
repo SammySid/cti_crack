@@ -486,43 +486,48 @@ def _make_canvas_callbacks(payload: dict, report_title: str, total_pages: list):
     Returns (on_first_page, on_later_pages) canvas callbacks.
     total_pages is a mutable list [N] so it can be updated between passes.
     """
+    _TEAL = HexColor('#0e7490')
+    _NAVY = HexColor('#0d2137')
+    _MUTED = HexColor('#64748b')
+    _BORDER = HexColor('#cbd5e1')
+
     def _on_first_page(canvas, doc):
         draw_cover_canvas(canvas, doc, payload)
 
     def _on_later_pages(canvas, doc):
         canvas.saveState()
         W, H = A4
-        L = R = 51.0
-        B = 45.0
-        T = 51.0
+        L = R = 48.0
+        B = 44.0
+        T = 48.0
 
         page_num = canvas.getPageNumber()
 
-        # Running header strip
-        canvas.setStrokeColor(HexColor('#1e3a5f'))
-        canvas.setLineWidth(1.5)
-        y_hdr = H - T + 6
+        # Running header — teal rule with company name left, tagline right
+        y_hdr = H - T + 8
+        canvas.setStrokeColor(_TEAL)
+        canvas.setLineWidth(1.8)
         canvas.line(L, y_hdr, W - R, y_hdr)
 
         canvas.setFont('Helvetica-Bold', 7.5)
-        canvas.setFillColor(HexColor('#1e3a5f'))
-        canvas.drawString(L, y_hdr + 3, 'SS COOLING TOWER CONSULTANTS')
+        canvas.setFillColor(_NAVY)
+        canvas.drawString(L, y_hdr + 4, 'SS COOLING TOWER CONSULTANTS')
 
         canvas.setFont('Helvetica', 6.5)
-        canvas.setFillColor(HexColor('#64748b'))
+        canvas.setFillColor(_MUTED)
         canvas.drawRightString(
-            W - R, y_hdr + 3,
+            W - R, y_hdr + 4,
             'Thermal Design \u00b7 CT Assessment & Upgrade \u00b7 CT Testing \u00b7 www.ssctc.org',
         )
 
-        # Footer
+        # Footer — thin grey rule + centred details
         footer_y = B - 14
-        canvas.setStrokeColor(HexColor('#cbd5e1'))
+        canvas.setStrokeColor(_BORDER)
         canvas.setLineWidth(0.5)
         canvas.line(L, footer_y + 8, W - R, footer_y + 8)
 
         canvas.setFont('Helvetica', 6.5)
-        canvas.setFillColor(HexColor('#64748b'))
+        canvas.setFillColor(_MUTED)
         total = total_pages[0] if total_pages[0] else '?'
         canvas.drawRightString(
             W - R, footer_y,
@@ -637,26 +642,19 @@ def generate_pdf_report(payload: dict) -> bytes:
     total_pages: list = [0]
     on_first, on_later = _make_canvas_callbacks(payload, report_title, total_pages)
 
+    _MARGIN = dict(leftMargin=48, rightMargin=48, topMargin=48, bottomMargin=44)
+
     buf1 = io.BytesIO()
-    doc1 = SimpleDocTemplate(
-        buf1, pagesize=A4,
-        leftMargin=51, rightMargin=51, topMargin=51, bottomMargin=45,
-        title=report_title,
-    )
+    doc1 = SimpleDocTemplate(buf1, pagesize=A4, title=report_title, **_MARGIN)
     try:
         doc1.build(_make_story(), onFirstPage=on_first, onLaterPages=on_later)
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"PDF build (pass 1) failed: {exc}")
 
-    total_pages[0] = doc1.page   # store accurate count
+    total_pages[0] = doc1.page
 
-    # ── Pass 2: render with correct page total ────────────────────────────────
     buf2 = io.BytesIO()
-    doc2 = SimpleDocTemplate(
-        buf2, pagesize=A4,
-        leftMargin=51, rightMargin=51, topMargin=51, bottomMargin=45,
-        title=report_title,
-    )
+    doc2 = SimpleDocTemplate(buf2, pagesize=A4, title=report_title, **_MARGIN)
     try:
         doc2.build(_make_story(), onFirstPage=on_first, onLaterPages=on_later)
     except Exception as exc:

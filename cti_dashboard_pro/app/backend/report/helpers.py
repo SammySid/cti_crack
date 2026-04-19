@@ -1,79 +1,86 @@
 """
 helpers.py — Reusable ReportLab flowable builders.
+
+Design tokens (imported from styles):
+  NAVY  — section bars (deep navy + 4 pt teal left accent)
+  TEAL  — sub-bars, data-table headers, step badges
+  GOLD  — conclusion-card accent bar
+  SKY   — summary-bar bg
+  PANEL — step-header right cell bg, calc-panel bg
 """
-from reportlab.platypus import Paragraph, Table, TableStyle, KeepTogether
+from reportlab.platypus import Paragraph, Table, TableStyle
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.colors import HexColor
 
 from .styles import (
-    NAVY, BLUE, SKY, STEEL, PANEL, BORDER, PAPER, RED,
-    WHITE, SLATE, LIGHT, BODY_COLOR,
+    NAVY, TEAL, GOLD, SKY, PANEL, PAPER, BORDER, BORDER2,
+    BODY, MUTED, RED, BLUE, WHITE,
 )
 
-A4_W, A4_H = A4
-L_MARGIN = R_MARGIN = 51
-T_MARGIN = 51
-B_MARGIN = 45
-AVAIL_W = A4_W - L_MARGIN - R_MARGIN   # ≈ 493.27 pt
+A4_W, _ = A4
+L_MARGIN = R_MARGIN = 48.0          # slightly narrower for more content width
+T_MARGIN = 52.0
+B_MARGIN = 44.0
+AVAIL_W  = A4_W - L_MARGIN - R_MARGIN   # ≈ 499 pt
 
 
-# ── Section / sub-section bars ────────────────────────────────────────────────
+# ── Section bar (navy + teal left accent) ─────────────────────────────────────
 
-def section_bar(text: str, styles: dict, indent: int = 10) -> Table:
-    """Dark navy bar with white bold text spanning the full content width."""
-    t = Table(
-        [[Paragraph(text, styles['SectionBar'])]],
-        colWidths=[AVAIL_W],
-    )
+def section_bar(text: str, styles: dict) -> Table:
+    """Full-width navy bar with a 4 pt teal left accent stripe."""
+    t = Table([[Paragraph(text, styles['SectionBar'])]], colWidths=[AVAIL_W])
     t.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, -1), NAVY),
+        ('BACKGROUND',    (0, 0), (-1, -1), NAVY),
+        ('TOPPADDING',    (0, 0), (-1, -1), 7),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 7),
+        ('LEFTPADDING',   (0, 0), (-1, -1), 14),
+        ('RIGHTPADDING',  (0, 0), (-1, -1), 10),
+        ('LINEBEFORE',    (0, 0), (0, -1),  4, TEAL),
+    ]))
+    return t
+
+
+# ── Sub-section bar (solid teal, bold white text) ─────────────────────────────
+
+def sub_bar(text: str, styles: dict) -> Table:
+    """Solid teal bar — fully readable, strong visual hierarchy."""
+    t = Table([[Paragraph(text, styles['SubBar'])]], colWidths=[AVAIL_W])
+    t.setStyle(TableStyle([
+        ('BACKGROUND',    (0, 0), (-1, -1), TEAL),
         ('TOPPADDING',    (0, 0), (-1, -1), 5),
         ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
-        ('LEFTPADDING',   (0, 0), (-1, -1), indent),
-        ('RIGHTPADDING',  (0, 0), (-1, -1), 8),
+        ('LEFTPADDING',   (0, 0), (-1, -1), 12),
+        ('RIGHTPADDING',  (0, 0), (-1, -1), 10),
     ]))
     return t
 
 
-def sub_bar(text: str, styles: dict, bg=None) -> Table:
-    """Steel-blue (or custom) sub-section bar."""
-    bg = bg or STEEL
-    t = Table(
-        [[Paragraph(text, styles['SubBar'])]],
-        colWidths=[AVAIL_W],
-    )
-    t.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (-1, -1), bg),
-        ('TOPPADDING',    (0, 0), (-1, -1), 4),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
-        ('LEFTPADDING',   (0, 0), (-1, -1), 10),
-        ('RIGHTPADDING',  (0, 0), (-1, -1), 8),
-    ]))
-    return t
-
-
-# ── Step header (badge + title) ───────────────────────────────────────────────
+# ── Step header (horizontal badge + title) ────────────────────────────────────
 
 def step_header(step_num: str, title_text: str, styles: dict) -> Table:
-    """Blue step-number badge next to a panel-background title row."""
-    badge = Paragraph(f"STEP<br/>{step_num}", styles['StepBadge'])
+    """
+    Teal "STEP N" badge on the left, pale-blue title panel on the right.
+    Rendered as a single horizontal row — no vertical stacking.
+    """
+    badge = Paragraph(f'STEP {step_num}', styles['StepBadge'])
     title = Paragraph(title_text, styles['StepTitle'])
-    t = Table([[badge, title]], colWidths=[36, AVAIL_W - 36])
+    t = Table([[badge, title]], colWidths=[56, AVAIL_W - 56])
     t.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0), (0, 0), BLUE),
-        ('BACKGROUND', (1, 0), (1, 0), PANEL),
-        ('LEFTPADDING',   (0, 0), (0, 0), 4),
-        ('RIGHTPADDING',  (0, 0), (0, 0), 4),
-        ('LEFTPADDING',   (1, 0), (1, 0), 12),
-        ('LINEBEFORE',    (1, 0), (1, 0), 3, BLUE),
+        ('BACKGROUND',    (0, 0), (0, 0), TEAL),
+        ('BACKGROUND',    (1, 0), (1, 0), PANEL),
+        ('LEFTPADDING',   (0, 0), (0, 0), 6),
+        ('RIGHTPADDING',  (0, 0), (0, 0), 6),
+        ('LEFTPADDING',   (1, 0), (1, 0), 14),
+        ('RIGHTPADDING',  (1, 0), (1, 0), 10),
+        ('LINEBEFORE',    (1, 0), (1, 0), 3, TEAL),
         ('VALIGN',        (0, 0), (-1, -1), 'MIDDLE'),
-        ('TOPPADDING',    (0, 0), (-1, -1), 5),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+        ('TOPPADDING',    (0, 0), (-1, -1), 7),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 7),
     ]))
     return t
 
 
-# ── Data table (NAVY header + alternating rows) ───────────────────────────────
+# ── Data table (teal header + alternating rows) ───────────────────────────────
 
 def data_table(
     header_row: list,
@@ -83,38 +90,34 @@ def data_table(
     alt_bg=None,
 ) -> Table:
     """
-    Builds a styled Table:  NAVY header row, alternating PAPER / WHITE body rows.
-    header_row  — list of strings (raw text).
-    data_rows   — list of lists of strings.
-    col_widths  — list of floats that must sum to AVAIL_W.
+    Styled table: teal header row, alternating PAPER / WHITE body rows.
+    First column of each body row is left-aligned; rest centred.
     """
     alt_bg = alt_bg or PAPER
 
     tbl_data = [[Paragraph(str(h), styles['TblHdr']) for h in header_row]]
     for row in data_rows:
-        styled = []
-        for j, cell in enumerate(row):
-            style_key = 'TblBodyL' if j == 0 else 'TblBody'
-            styled.append(Paragraph(str(cell) if cell not in (None, '') else '—', styles[style_key]))
+        styled = [
+            Paragraph(str(c) if c not in (None, '') else '—',
+                      styles['TblBodyL'] if j == 0 else styles['TblBody'])
+            for j, c in enumerate(row)
+        ]
         tbl_data.append(styled)
 
     tbl = Table(tbl_data, colWidths=col_widths, repeatRows=1)
-
-    style_cmds = [
-        ('BACKGROUND', (0, 0), (-1, 0), NAVY),
-        ('GRID',          (0, 0), (-1, -1), 0.5, BORDER),
-        ('BOX',           (0, 0), (-1, -1), 1.5, NAVY),
-        ('TOPPADDING',    (0, 0), (-1, -1), 4),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
-        ('LEFTPADDING',   (0, 0), (-1, -1), 6),
-        ('RIGHTPADDING',  (0, 0), (-1, -1), 6),
+    cmds = [
+        ('BACKGROUND',    (0, 0), (-1, 0),  TEAL),
+        ('GRID',          (0, 0), (-1, -1), 0.4, BORDER2),
+        ('BOX',           (0, 0), (-1, -1), 1.2, NAVY),
+        ('TOPPADDING',    (0, 0), (-1, -1), 5),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+        ('LEFTPADDING',   (0, 0), (-1, -1), 7),
+        ('RIGHTPADDING',  (0, 0), (-1, -1), 7),
         ('VALIGN',        (0, 0), (-1, -1), 'MIDDLE'),
     ]
     for i in range(1, len(data_rows) + 1):
-        bg = alt_bg if i % 2 == 0 else WHITE
-        style_cmds.append(('BACKGROUND', (0, i), (-1, i), bg))
-
-    tbl.setStyle(TableStyle(style_cmds))
+        cmds.append(('BACKGROUND', (0, i), (-1, i), alt_bg if i % 2 == 0 else WHITE))
+    tbl.setStyle(TableStyle(cmds))
     return tbl
 
 
@@ -122,36 +125,31 @@ def data_table(
 
 def calc_panel(rows: list, total_row: tuple, styles: dict, w: float = AVAIL_W) -> Table:
     """
-    Bordered light-blue panel for Step 3 inputs.
-    rows       — list of (label_str, value_str) tuples (max 10 rows).
-    total_row  — (label_str, value_str) rendered in NAVY-header style.
+    Light-panel bordered table for Step 3 inputs.
+    rows      — list of (label, value) strings
+    total_row — (label, value) rendered in teal-header style as the total row
     """
-    col_w1 = w * 0.70
-    col_w2 = w * 0.30
-
-    tbl_data = []
-    for label, value in rows:
-        tbl_data.append([
-            Paragraph(label, styles['CalcLabel']),
-            Paragraph(str(value), styles['CalcValue']),
-        ])
+    col_w1, col_w2 = w * 0.70, w * 0.30
+    tbl_data = [
+        [Paragraph(lbl, styles['CalcLabel']), Paragraph(str(val), styles['CalcValue'])]
+        for lbl, val in rows
+    ]
     n = len(rows)
     tbl_data.append([
         Paragraph(total_row[0], styles['TblHdr']),
         Paragraph(str(total_row[1]), styles['TblHdr']),
     ])
-
     tbl = Table(tbl_data, colWidths=[col_w1, col_w2])
     tbl.setStyle(TableStyle([
-        ('BACKGROUND', (0, 0),  (-1, n - 1), PANEL),
-        ('BACKGROUND', (0, n),  (-1, n),     NAVY),
-        ('GRID',          (0, 0), (-1, -1), 0.5, BORDER),
-        ('BOX',           (0, 0), (-1, n),   1.5, NAVY),
-        ('TOPPADDING',    (0, 0), (-1, -1), 3),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 3),
-        ('LEFTPADDING',   (0, 0), (-1, -1), 8),
-        ('RIGHTPADDING',  (0, 0), (-1, -1), 8),
-        ('VALIGN',        (0, 0), (-1, -1), 'MIDDLE'),
+        ('BACKGROUND',    (0, 0),  (-1, n - 1), PANEL),
+        ('BACKGROUND',    (0, n),  (-1, n),     TEAL),
+        ('GRID',          (0, 0),  (-1, -1),    0.4, BORDER2),
+        ('BOX',           (0, 0),  (-1, n),     1.2, NAVY),
+        ('TOPPADDING',    (0, 0),  (-1, -1), 4),
+        ('BOTTOMPADDING', (0, 0),  (-1, -1), 4),
+        ('LEFTPADDING',   (0, 0),  (-1, -1), 8),
+        ('RIGHTPADDING',  (0, 0),  (-1, -1), 8),
+        ('VALIGN',        (0, 0),  (-1, -1), 'MIDDLE'),
     ]))
     return tbl
 
@@ -160,103 +158,81 @@ def calc_panel(rows: list, total_row: tuple, styles: dict, w: float = AVAIL_W) -
 
 def result_card(
     test_label: str,
-    shortfall,
-    capability,
-    adj_flow,
-    pred_flow,
-    test_cwt,
-    pred_cwt,
-    styles: dict,
-    w: float = AVAIL_W,
+    shortfall, capability, adj_flow, pred_flow, test_cwt, pred_cwt,
+    styles: dict, w: float = AVAIL_W,
 ) -> list:
     """
-    Returns [header_table, body_table, summary_bar_table] — three flowables
-    that together form the CWT Shortfall / Capability result card.
+    Returns [header_table, body_table, summary_bar] — three flowables.
+    Header has a 4 pt gold left accent. Shortfall in red, Capability in blue.
     """
-    def _safe_fmt(val, decimals=2, fallback='—'):
-        try:
-            f = float(val)
-            return f'{f:.{decimals}f}'
-        except (TypeError, ValueError):
-            return str(val) if val not in (None, '') else fallback
+    def _safe(val, dp=2):
+        try:    return f'{float(val):.{dp}f}'
+        except: return str(val) if val not in (None, '') else '—'
 
-    sf_num_str = _safe_fmt(shortfall)
-    cap_str    = _safe_fmt(capability, 1)
-    adj_str    = _safe_fmt(adj_flow, 0)
-    pf_str     = _safe_fmt(pred_flow, 0)
-    tc_str     = _safe_fmt(test_cwt)
-    pc_str     = _safe_fmt(pred_cwt)
+    sf_disp  = f"{float(shortfall):+.2f} °C" if _safe(shortfall) != '—' else '— °C'
+    cap_disp = f"{_safe(capability, 1)} %"
 
-    try:
-        sf_disp = f"{float(shortfall):+.2f} °C"
-    except (TypeError, ValueError):
-        sf_disp = f"{shortfall} °C"
-    cap_disp = f"{cap_str} %"
-
-    # Header bar
+    # Header bar (navy + gold left accent)
     header = Table(
-        [[Paragraph(f"CONCLUSION — {test_label}", styles['CardHeader'])]],
+        [[Paragraph(f'CONCLUSION \u2014 {test_label}', styles['CardHeader'])]],
         colWidths=[w],
     )
     header.setStyle(TableStyle([
         ('BACKGROUND',    (0, 0), (-1, -1), NAVY),
-        ('TOPPADDING',    (0, 0), (-1, -1), 7),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 7),
-        ('LEFTPADDING',   (0, 0), (-1, -1), 12),
+        ('TOPPADDING',    (0, 0), (-1, -1), 8),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 8),
+        ('LEFTPADDING',   (0, 0), (-1, -1), 16),
+        ('LINEBEFORE',    (0, 0), (0, -1),  4, GOLD),
     ]))
 
+    # Two-column body
     col_w = w / 2
     left_cells = [
-        Paragraph("CWT SHORTFALL IN PERFORMANCE", styles['RcLabel']),
+        Paragraph('CWT SHORTFALL IN PERFORMANCE', styles['RcLabel']),
         Paragraph(sf_disp, styles['RcValueRed']),
-        Paragraph(f"Test CWT ({tc_str}°C) vs Predicted CWT ({pc_str}°C)", styles['RcSub']),
+        Paragraph(f'Test CWT ({_safe(test_cwt)}°C) vs Predicted CWT ({_safe(pred_cwt)}°C)', styles['RcSub']),
     ]
     right_cells = [
-        Paragraph("COOLING TOWER CAPABILITY", styles['RcLabel']),
+        Paragraph('COOLING TOWER CAPABILITY', styles['RcLabel']),
         Paragraph(cap_disp, styles['RcValueBlue']),
-        Paragraph(f"= {adj_str} / {pf_str} × 100", styles['RcSub']),
+        Paragraph(f'= {_safe(adj_flow, 0)} / {_safe(pred_flow, 0)} \u00d7 100', styles['RcSub']),
     ]
-
     body = Table([[left_cells, right_cells]], colWidths=[col_w, col_w])
     body.setStyle(TableStyle([
         ('BACKGROUND',    (0, 0), (-1, -1), PANEL),
-        ('LINEBEFORE',    (1, 0), (1, 0),   1.5, HexColor('#93c5fd')),
+        ('LINEBEFORE',    (1, 0), (1, -1),  1.5, HexColor('#7dd3fc')),
         ('VALIGN',        (0, 0), (-1, -1), 'MIDDLE'),
-        ('TOPPADDING',    (0, 0), (-1, -1), 16),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 16),
-        ('LEFTPADDING',   (0, 0), (-1, -1), 16),
-        ('BOX',           (0, 0), (-1, -1), 1.5, NAVY),
+        ('TOPPADDING',    (0, 0), (-1, -1), 18),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 18),
+        ('LEFTPADDING',   (0, 0), (-1, -1), 18),
+        ('BOX',           (0, 0), (-1, -1), 1.2, NAVY),
     ]))
 
-    # Result summary bar
+    # Summary bar
     try:
         sf_val  = float(shortfall)
         cap_val = float(capability)
         if sf_val < 0:
-            summary_txt = (
-                f"Tower is <b>BELOW specification</b> by {abs(sf_val):.2f}°C "
-                f"— Capability: <b>{cap_val:.1f}%</b>"
-            )
+            txt = (f'Tower is <b>BELOW specification</b> by {abs(sf_val):.2f}°C '
+                   f'\u2014 Capability: <b>{cap_val:.1f}%</b>')
         elif sf_val == 0:
-            summary_txt = f"Tower <b>MEETS design specification</b> — Capability: <b>{cap_val:.1f}%</b>"
+            txt = f'Tower <b>MEETS design specification</b> \u2014 Capability: <b>{cap_val:.1f}%</b>'
         else:
-            summary_txt = (
-                f"Tower <b>EXCEEDS design</b> by {sf_val:.2f}°C "
-                f"— Capability: <b>{cap_val:.1f}%</b>"
-            )
+            txt = (f'Tower <b>EXCEEDS design</b> by {sf_val:.2f}°C '
+                   f'\u2014 Capability: <b>{cap_val:.1f}%</b>')
     except (TypeError, ValueError):
-        summary_txt = "ATC-105 Analysis Complete"
+        txt = 'ATC-105 Analysis Complete'
 
-    summary_bar = Table(
-        [[Paragraph(summary_txt, styles['ResultSummary'])]],
+    summary = Table(
+        [[Paragraph(txt, styles['ResultSummary'])]],
         colWidths=[w],
     )
-    summary_bar.setStyle(TableStyle([
+    summary.setStyle(TableStyle([
         ('BACKGROUND',    (0, 0), (-1, -1), SKY),
-        ('TOPPADDING',    (0, 0), (-1, -1), 6),
-        ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('TOPPADDING',    (0, 0), (-1, -1), 7),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 7),
         ('LEFTPADDING',   (0, 0), (-1, -1), 12),
-        ('BOX',           (0, 0), (-1, -1), 1.0, NAVY),
+        ('BOX',           (0, 0), (-1, -1), 1.0, TEAL),
     ]))
 
-    return [header, body, summary_bar]
+    return [header, body, summary]
