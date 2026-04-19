@@ -7,6 +7,5 @@ xlsxwriter
 openpyxl
 xlrd
 python-dateutil
-jinja2
-weasyprint
+reportlab
 matplotlib
