@@ -23,7 +23,7 @@ echo [0/4] Checking for existing server on port 8000...
 powershell -Command "Get-NetTCPConnection -LocalPort 8000 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }" >nul 2>&1
 
 echo [1/4] Installing/validating Python dependencies...
-"%PYTHON_EXE%" -m pip install --disable-pip-version-check --quiet --user xlsxwriter pandas openpyxl python-dateutil fastapi uvicorn pydantic python-multipart
+"%PYTHON_EXE%" -m pip install --disable-pip-version-check --quiet --user -r requirements.txt
 if errorlevel 1 (
     echo [ERROR] Failed to install Python dependencies.
     goto :fatal

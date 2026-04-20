@@ -6,7 +6,7 @@
 
 ```bash
 # Install dependencies
-pip install fastapi uvicorn pydantic python-multipart pandas openpyxl xlsxwriter python-dateutil jinja2 xhtml2pdf matplotlib
+pip install -r requirements.txt
 
 # Start server (from cti_dashboard_pro/)
 python -m uvicorn app.backend.main:app --host 127.0.0.1 --port 8000
