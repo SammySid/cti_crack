@@ -610,7 +610,7 @@ templates = Jinja2Templates(directory=str(WEB_ROOT / "templates"))
 
 @app.get("/")
 async def root(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="index.html")
 
 if __name__ == "__main__":
     port = 8000
