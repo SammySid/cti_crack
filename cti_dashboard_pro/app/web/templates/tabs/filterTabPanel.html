@@ -1,0 +1,79 @@
+<div id="filterTabPanel" class="hidden space-y-6">
+                <div class="glass-card rounded-3xl p-8 border border-cyan-500/10">
+                    <h3 class="text-xl font-black tracking-tight text-slate-100">Excel Data Filter Tool</h3>
+                    <p class="text-sm text-slate-400 mt-2">Bulk scan a folder of Excel files and export a filtered master workbook by time range.</p>
+                    <p id="filterStatus" class="text-[11px] text-slate-400 font-semibold mt-3">Filter tool ready.</p>
+                </div>
+
+                <div class="glass-card rounded-3xl p-8 border border-white/10 space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label for="filterSourcePath" class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Source Folder Path</label>
+                            <input id="filterSourcePath" type="text" placeholder="F:\path\to\data"
+                                class="w-full input-premium rounded-lg px-3 py-2 text-sm font-mono" />
+                            <p class="text-[10px] text-slate-500 mt-2">Saved in browser local storage.</p>
+                        </div>
+                        <div>
+                            <label for="filterDestPath" class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Dest Folder Path (Optional)</label>
+                            <input id="filterDestPath" type="text" placeholder="F:\path\to\output"
+                                class="w-full input-premium rounded-lg px-3 py-2 text-sm font-mono border border-emerald-500/20 focus:border-emerald-500/50" />
+                            <p class="text-[10px] text-emerald-500/70 mt-2">Bypasses browser download and saves directly.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <!-- START TIME — typeable text input, always 12h via JS normaliser on blur -->
+                        <div>
+                            <label for="filterStartTime" class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Start Time</label>
+                            <div class="relative">
+                                <input id="filterStartTime" type="text" placeholder="4:00 PM"
+                                    class="w-full input-premium rounded-lg px-3 py-2 pr-9 text-sm font-mono" />
+                                <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                        </div>
+                        <!-- END TIME — typeable text input, always 12h via JS normaliser on blur -->
+                        <div>
+                            <label for="filterEndTime" class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">End Time</label>
+                            <div class="relative">
+                                <input id="filterEndTime" type="text" placeholder="5:00 PM"
+                                    class="w-full input-premium rounded-lg px-3 py-2 pr-9 text-sm font-mono" />
+                                <svg class="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Process All toggle -->
+                    <div class="flex items-center gap-3 py-1">
+                        <input id="filterProcessAll" type="checkbox"
+                            class="w-4 h-4 rounded accent-cyan-400 cursor-pointer" />
+                        <label for="filterProcessAll" class="text-[11px] font-bold text-slate-300 uppercase tracking-widest cursor-pointer select-none">
+                            Process All Rows <span class="text-slate-500 normal-case font-normal">(ignore time filter — include every row)</span>
+                        </label>
+                    </div>
+
+                    <div>
+                        <label for="filterExcelFolder" class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Source Folder (bulk scan)</label>
+                        <input id="filterExcelFolder" type="file" accept=".xlsx,.xls" webkitdirectory directory multiple
+                            class="w-full text-sm text-slate-300 file:mr-4 file:rounded-lg file:border-0 file:bg-cyan-500/20 file:px-3 file:py-2 file:text-xs file:font-bold file:uppercase file:tracking-widest file:text-cyan-300 hover:file:bg-cyan-500/30" />
+                        <p class="text-[10px] text-slate-500 mt-2">Select one folder and all nested <code>.xlsx</code> / <code>.xls</code> files will be scanned.</p>
+                    </div>
+
+                    <div>
+                        <label for="filterExcelFiles" class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Fallback: Select Files Manually</label>
+                        <input id="filterExcelFiles" type="file" accept=".xlsx,.xls" multiple
+                            class="w-full text-sm text-slate-300 file:mr-4 file:rounded-lg file:border-0 file:bg-cyan-500/20 file:px-3 file:py-2 file:text-xs file:font-bold file:uppercase file:tracking-widest file:text-cyan-300 hover:file:bg-cyan-500/30" />
+                    </div>
+
+                    <div class="flex items-center justify-between gap-4 pt-2">
+                        <p id="filterPanelStatus" class="text-xs text-slate-400">Ready to process files.</p>
+                        <button id="runFilterAction"
+                            class="px-4 py-2 rounded-lg border border-cyan-400/30 bg-cyan-500/20 text-cyan-300 text-xs font-bold uppercase tracking-widest hover:bg-cyan-500/30">
+                            Generate Filtered Excel
+                        </button>
+                    </div>
+                </div>
+            </div>

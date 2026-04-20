@@ -9,9 +9,10 @@ from pathlib import Path
 from typing import List, Optional
 
 import uvicorn
-from fastapi import FastAPI, Form, UploadFile, File, HTTPException
+from fastapi import FastAPI, Form, UploadFile, File, HTTPException, Request
 from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -605,10 +606,11 @@ def api_download_pdf(token: str):
 app.mount("/css", StaticFiles(directory=str(WEB_ROOT / "css")), name="css")
 app.mount("/js", StaticFiles(directory=str(WEB_ROOT / "js")), name="js")
 
+templates = Jinja2Templates(directory=str(WEB_ROOT / "templates"))
+
 @app.get("/")
-async def root():
-    index_path = WEB_ROOT / "index.html"
-    return FileResponse(index_path)
+async def root(request: Request):
+    return templates.TemplateResponse("index.html", {"request": request})
 
 if __name__ == "__main__":
     port = 8000

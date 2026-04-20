@@ -1,0 +1,63 @@
+<div id="psychroTabPanel" class="hidden space-y-6">
+                <div class="glass-card rounded-3xl p-8 border border-cyan-500/10">
+                    <h3 class="text-xl font-black tracking-tight text-slate-100">Psychrometric Calculator</h3>
+                    <p class="text-sm text-slate-400 mt-2">Compute key air properties from Dry Bulb, Wet Bulb, and altitude using the integrated CTI engine.</p>
+                    <p id="psychroStatus" class="text-[11px] text-slate-400 font-semibold mt-3">Ready.</p>
+                </div>
+
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="glass-card rounded-3xl p-8 border border-white/10 space-y-5">
+                        <h4 class="text-xs font-black uppercase tracking-widest text-slate-300">Inputs</h4>
+                        <div>
+                            <label for="p-dbt" class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Dry Bulb Temperature (°C)</label>
+                            <input id="p-dbt" type="number" step="0.1" value="35"
+                                class="w-full input-premium rounded-lg px-3 py-2 text-sm font-mono" />
+                        </div>
+                        <div>
+                            <label for="p-wbt" class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Wet Bulb Temperature (°C)</label>
+                            <input id="p-wbt" type="number" step="0.1" value="25"
+                                class="w-full input-premium rounded-lg px-3 py-2 text-sm font-mono" />
+                        </div>
+                        <div>
+                            <label for="p-alt" class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Altitude (m)</label>
+                            <input id="p-alt" type="number" step="1" value="0"
+                                class="w-full input-premium rounded-lg px-3 py-2 text-sm font-mono" />
+                        </div>
+                        <p id="p-error" class="text-xs text-rose-400 hidden">WBT cannot exceed DBT.</p>
+                    </div>
+
+                    <div class="glass-card rounded-3xl p-8 border border-white/10">
+                        <h4 class="text-xs font-black uppercase tracking-widest text-slate-300 mb-4">Results</h4>
+                        <div class="grid grid-cols-2 gap-4 text-sm">
+                            <div class="bg-slate-900/50 rounded-xl p-4 border border-white/5">
+                                <p class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Humidity Ratio</p>
+                                <p id="out-hr" class="mt-2 text-xl font-black text-cyan-300">--</p>
+                            </div>
+                            <div class="bg-slate-900/50 rounded-xl p-4 border border-white/5">
+                                <p class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Dew Point</p>
+                                <p id="out-dp" class="mt-2 text-xl font-black text-cyan-300">--</p>
+                            </div>
+                            <div class="bg-slate-900/50 rounded-xl p-4 border border-white/5">
+                                <p class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Relative Humidity</p>
+                                <p id="out-rh" class="mt-2 text-xl font-black text-cyan-300">--</p>
+                            </div>
+                            <div class="bg-slate-900/50 rounded-xl p-4 border border-white/5">
+                                <p class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Enthalpy</p>
+                                <p id="out-h" class="mt-2 text-xl font-black text-cyan-300">--</p>
+                            </div>
+                            <div class="bg-slate-900/50 rounded-xl p-4 border border-white/5">
+                                <p class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Specific Volume</p>
+                                <p id="out-sv" class="mt-2 text-xl font-black text-cyan-300">--</p>
+                            </div>
+                            <div class="bg-slate-900/50 rounded-xl p-4 border border-white/5">
+                                <p class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Density</p>
+                                <p id="out-dens" class="mt-2 text-xl font-black text-cyan-300">--</p>
+                            </div>
+                        </div>
+                        <div class="mt-4 bg-slate-900/50 rounded-xl p-4 border border-white/5">
+                            <p class="text-[10px] text-slate-400 uppercase tracking-widest font-bold">Atmospheric Pressure</p>
+                            <p id="out-p" class="mt-2 text-xl font-black text-cyan-300">--</p>
+                        </div>
+                    </div>
+                </div>
+            </div>

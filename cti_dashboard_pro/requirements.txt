@@ -9,3 +9,5 @@ xlrd
 python-dateutil
 reportlab
 matplotlib
+jinja2
+aiofiles

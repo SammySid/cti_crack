@@ -1,0 +1,62 @@
+<div id="previewModal" role="dialog" aria-modal="true" tabindex="-1"
+         class="fixed inset-0 z-[60] hidden" style="flex-direction:column">
+
+        <!-- Backdrop -->
+        <div id="pvm-bg"
+             class="absolute inset-0 cursor-pointer"
+             style="background:rgba(2,6,23,0.82);backdrop-filter:blur(8px);opacity:0;transition:opacity 0.22s"
+             onclick="closePreviewModal()"></div>
+
+        <!-- Floating panel -->
+        <div id="pvm-panel"
+             class="relative m-3 sm:m-5 rounded-3xl border border-white/[0.08] shadow-[0_32px_80px_rgba(0,0,0,0.7)] flex flex-col overflow-hidden"
+             style="background:#0c1222;flex:1;max-height:calc(100dvh - 24px);opacity:0;transform:scale(0.96);transition:opacity 0.22s,transform 0.22s">
+
+            <!-- ── Modal header ────────────────────────────────────────── -->
+            <div class="shrink-0 flex items-center justify-between gap-3 px-5 sm:px-7 py-4 border-b border-white/[0.08]"
+                 style="background:rgba(12,18,34,0.98)">
+                <div class="flex items-center gap-3 min-w-0">
+                    <span class="inline-block w-2 h-2 rounded-full bg-violet-400 ring-[3px] ring-violet-400/20 shrink-0"></span>
+                    <div class="min-w-0">
+                        <p class="text-[10px] font-black uppercase tracking-widest text-violet-400/60">CTI ATC-105 · Full Report Preview</p>
+                        <p id="pv-modal-subtitle" class="text-[11px] font-bold text-slate-300 truncate mt-0.5">—</p>
+                    </div>
+                    <span id="pv-modal-verdict" class="shrink-0 ml-1 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border border-slate-700/50 text-slate-500 bg-slate-800/60">—</span>
+                </div>
+                <div class="flex items-center gap-2 shrink-0">
+                    <button type="button"
+                            onclick="closePreviewModal(); document.getElementById('generateReportBtn').click();"
+                            class="flex items-center gap-1.5 px-3.5 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl border border-emerald-500/40 text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 transition-all">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        Generate PDF
+                    </button>
+                    <button type="button" onclick="closePreviewModal()"
+                            class="flex items-center gap-1.5 px-3.5 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl border border-white/10 text-slate-400 hover:text-slate-200 hover:bg-white/[0.05] transition-all">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                        Close
+                    </button>
+                </div>
+            </div>
+
+            <!-- ── Scrollable body (preview content teleported here) ─── -->
+            <div id="pvm-body" class="flex-1 overflow-y-auto overscroll-contain" style="scroll-behavior:smooth"></div>
+
+            <!-- ── Modal footer ────────────────────────────────────────── -->
+            <div class="shrink-0 flex flex-wrap items-center justify-between gap-3 px-5 sm:px-7 py-3.5 border-t border-white/[0.08]"
+                 style="background:rgba(12,18,34,0.98)">
+                <p class="text-[10px] text-slate-600 italic">All values and charts match the PDF. Check results, then generate.</p>
+                <div class="flex items-center gap-2">
+                    <button type="button" onclick="closePreviewModal()"
+                            class="px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl border border-white/10 text-slate-400 hover:text-slate-200 hover:bg-white/[0.05] transition-all">
+                        Close Preview
+                    </button>
+                    <button type="button"
+                            onclick="closePreviewModal(); document.getElementById('generateReportBtn').click();"
+                            class="flex items-center gap-1.5 px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl border border-emerald-500/40 text-emerald-300 bg-emerald-500/10 hover:bg-emerald-500/20 transition-all">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        Generate PDF Report
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
