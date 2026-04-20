@@ -9,7 +9,7 @@
 A full-stack engineering dashboard for cooling tower thermal analysis, psychrometric calculations, Excel data processing, and automated ATC-105 PDF report generation.
 
 **Stack:**
-- Frontend: Single-page HTML/CSS/JS (Tailwind CDN, Chart.js, modular ES6)
+- Frontend: Modular Jinja2 HTML/CSS/JS (Tailwind CDN, Chart.js, modular ES6)
 - Backend: Python 3.11 + FastAPI + Uvicorn
 - PDF reports: ReportLab Platypus + Matplotlib (two-pass build for accurate page numbers)
 - Deployment: Docker (python:3.11-slim) on Oracle UK VPS via `auto_sync.sh`
@@ -72,6 +72,7 @@ See Section 4 for the complete calculation flow.
 
 | File | Purpose |
 |---|---|
+| `templates/index.html` | Jinja2 layout shell with modular `components/` and `tabs/` includes |
 | `js/ui.js` | Central state store + orchestration |
 | `js/worker.js` | Web Worker proxy for curve API calls |
 | `js/charts.js` | Chart.js rendering wrapper |

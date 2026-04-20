@@ -39,7 +39,10 @@ cti_dashboard_pro/
 │   │   └── templates/
 │   │       └── report_template.html ← Jinja2 ATC-105 PDF template
 │   └── web/
-│       ├── index.html               ← Single-page dashboard UI
+│       ├── templates/
+│       │   ├── index.html           ← Main layout shell
+│       │   ├── components/          ← Modular Jinja2 components
+│       │   └── tabs/                ← Modular Tab Panels
 │       ├── css/main.css
 │       └── js/
 │           ├── ui.js                ← Central state orchestrator
