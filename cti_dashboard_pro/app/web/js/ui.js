@@ -26,10 +26,15 @@ export const ui = {
         axYMin: 25,
         axYMax: 38,
         offsetWbt20: 0.0,
-        offsetRange80: 0.0,
-        offsetRange120: 0.0,
-        offsetFlow90: 0.0,
-        offsetFlow110: 0.0
+        off90r80: 0.0,
+        off90r100: 0.0,
+        off90r120: 0.0,
+        off100r80: 0.0,
+        off100r100: 0.0,
+        off100r120: 0.0,
+        off110r80: 0.0,
+        off110r100: 0.0,
+        off110r120: 0.0
     },
     filterSettings: {
         sourcePath: '',
@@ -79,7 +84,7 @@ export const ui = {
                 ui.curveData[flowPercent] = data;
                 ui.pendingFlows.delete(flowPercent);
 
-                const hasOffsets = Object.keys(ui.inputs).some(k => k.startsWith('offset') && ui.inputs[k] !== 0);
+                const hasOffsets = Object.keys(ui.inputs).some(k => (k.startsWith('offset') || k.startsWith('off')) && ui.inputs[k] !== 0);
                 const titleText = hasOffsets ? 
                     [`Curve ${index + 1} (${flowPercent}% Flow)`, '(Safety Margins Applied)'] : 
                     `Curve ${index + 1} (${flowPercent}% Flow)`;
@@ -245,10 +250,15 @@ export const ui = {
             axYMin: ui.inputs.axYMin,
             axYMax: ui.inputs.axYMax,
             offsetWbt20: ui.inputs.offsetWbt20,
-            offsetRange80: ui.inputs.offsetRange80,
-            offsetRange120: ui.inputs.offsetRange120,
-            offsetFlow90: ui.inputs.offsetFlow90,
-            offsetFlow110: ui.inputs.offsetFlow110,
+            off90r80: ui.inputs.off90r80,
+            off90r100: ui.inputs.off90r100,
+            off90r120: ui.inputs.off90r120,
+            off100r80: ui.inputs.off100r80,
+            off100r100: ui.inputs.off100r100,
+            off100r120: ui.inputs.off100r120,
+            off110r80: ui.inputs.off110r80,
+            off110r100: ui.inputs.off110r100,
+            off110r120: ui.inputs.off110r120,
             isPrinting: ui.isPrinting
         });
         if (ui.areCurvesReady() && ui.lastCurveSignature === curveSignature) {
