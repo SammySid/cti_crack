@@ -16,15 +16,7 @@ self.onmessage = async function (e) {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
-                    inputs: {
-                        axXMin: Number(inputs.axXMin),
-                        axXMax: Number(inputs.axXMax),
-                        lgRatio: Number(inputs.lgRatio),
-                        constantC: Number(inputs.constantC),
-                        constantM: Number(inputs.constantM),
-                        designHWT: Number(inputs.designHWT),
-                        designCWT: Number(inputs.designCWT)
-                    },
+                    inputs: inputs,
                     flowPercent: flowPercent
                 })
             });
