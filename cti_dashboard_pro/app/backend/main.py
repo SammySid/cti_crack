@@ -87,6 +87,12 @@ class CurveInputs(BaseModel):
     constantM: float
     designHWT: float
     designCWT: float
+    designWBT: float = 28.5
+    offsetWbt20: float = 0.0
+    offsetRange80: float = 0.0
+    offsetRange120: float = 0.0
+    offsetFlow90: float = 0.0
+    offsetFlow110: float = 0.0
 
 class CurveRequest(BaseModel):
     inputs: CurveInputs
@@ -199,6 +205,28 @@ async def api_calc_curves(req: CurveRequest):
             cwt120 = find_cwt(inputs_dict, wbt_val, 120, req.flowPercent)
 
             if not (math.isnan(cwt80) or math.isnan(cwt100) or math.isnan(cwt120)):
+                # Apply Safety Offsets
+                # 1. WBT Rotation: Anchor at designWBT=0 offset. At wbt=20, offset is offsetWbt20.
+                if inputs_dict.get('designWBT') != 20:
+                    wbt_slope = req.inputs.offsetWbt20 / (20.0 - req.inputs.designWBT)
+                    wbt_correction = wbt_slope * (wbt_val - req.inputs.designWBT)
+                else:
+                    wbt_correction = req.inputs.offsetWbt20 if wbt_val == 20 else 0
+                
+                # 2. Flow Offsets
+                flow_correction = 0.0
+                if req.flowPercent == 90:
+                    flow_correction = req.inputs.offsetFlow90
+                elif req.flowPercent == 110:
+                    flow_correction = req.inputs.offsetFlow110
+
+                base_correction = wbt_correction + flow_correction
+                
+                # Apply base and range-specific offsets
+                cwt80 = round(cwt80 + base_correction + req.inputs.offsetRange80, 3)
+                cwt100 = round(cwt100 + base_correction, 3)
+                cwt120 = round(cwt120 + base_correction + req.inputs.offsetRange120, 3)
+
                 data.append({
                     "wbt": wbt_val,
                     "range80": cwt80,

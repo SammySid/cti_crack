@@ -24,7 +24,12 @@ export const ui = {
         axXMin: 18,
         axXMax: 30,
         axYMin: 25,
-        axYMax: 38
+        axYMax: 38,
+        offsetWbt20: 0.0,
+        offsetRange80: 0.0,
+        offsetRange120: 0.0,
+        offsetFlow90: 0.0,
+        offsetFlow110: 0.0
     },
     filterSettings: {
         sourcePath: '',
@@ -234,6 +239,11 @@ export const ui = {
             axXMax: ui.inputs.axXMax,
             axYMin: ui.inputs.axYMin,
             axYMax: ui.inputs.axYMax,
+            offsetWbt20: ui.inputs.offsetWbt20,
+            offsetRange80: ui.inputs.offsetRange80,
+            offsetRange120: ui.inputs.offsetRange120,
+            offsetFlow90: ui.inputs.offsetFlow90,
+            offsetFlow110: ui.inputs.offsetFlow110,
             isPrinting: ui.isPrinting
         });
         if (ui.areCurvesReady() && ui.lastCurveSignature === curveSignature) {
