@@ -89,7 +89,7 @@ export const charts = {
                 plugins: {
                     title: {
                         display: true,
-                        text: title.toUpperCase(),
+                        text: Array.isArray(title) ? title.map(t => t.toUpperCase()) : title.toUpperCase(),
                         color: textColor,
                         font: { size: 16, weight: '900', family: "'Inter', sans-serif" },
                         padding: { bottom: 20 }

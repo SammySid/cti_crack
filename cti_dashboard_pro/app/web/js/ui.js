@@ -79,10 +79,15 @@ export const ui = {
                 ui.curveData[flowPercent] = data;
                 ui.pendingFlows.delete(flowPercent);
 
+                const hasOffsets = Object.keys(ui.inputs).some(k => k.startsWith('offset') && ui.inputs[k] !== 0);
+                const titleText = hasOffsets ? 
+                    [`Curve ${index + 1} (${flowPercent}% Flow)`, '(Safety Margins Applied)'] : 
+                    `Curve ${index + 1} (${flowPercent}% Flow)`;
+
                 charts.render(
                     `chart${index + 1}`,
                     data,
-                    `Curve ${index + 1} (${flowPercent}% Flow)`,
+                    titleText,
                     ui.inputs.axXMin,
                     ui.inputs.axXMax,
                     ui.inputs.axYMin,
