@@ -92,6 +92,13 @@ class CurveRequest(BaseModel):
     inputs: CurveInputs
     flowPercent: int
 
+class CalibrateRequest(BaseModel):
+    targetCWT: float
+    designWBT: float
+    designRange: float
+    lgRatio: float
+    constantM: float
+
 class ExcelExportRequest(BaseModel):
     inputs: dict
     curves: dict
@@ -156,6 +163,23 @@ async def api_calc_predict(req: PredictRequest):
     except Exception as e:
         raise HTTPException(status_code=400, detail=str(e))
 
+@app.post("/api/calculate/calibrate")
+async def api_calc_calibrate(req: CalibrateRequest):
+    try:
+        from core.calculations import calculate_demand_kavl
+        target_hwt = req.targetCWT + req.designRange
+        demand_kavl = calculate_demand_kavl(req.designWBT, target_hwt, req.targetCWT, req.lgRatio)
+        
+        if math.isnan(demand_kavl) or demand_kavl <= 0:
+            raise ValueError("Invalid thermodynamics for given target CWT. Demand KaV/L did not converge.")
+
+        # demand_kavl = C * (L/G)^-m
+        # C = demand_kavl / ((L/G)^-m)
+        constant_c = demand_kavl / math.pow(req.lgRatio, -req.constantM)
+        
+        return {"constantC": round(constant_c, 4), "demandKavl": round(demand_kavl, 4)}
+    except Exception as e:
+        raise HTTPException(status_code=400, detail=str(e))
 @app.post("/api/calculate/curves")
 async def api_calc_curves(req: CurveRequest):
     try:

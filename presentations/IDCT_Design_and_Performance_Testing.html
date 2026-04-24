@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Cooling Tower Fundamentals: IDCT Design and Performance Testing — Engineering Presentation for NTPC">
+  <title>Cooling Tower Fundamentals — IDCT Design &amp; Performance Testing</title>
+
+  <!--
+  ╔══════════════════════════════════════════════════════════════════════════╗
+  ║  IDCT Design and Performance Testing — Portable HTML Presentation       ║
+  ║  No external dependencies. Open in any modern browser.                  ║
+  ║  Navigate: ← → Arrow keys · Space · Buttons · Dot nav                  ║
+  ╚══════════════════════════════════════════════════════════════════════════╝
+  -->
+
+  <style>
+    /* ═══════════════════════════════════════════════════════════════════
+       MODULE 1 · RESET & BASE
+       ═══════════════════════════════════════════════════════════════════ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { font-size: 14px; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui,
+                   'Helvetica Neue', Arial, sans-serif;
+      line-height: 1.55;
+      background: var(--stage);
+      color: var(--text-1);
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       MODULE 2 · DESIGN TOKENS
+       ═══════════════════════════════════════════════════════════════════ */
+    :root {
+      /* Stage (the area behind the slide) */
+      --stage:          #DDE3EE;
+
+      /* Slide surface */
+      --slide-bg:       #FFFFFF;
+      --slide-max-w:    920px;
+      --slide-radius:   10px;
+
+      /* Navigation chrome */
+      --chrome:         #1A2332;
+      --chrome-border:  rgba(255,255,255,0.07);
+      --chrome-text:    #94A3B8;
+
+      /* Text scale */
+      --text-1:  #0F172A;
+      --text-2:  #334155;
+      --text-3:  #64748B;
+      --text-4:  #94A3B8;
+
+      /* Accent */
+      --accent:         #2563EB;
+      --accent-bg:      #EFF6FF;
+      --accent-border:  #BFDBFE;
+
+      /* Structural */
+      --border:     #E2E8F0;
+      --border-md:  #CBD5E1;
+      --fill-xs:    #F8FAFC;
+      --fill-sm:    #F1F5F9;
+      --fill-md:    #E2E8F0;
+
+      /* Semantic tones — light mode */
+      --info:           #2563EB;
+      --info-bg:        #EFF6FF;
+      --info-border:    #BFDBFE;
+      --info-text:      #1D4ED8;
+
+      --success:        #059669;
+      --success-bg:     #ECFDF5;
+      --success-border: #A7F3D0;
+      --success-text:   #065F46;
+
+      --warning:        #D97706;
+      --warning-bg:     #FFFBEB;
+      --warning-border: #FDE68A;
+      --warning-text:   #92400E;
+
+      --danger:         #DC2626;
+      --danger-bg:      #FEF2F2;
+      --danger-border:  #FECACA;
+      --danger-text:    #991B1B;
+
+      --neutral:        #475569;
+      --neutral-bg:     #F1F5F9;
+      --neutral-border: #CBD5E1;
+      --neutral-text:   #334155;
+
+      /* Chart palette */
+      --c1: #3B82F6;
+      --c2: #10B981;
+      --c3: #F59E0B;
+      --c4: #EF4444;
+      --c5: #8B5CF6;
+      --c6: #14B8A6;
+      --c7: #EC4899;
+
+      /* Radii */
+      --r-sm: 4px;
+      --r-md: 6px;
+      --r-lg: 8px;
+      --r-xl: 12px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       MODULE 3 · SHELL — Flex column, full viewport
+       ═══════════════════════════════════════════════════════════════════ */
+    .shell {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       MODULE 4 · TOP BAR — Dark chrome
+       ═══════════════════════════════════════════════════════════════════ */
+    .top-bar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      height: 40px;
+      background: var(--chrome);
+      border-bottom: 1px solid var(--chrome-border);
+      flex-shrink: 0;
+    }
+    .top-bar-counter {
+      font-size: 11.5px;
+      color: var(--chrome-text);
+      font-variant-numeric: tabular-nums;
+      letter-spacing: 0.02em;
+    }
+
+    /* Top bar pill variants — visible on dark chrome */
+    #part-badge.pill-info    { background: rgba(59,130,246,0.22);  color: #93C5FD; border-color: rgba(59,130,246,0.4); }
+    #part-badge.pill-success { background: rgba(16,185,129,0.22);  color: #6EE7B7; border-color: rgba(16,185,129,0.4); }
+    #part-badge.pill-warning { background: rgba(245,158,11,0.22);  color: #FCD34D; border-color: rgba(245,158,11,0.4); }
+    #part-badge.pill-neutral { background: rgba(100,116,139,0.2);  color: #94A3B8; border-color: rgba(100,116,139,0.35); }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       MODULE 5 · PROGRESS BAR
+       ═══════════════════════════════════════════════════════════════════ */
+    .progress-track {
+      height: 3px;
+      background: rgba(37,99,235,0.15);
+      flex-shrink: 0;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--accent);
+      transition: width 0.32s ease;
+      will-change: width;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       MODULE 6 · STAGE — The visible background behind the slide
+       ═══════════════════════════════════════════════════════════════════ */
+    .slides-container {
+      flex: 1;
+      background: var(--stage);
+      overflow-y: auto;
+      overflow-x: hidden;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 22px 20px 16px;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       MODULE 7 · SLIDE CARD — White constrained-width card
+       ═══════════════════════════════════════════════════════════════════ */
+    .slide {
+      display: none;
+      width: 100%;
+      max-width: var(--slide-max-w);
+      background: var(--slide-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--slide-radius);
+      box-shadow: 0 1px 3px rgba(15,23,42,0.06), 0 6px 18px rgba(15,23,42,0.05);
+      min-height: calc(100vh - 130px);
+      padding: 36px 44px 32px;
+    }
+    .slide.active {
+      display: block;
+      animation: slideIn 0.18s ease;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       MODULE 8 · BOTTOM NAV — Dark chrome
+       ═══════════════════════════════════════════════════════════════════ */
+    .bottom-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 24px;
+      height: 46px;
+      background: var(--chrome);
+      border-top: 1px solid var(--chrome-border);
+      flex-shrink: 0;
+      gap: 16px;
+    }
+    .nav-btn {
+      background: rgba(255,255,255,0.07);
+      color: #CBD5E1;
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: var(--r-md);
+      padding: 5px 16px;
+      font-size: 12.5px;
+      cursor: pointer;
+      transition: background 0.14s, color 0.14s;
+      font-family: inherit;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .nav-btn:hover:not(:disabled) {
+      background: rgba(255,255,255,0.13);
+      color: #F1F5F9;
+    }
+    .nav-btn:disabled { opacity: 0.28; cursor: default; }
+    .dot-nav {
+      display: flex;
+      gap: 4px;
+      align-items: center;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .dot {
+      height: 7px; width: 7px;
+      border-radius: 4px;
+      background: rgba(255,255,255,0.18);
+      cursor: pointer;
+      transition: all 0.22s ease;
+    }
+    .dot.active { width: 20px; background: var(--accent); }
+    .dot:hover:not(.active) { background: rgba(255,255,255,0.3); }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       MODULE 9 · TYPOGRAPHY
+       ═══════════════════════════════════════════════════════════════════ */
+    .h1 {
+      font-size: 22px; font-weight: 700;
+      color: var(--text-1); line-height: 1.25;
+      margin-bottom: 5px; letter-spacing: -0.01em;
+    }
+    .h2 {
+      font-size: 15px; font-weight: 600;
+      color: var(--text-1); margin-bottom: 8px; margin-top: 4px;
+    }
+    .slide-intro {
+      font-size: 13px; color: var(--text-3); line-height: 1.65;
+      margin-bottom: 18px; max-width: 780px;
+    }
+    .t-sm   { font-size: 12.5px; }
+    .t-xs   { font-size: 11.5px; }
+    .t-2nd  { color: var(--text-2); }
+    .t-3rd  { color: var(--text-3); }
+    .t-4th  { color: var(--text-4); }
+    .t-acc  { color: var(--accent); }
+    .t-suc  { color: var(--success); }
+    .t-wrn  { color: var(--warning); }
+    .t-dng  { color: var(--danger); }
+    .t-inf  { color: var(--info); }
+    .fw-sb  { font-weight: 600; }
+    .fw-b   { font-weight: 700; }
+    .lh-6   { line-height: 1.6; }
+    hr.div  { border: none; border-top: 1px solid var(--border); margin: 10px 0; }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       MODULE 10 · PILL / BADGE
+       ═══════════════════════════════════════════════════════════════════ */
+    .pill {
+      display: inline-flex; align-items: center;
+      padding: 3px 10px; border-radius: 99px;
+      font-size: 11px; font-weight: 600;
+      letter-spacing: 0.025em; white-space: nowrap; border: 1px solid;
+    }
+    /* Light mode pills — used inside slide content */
+    .pill-info    { background: var(--info-bg);    color: var(--info-text);    border-color: var(--info-border); }
+    .pill-success { background: var(--success-bg); color: var(--success-text); border-color: var(--success-border); }
+    .pill-warning { background: var(--warning-bg); color: var(--warning-text); border-color: var(--warning-border); }
+    .pill-danger  { background: var(--danger-bg);  color: var(--danger-text);  border-color: var(--danger-border); }
+    .pill-neutral { background: var(--neutral-bg); color: var(--neutral-text); border-color: var(--neutral-border); }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       MODULE 11 · CARD
+       ═══════════════════════════════════════════════════════════════════ */
+    .card {
+      background: var(--slide-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--r-lg);
+      overflow: hidden;
+    }
+    .card-hd {
+      display: flex; align-items: center; justify-content: space-between; gap: 8px;
+      padding: 8px 13px; border-bottom: 1px solid var(--border);
+      font-size: 11.5px; font-weight: 600; color: var(--text-3);
+      background: var(--fill-xs);
+    }
+    .card-bd { padding: 13px 13px; }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       MODULE 12 · TABLE
+       ═══════════════════════════════════════════════════════════════════ */
+    .tbl { width: 100%; border-collapse: collapse; font-size: 12px; }
+    .tbl th {
+      background: var(--fill-sm); color: var(--text-3); font-weight: 600;
+      padding: 7px 12px; text-align: left; border-bottom: 1px solid var(--border-md);
+      font-size: 11.5px; white-space: nowrap;
+    }
+    .tbl td {
+      padding: 6.5px 12px; color: var(--text-2); border-bottom: 1px solid var(--border);
+      vertical-align: top; line-height: 1.5;
+    }
+    .tbl tr:last-child td { border-bottom: none; }
+    .tbl tr:nth-child(even) td { background: var(--fill-xs); }
+    .tbl .row-wrn td { background: var(--warning-bg) !important; }
+    .tbl .row-dng td { background: var(--danger-bg)  !important; }
+    .tbl .row-suc td { background: var(--success-bg) !important; }
+    .tbl-framed { border: 1px solid var(--border-md); border-radius: var(--r-md); overflow: hidden; }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       MODULE 13 · CALLOUT
+       ═══════════════════════════════════════════════════════════════════ */
+    .callout {
+      padding: 11px 14px; border-radius: var(--r-md); border-left: 3px solid;
+      font-size: 12.5px; line-height: 1.58;
+    }
+    .callout-title { font-weight: 600; font-size: 12px; margin-bottom: 4px; }
+    .callout-info    { background: var(--info-bg);    border-color: var(--info);    color: var(--text-2); }
+    .callout-info    .callout-title { color: var(--info-text); }
+    .callout-success { background: var(--success-bg); border-color: var(--success); color: var(--text-2); }
+    .callout-success .callout-title { color: var(--success-text); }
+    .callout-warning { background: var(--warning-bg); border-color: var(--warning); color: var(--text-2); }
+    .callout-warning .callout-title { color: var(--warning-text); }
+    .callout-danger  { background: var(--danger-bg);  border-color: var(--danger);  color: var(--text-2); }
+    .callout-danger  .callout-title { color: var(--danger-text); }
+    .callout-neutral { background: var(--neutral-bg); border-color: var(--neutral-border); color: var(--text-2); }
+    .callout-neutral .callout-title { color: var(--neutral); }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       MODULE 14 · STAT
+       ═══════════════════════════════════════════════════════════════════ */
+    .stat { text-align: center; padding: 11px 8px; }
+    .stat-val { font-size: 19px; font-weight: 700; line-height: 1.15; margin-bottom: 4px; }
+    .stat-lbl { font-size: 11px; color: var(--text-4); line-height: 1.3; }
+    .sv-primary { color: var(--text-1); }
+    .sv-success { color: var(--success); }
+    .sv-warning { color: var(--warning); }
+    .sv-danger  { color: var(--danger); }
+    .sv-info    { color: var(--info); }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       MODULE 15 · EQUATION
+       ═══════════════════════════════════════════════════════════════════ */
+    .eq {
+      font-family: 'Cascadia Code', 'Fira Code', 'JetBrains Mono', 'Courier New', monospace;
+      font-size: 12.5px; padding: 11px 16px;
+      background: #F0F5FF;
+      border-left: 3px solid var(--accent);
+      border-radius: 0 var(--r-md) var(--r-md) 0;
+      color: #1E40AF; letter-spacing: 0.02em; line-height: 1.6;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       MODULE 16 · LAYOUT UTILITIES
+       ═══════════════════════════════════════════════════════════════════ */
+    .g2   { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+    .g3   { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 13px; }
+    .g4   { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 11px; }
+    .stk  { display: flex; flex-direction: column; }
+    .g-4  { gap: 4px; }  .g-6  { gap: 6px; }  .g-8  { gap: 8px; }
+    .g-10 { gap: 10px; } .g-12 { gap: 12px; } .g-16 { gap: 16px; }
+    .g-18 { gap: 18px; } .g-20 { gap: 20px; }
+    .row  { display: flex; align-items: center; }
+    .row-between { justify-content: space-between; }
+    .spacer { flex: 1; }
+    .mt-4  { margin-top: 4px; }  .mt-6  { margin-top: 6px; }
+    .mt-8  { margin-top: 8px; }  .mt-10 { margin-top: 10px; }
+    .mt-12 { margin-top: 12px; } .mt-16 { margin-top: 16px; }
+    .mb-6  { margin-bottom: 6px; } .mb-8  { margin-bottom: 8px; }
+    .mb-10 { margin-bottom: 10px; }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       MODULE 17 · TITLE SLIDE
+       ═══════════════════════════════════════════════════════════════════ */
+    .title-wrap {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      text-align: center; min-height: calc(100vh - 180px); padding: 20px;
+    }
+    .title-kicker {
+      display: inline-flex; align-items: center; gap: 8px;
+      font-size: 11px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 20px;
+    }
+    .title-kicker::before, .title-kicker::after {
+      content: ''; width: 28px; height: 1px; background: var(--accent-border);
+    }
+    .title-main  { font-size: 32px; font-weight: 800; color: var(--text-1); line-height: 1.15; letter-spacing: -0.02em; margin-bottom: 10px; }
+    .title-sub   { font-size: 16px; font-weight: 400; color: var(--text-3); margin-bottom: 7px; }
+    .title-tag   { font-size: 13px; color: var(--text-4); margin-bottom: 38px; }
+    .title-rule  { width: 360px; height: 1px; background: var(--border); margin-bottom: 30px; }
+    .title-meta  { display: grid; grid-template-columns: repeat(3,1fr); gap: 36px; max-width: 560px; }
+    .meta-lbl    { font-size: 10.5px; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-4); margin-bottom: 5px; }
+    .meta-val    { font-size: 12.5px; color: var(--text-2); }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       MODULE 18 · CHART CONTAINERS
+       ═══════════════════════════════════════════════════════════════════ */
+    .chart-wrap { width: 100%; }
+    .chart-wrap svg { width: 100%; height: auto; display: block; }
+    .chart-note { font-size: 11px; color: var(--text-4); margin-top: 7px; font-style: italic; }
+    .legend { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 9px; }
+    .legend-item { display: flex; align-items: center; gap: 6px; font-size: 11.5px; color: var(--text-3); }
+    .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       MODULE 19 · SCROLLBAR & PRINT
+       ═══════════════════════════════════════════════════════════════════ */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--fill-md); border-radius: 3px; }
+
+    @media print {
+      .bottom-nav, .top-bar, .progress-track { display: none !important; }
+      body { height: auto; overflow: visible; background: #fff; }
+      .shell { height: auto; }
+      .slides-container { overflow: visible; height: auto; background: #fff; padding: 0; }
+      .slide { display: block !important; animation: none !important; page-break-after: always;
+               min-height: 0; box-shadow: none; border: none; max-width: 100%; border-radius: 0; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="shell">
+
+    <header class="top-bar">
+      <span id="part-badge" class="pill pill-neutral"></span>
+      <span id="slide-counter" class="top-bar-counter"></span>
+    </header>
+
+    <div class="progress-track">
+      <div id="progress-fill" class="progress-fill" style="width:0%"></div>
+    </div>
+
+    <main id="slides" class="slides-container" aria-live="polite"></main>
+
+    <nav class="bottom-nav" aria-label="Slide navigation">
+      <button id="btn-prev" class="nav-btn">&#8592; Previous</button>
+      <div id="dot-nav" class="dot-nav" role="tablist"></div>
+      <button id="btn-next" class="nav-btn">Next &#8594;</button>
+    </nav>
+
+  </div>
+
+  <script>
+  (function () {
+    'use strict';
+
+    /* ═══════════════════════════════════════════════════════════════════
+       MODULE A · SVG CHART ENGINE  (light-mode palette)
+       ═══════════════════════════════════════════════════════════════════ */
+    const CHART_COLORS = ['#3B82F6','#10B981','#F59E0B','#EF4444','#8B5CF6','#14B8A6','#EC4899'];
+    const TONE_MAP = { info:'#3B82F6', success:'#10B981', warning:'#F59E0B', danger:'#EF4444', neutral:'#94A3B8' };
+
+    // SVG style constants for light-mode charts
+    const LM = {
+      grid:   'rgba(15,23,42,0.07)',
+      axis:   'rgba(15,23,42,0.15)',
+      label:  '#94A3B8',
+      valLbl: '#475569',
+    };
+
+    function niceMax(v) {
+      if (v <= 0) return 1;
+      const mag = Math.pow(10, Math.floor(Math.log10(v)));
+      return Math.ceil(v / mag) * mag;
+    }
+
+    function barSVG(cats, data, suffix, svgH) {
+      const W = 480, H = svgH || 210;
+      const P = { t: 20, r: 16, b: 50, l: 44 };
+      const CW = W - P.l - P.r, CH = H - P.t - P.b;
+      const maxV = niceMax(Math.max(...data) * 1.12);
+      const n = cats.length;
+      const slot = CW / n;
+      const bw = Math.min(Math.max(slot * 0.54, 10), 68);
+      let s = '';
+
+      // Grid & y-labels
+      [0, 0.25, 0.5, 0.75, 1.0].forEach(f => {
+        const v = maxV * f, y = P.t + CH - f * CH;
+        s += `<line x1="${P.l}" y1="${y.toFixed(1)}" x2="${P.l+CW}" y2="${y.toFixed(1)}" stroke="${LM.grid}" stroke-width="1"/>`;
+        const lbl = v < 1 ? v.toFixed(1) : Math.round(v);
+        s += `<text x="${P.l-4}" y="${(y+4).toFixed(1)}" text-anchor="end" fill="${LM.label}" font-size="10" font-family="system-ui">${lbl}${suffix}</text>`;
+      });
+
+      // Bars
+      cats.forEach((cat, i) => {
+        const v = data[i];
+        const bh = (v / maxV) * CH;
+        const bx = P.l + i * slot + (slot - bw) / 2;
+        const by = P.t + CH - bh;
+        const col = CHART_COLORS[i % CHART_COLORS.length];
+        s += `<rect x="${bx.toFixed(1)}" y="${by.toFixed(1)}" width="${bw.toFixed(1)}" height="${bh.toFixed(1)}" fill="${col}" opacity="0.88" rx="4"/>`;
+        s += `<text x="${(bx+bw/2).toFixed(1)}" y="${(by-5).toFixed(1)}" text-anchor="middle" fill="${LM.valLbl}" font-size="11" font-weight="600" font-family="system-ui">${v}${suffix}</text>`;
+
+        // X-label — split on spaces
+        const words = cat.split(' ');
+        const mid = Math.ceil(words.length / 2);
+        if (words.length <= 2) {
+          s += `<text x="${(bx+bw/2).toFixed(1)}" y="${(P.t+CH+16).toFixed(1)}" text-anchor="middle" fill="${LM.label}" font-size="11" font-family="system-ui">${cat}</text>`;
+        } else {
+          s += `<text x="${(bx+bw/2).toFixed(1)}" y="${(P.t+CH+14).toFixed(1)}" text-anchor="middle" fill="${LM.label}" font-size="10.5" font-family="system-ui">${words.slice(0,mid).join(' ')}</text>`;
+          s += `<text x="${(bx+bw/2).toFixed(1)}" y="${(P.t+CH+27).toFixed(1)}" text-anchor="middle" fill="${LM.label}" font-size="10.5" font-family="system-ui">${words.slice(mid).join(' ')}</text>`;
+        }
+      });
+      s += `<line x1="${P.l}" y1="${P.t+CH}" x2="${P.l+CW}" y2="${P.t+CH}" stroke="${LM.axis}" stroke-width="1"/>`;
+      return `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">${s}</svg>`;
+    }
+
+    function lineSVG(cats, series, suffix, svgH) {
+      const W = 480, H = svgH || 210;
+      const P = { t: 20, r: 16, b: 48, l: 48 };
+      const CW = W - P.l - P.r, CH = H - P.t - P.b;
+      const n = cats.length;
+      const xStep = CW / Math.max(n - 1, 1);
+
+      const allV = series.flatMap(s => s.data);
+      const rawMin = Math.min(...allV), rawMax = Math.max(...allV);
+      const pad = (rawMax - rawMin) * 0.13 || 1;
+      const yMin = rawMin - pad, yMax = rawMax + pad, yR = yMax - yMin;
+
+      function xAt(i) { return P.l + i * xStep; }
+      function yAt(v) { return P.t + CH - ((v - yMin) / yR) * CH; }
+
+      let s = '';
+
+      // Grid & y-axis
+      for (let t = 0; t <= 5; t++) {
+        const v = yMin + (yR / 5) * t, y = yAt(v);
+        s += `<line x1="${P.l}" y1="${y.toFixed(1)}" x2="${P.l+CW}" y2="${y.toFixed(1)}" stroke="${LM.grid}" stroke-width="1"/>`;
+        s += `<text x="${P.l-4}" y="${(y+4).toFixed(1)}" text-anchor="end" fill="${LM.label}" font-size="10" font-family="system-ui">${Math.round(v*10)/10}${suffix}</text>`;
+      }
+
+      // X-labels
+      cats.forEach((cat, i) => {
+        s += `<text x="${xAt(i).toFixed(1)}" y="${(P.t+CH+16).toFixed(1)}" text-anchor="middle" fill="${LM.label}" font-size="10" font-family="system-ui">${cat}</text>`;
+      });
+
+      let legendHTML = '';
+      series.forEach((sr, si) => {
+        const col = sr.color || TONE_MAP[sr.tone] || CHART_COLORS[si % CHART_COLORS.length];
+        const pts = sr.data.map((v, i) => `${xAt(i).toFixed(1)},${yAt(v).toFixed(1)}`);
+        const fX = xAt(0), lX = xAt(sr.data.length-1), baseY = P.t + CH;
+        const areaD = `M ${pts[0]} ${pts.slice(1).map(p=>'L '+p).join(' ')} L ${lX.toFixed(1)},${baseY} L ${fX.toFixed(1)},${baseY} Z`;
+        s += `<path d="${areaD}" fill="${col}" opacity="0.09"/>`;
+        s += `<polyline points="${pts.join(' ')}" fill="none" stroke="${col}" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+        sr.data.forEach((v, i) => {
+          s += `<circle cx="${xAt(i).toFixed(1)}" cy="${yAt(v).toFixed(1)}" r="3.5" fill="${col}" stroke="white" stroke-width="1.5"/>`;
+        });
+        legendHTML += `<span class="legend-item"><span class="legend-dot" style="background:${col}"></span>${sr.name}</span>`;
+      });
+
+      s += `<line x1="${P.l}" y1="${P.t+CH}" x2="${P.l+CW}" y2="${P.t+CH}" stroke="${LM.axis}" stroke-width="1"/>`;
+      const leg = series.length > 1 ? `<div class="legend">${legendHTML}</div>` : '';
+      return `<div class="chart-wrap"><svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">${s}</svg>${leg}</div>`;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       MODULE B · HTML COMPONENT HELPERS
+       ═══════════════════════════════════════════════════════════════════ */
+    const pill = (t, tone) => `<span class="pill pill-${tone}">${t}</span>`;
+
+    const card = (hd, body, badge = '') =>
+      `<div class="card"><div class="card-hd"><span>${hd}</span>${badge}</div><div class="card-bd">${body}</div></div>`;
+
+    const callout = (title, body, tone) =>
+      `<div class="callout callout-${tone}"><div class="callout-title">${title}</div>${body}</div>`;
+
+    const stat = (val, lbl, tone = 'primary') =>
+      `<div class="stat"><div class="stat-val sv-${tone}">${val}</div><div class="stat-lbl">${lbl}</div></div>`;
+
+    const eq = t => `<div class="eq">${t}</div>`;
+
+    const tbl = (headers, rows, rowTones = []) => {
+      const thead = `<tr>${headers.map(h=>`<th>${h}</th>`).join('')}</tr>`;
+      const tbody = rows.map((row, i) => {
+        const tc = rowTones[i] ? ` class="row-${rowTones[i]}"` : '';
+        return `<tr${tc}>${row.map(c=>`<td>${c}</td>`).join('')}</tr>`;
+      }).join('');
+      return `<div class="tbl-framed"><table class="tbl">${thead}<tbody>${tbody}</tbody></table></div>`;
+    };
+
+    /* ═══════════════════════════════════════════════════════════════════
+       MODULE C · SLIDE DATA
+       ═══════════════════════════════════════════════════════════════════ */
+    const SLIDES = [
+
+      /* 01 · Title */
+      {
+        part: 'NTPC  ·  Engineering Review', partTone: 'neutral', title: 'Title',
+        html: () => `
+          <div class="title-wrap">
+            <div class="title-kicker">Cooling Tower Engineering Series</div>
+            <div class="title-main">Cooling Tower Fundamentals</div>
+            <div class="title-sub">IDCT Design and Performance Testing</div>
+            <div class="title-tag">From First Principles to CTI ATC-105 Field Evaluation</div>
+            <div class="title-rule"></div>
+            <div class="title-meta">
+              <div><div class="meta-lbl">Audience</div><div class="meta-val">Engineering Executives &amp; Technical Teams (NTPC)</div></div>
+              <div><div class="meta-lbl">Date</div><div class="meta-val fw-b">29 April 2026</div></div>
+              <div><div class="meta-lbl">Duration</div><div class="meta-val">120 min · incl. 15–20 min Q&amp;A</div></div>
+            </div>
+          </div>`
+      },
+
+      /* 02 · Agenda */
+      {
+        part: 'Overview', partTone: 'neutral', title: 'Agenda',
+        html: () => `
+          <div class="stk g-20">
+            <div>
+              <div class="h1">Session Agenda</div>
+              <div class="slide-intro">This session follows the engineering life cycle of a cooling tower — from the governing physics to field-level guarantee validation.</div>
+            </div>
+            <div class="g2">
+              ${[
+                { n:'01', lbl:'Part 1', title:'Thermodynamics &amp; Psychrometrics', tone:'info',
+                  pts:['Latent vs. sensible heat rejection mechanisms','Wet bulb temperature as the absolute cooling limit','Elevation-wise heat and mass transfer (Spray / Fill / Rain zones)'] },
+                { n:'02', lbl:'Part 2', title:'IDCT Design &amp; Sizing', tone:'success',
+                  pts:['L/G ratio — the primary design variable','Merkel method and Chebyshev integration','Poppe method and KaV/L zone contributions'] },
+                { n:'03', lbl:'Part 3', title:'Practical Engineering &amp; Layout', tone:'warning',
+                  pts:['Recirculation identification and mitigation','Fill, fan, and nozzle selection trade-offs','Altitude, wind, water chemistry, and sensitivity'] },
+                { n:'04', lbl:'Part 4', title:'Performance Testing', tone:'neutral',
+                  pts:['CTI ATC-105 standard and tower capability','Instrumentation requirements and data averaging','Tolerance bands and the risks of extrapolation'] }
+              ].map(({n,lbl,title,tone,pts}) => card(
+                `<span style="color:var(--text-1);font-weight:700">${n}</span>&ensp;${title}`,
+                pts.map(p=>`<div class="t-sm t-3rd mt-4">— ${p}</div>`).join(''),
+                pill(lbl, tone)
+              )).join('')}
+            </div>
+          </div>`
+      },
+
+      /* 03 · Heat Rejection */
+      {
+        part: 'Part 1  ·  Thermodynamics &amp; Psychrometrics', partTone: 'info', title: 'Heat Rejection Mechanisms',
+        html: () => `
+          <div class="stk g-18">
+            <div><div class="h1">Sensible vs. Latent Heat Rejection</div>
+            <div class="slide-intro">Cooling towers are not large radiators. Evaporation — not convection — carries the duty. Understanding this split is fundamental to every sizing and optimisation decision.</div></div>
+            <div class="g2">
+              <div class="stk g-12">
+                <div class="g2">
+                  ${stat('~20%','Sensible Heat (Convection)','warning')}
+                  ${stat('~80%','Latent Heat (Evaporation)','success')}
+                </div>
+                ${callout('The Core Principle','Evaporating just 1–1.5% of circulating water extracts enough latent heat to cool the remaining 98.5% by 10–12 °C. Evaporation carries the duty; convection assists.','info')}
+                ${card('Governing Equation',`
+                  ${eq('Q = ṁ<sub>evap</sub> × h<sub>fg</sub>')}
+                  <div class="stk g-4 mt-8">
+                    <div class="t-sm t-3rd">ṁ<sub>evap</sub> — mass flow of evaporated water (kg/s)</div>
+                    <div class="t-sm t-3rd">h<sub>fg</sub> — latent heat of vaporisation ≈ 2,400–2,500 kJ/kg</div>
+                    <div class="t-sm t-3rd">Q — total heat rejection duty (kW)</div>
+                  </div>`)}
+              </div>
+              ${card('Heat Rejection Split',barSVG(['Sensible Heat','Latent Heat'],[20,80],'%',220))}
+            </div>
+          </div>`
+      },
+
+      /* 04 · Psychrometrics */
+      {
+        part: 'Part 1  ·  Thermodynamics &amp; Psychrometrics', partTone: 'info', title: 'Psychrometrics — The Cooling Limit',
+        html: () => `
+          <div class="stk g-18">
+            <div><div class="h1">Psychrometrics — The Absolute Cooling Limit</div>
+            <div class="slide-intro">Because evaporation governs the process, the ambient Wet Bulb Temperature (WBT) is the theoretical floor. No matter the tower size, cold water temperature cannot fall below the WBT.</div></div>
+            <div class="g2">
+              ${card('Key Psychrometric Terms', tbl(
+                ['Term','Definition'],
+                [['WBT (Wet Bulb)','Lowest temp achievable by evaporative cooling — the design baseline'],
+                 ['DBT (Dry Bulb)','Ambient air temperature — always ≥ WBT'],
+                 ['Approach','CWT − WBT · How closely we push cold water to the ambient limit'],
+                 ['Range','HWT − CWT · The heat load carried by the water circuit'],
+                 ['CWT','Cold Water Temperature — the tower\'s guaranteed deliverable'],
+                 ['HWT','Hot Water Temperature — condenser outlet, tower inlet']]
+              ))}
+              <div class="stk g-12">
+                ${callout('The Approach Penalty','Each 1 °C reduction in Approach demands a disproportionately larger tower. Halving the Approach from 5 °C to 2.5 °C can more than double the required fill volume and fan power for the same duty.','warning')}
+                ${card('Typical NTPC Design Parameters',`<div class="g2">
+                  ${stat('28 °C','Design WBT (Summer Peak)')}
+                  ${stat('4–5 °C','Design Approach')}
+                  ${stat('10–12 °C','Range (HWT − CWT)')}
+                  ${stat('32–33 °C','Target CWT')}
+                </div>`)}
+              </div>
+            </div>
+          </div>`
+      },
+
+      /* 05 · Elevation Zones */
+      {
+        part: 'Part 1  ·  Thermodynamics &amp; Psychrometrics', partTone: 'info', title: 'Zonal Heat Transfer',
+        html: () => `
+          <div class="stk g-18">
+            <div><div class="h1">Elevation-Wise Heat &amp; Mass Transfer</div>
+            <div class="slide-intro">Heat exchange is not uniform throughout the tower height. A falling water droplet passes through three distinct zones, each contributing differently to the overall cooling duty.</div></div>
+            <div class="g3">
+              ${[
+                { z:'Spray Zone', pos:'Top of Tower', share:'10–15%', tone:'info',
+                  desc:'Water enters as high-velocity droplets from pressurised nozzles. The droplets meet near-saturated exhaust air, so sensible heat transfer is dominant here.' },
+                { z:'Fill Zone', pos:'Middle Section', share:'70–80%', tone:'success',
+                  desc:'Water is sheared into thin films across fill media, creating a large surface area for evaporation. This is where the majority of the cooling occurs.' },
+                { z:'Rain Zone', pos:'Below Fill', share:'10–15%', tone:'warning',
+                  desc:'Droplets fall freely into the basin, exchanging heat with the freshest, coolest inlet air. Frequently underestimated in simplified design calculations.' }
+              ].map(({z,pos,share,tone,desc}) => card(z,`
+                <div class="t-xs fw-sb mb-6 t-3rd">${pos}</div>
+                <div class="t-sm t-2nd lh-6">${desc}</div>`, pill(share+' of KaV/L', tone))).join('')}
+            </div>
+            ${callout('Design Implication','Ignoring Rain Zone and Spray Zone contributions during sizing leads to an oversized and costlier fill section. Accounting for all three zones is standard practice in modern detailed design.','neutral')}
+          </div>`
+      },
+
+      /* 06 · Tower Types */
+      {
+        part: 'Part 1  ·  Thermodynamics &amp; Psychrometrics', partTone: 'info', title: 'Cooling Tower Types',
+        html: () => `
+          <div class="stk g-18">
+            <div><div class="h1">Cooling Tower Types &amp; Selection Criteria</div>
+            <div class="slide-intro">For large power stations, topology selection carries significant capital, auxiliary power, and maintenance implications over the 30-year plant life.</div></div>
+            <div class="g2">
+              ${card('NDCT vs. IDCT', tbl(
+                ['Parameter','NDCT','IDCT'],
+                [['Draft mechanism','Buoyancy — hyperbolic concrete chimney','Mechanical fans (axial, top-mounted)'],
+                 ['Fan auxiliary power','Zero','0.5–1% of plant electrical output'],
+                 ['Capital cost','Very high (concrete shell, 120–200 m)','Moderate — steel or FRP structure'],
+                 ['Controllability','Seasonal only','Full — variable pitch or VFD fans'],
+                 ['Footprint','Compact base, very tall','Larger ground area, low profile'],
+                 ['Best application','Large baseload plant (>500 MW)','Flexible dispatch, gas &amp; combined cycle']]
+              ), pill('Draft Type','neutral'))}
+              ${card('Counterflow vs. Crossflow', tbl(
+                ['Parameter','Counterflow','Crossflow'],
+                [['Air direction','Vertically upward against falling water','Horizontal across falling water'],
+                 ['Thermal efficiency','Higher — true counter-current exchange','Slightly lower'],
+                 ['Pump head required','Higher (spray nozzles above fill)','Lower (gravity distribution basin)'],
+                 ['Maintenance access','More involved — confined fill bay','Easier — accessible fill decks'],
+                 ['Cold weather ops','Ice formation risk at low loads','Excellent — adjustable louver airflow'],
+                 ['Preferred use','Compact sites, tight approach specs','Ease of access, freezing climates']]
+              ), pill('Airflow Pattern','neutral'))}
+            </div>
+          </div>`
+      },
+
+      /* 07 · L/G Ratio */
+      {
+        part: 'Part 2  ·  IDCT Design &amp; Sizing', partTone: 'success', title: 'L/G Ratio',
+        html: () => `
+          <div class="stk g-18">
+            <div><div class="h1">Designing the IDCT — The L/G Ratio</div>
+            <div class="slide-intro">The liquid-to-gas mass flow ratio is the central variable in cooling tower design. It sets the slope of the operating line on the enthalpy chart and defines the balance between thermal performance and fan energy cost.</div></div>
+            <div class="g2">
+              <div class="stk g-12">
+                ${card('The Governing Relationship',`
+                  ${eq('L/G = (c<sub>pw</sub> × ΔT<sub>w</sub>) / Δh<sub>a</sub>')}
+                  <div class="stk g-4 mt-8">
+                    <div class="t-sm t-3rd">L — liquid water mass flow rate (kg/s)</div>
+                    <div class="t-sm t-3rd">G — air mass flow rate through tower (kg/s)</div>
+                    <div class="t-sm t-3rd">ΔT<sub>w</sub> — temperature range: HWT − CWT (°C)</div>
+                    <div class="t-sm t-3rd">Δh<sub>a</sub> — enthalpy rise of air across tower (kJ/kg)</div>
+                  </div>`)}
+                ${card('Practical Design Range (NTPC)',`<div class="g2">
+                  ${stat('1.0–1.5','Typical L/G Range')}
+                  ${stat('↑ L/G','Worse Approach','danger')}
+                  ${stat('↓ L/G','Better Cooling','success')}
+                  ${stat('↓ L/G','Higher Fan Cost','warning')}
+                </div>`)}
+              </div>
+              ${card('L/G Optimisation — Approach vs. Fan Power',`
+                ${lineSVG(['0.8','1.0','1.2','1.4','1.6','1.8'],
+                  [{ name:'Approach °C', data:[2.1,3.0,4.2,5.8,7.6,10.2], tone:'danger' },
+                   { name:'Fan Power Index', data:[2.8,2.2,1.8,1.5,1.2,1.0], tone:'info' }], '', 220)}
+                <div class="chart-note">X-axis: L/G ratio — optimal design near the curve crossover</div>`)}
+            </div>
+          </div>`
+      },
+
+      /* 08 · Merkel */
+      {
+        part: 'Part 2  ·  IDCT Design &amp; Sizing', partTone: 'success', title: 'Merkel Method',
+        html: () => `
+          <div class="stk g-18">
+            <div><div class="h1">Merkel Theory — The Industry Standard</div>
+            <div class="slide-intro">Published in 1925, the Merkel equation remains the primary tool for cooling tower sizing and acceptance testing worldwide. It integrates the thermodynamic driving force across the full water temperature range.</div></div>
+            <div class="g2">
+              <div class="stk g-12">
+                ${card('The Merkel Integral',`
+                  ${eq('KaV/L = ∫ dT / (h′<sub>w</sub> − h<sub>a</sub>)   [T<sub>CWT</sub> → T<sub>HWT</sub>]')}
+                  <div class="stk g-4 mt-8">
+                    <div class="t-sm t-3rd">KaV/L — dimensionless tower characteristic</div>
+                    <div class="t-sm t-3rd">h′<sub>w</sub> — enthalpy of saturated air at local water temp (kJ/kg)</div>
+                    <div class="t-sm t-3rd">h<sub>a</sub> — enthalpy of bulk air stream (kJ/kg)</div>
+                    <div class="t-sm t-3rd">Solved by Chebyshev 4-point numerical integration</div>
+                  </div>`)}
+                ${card('Underlying Assumptions', tbl(
+                  ['Assumption','Practical Impact'],
+                  [['Lewis Factor (Le) = 1','Accurate for most standard operating ranges'],
+                   ['Evaporated mass is negligible','Slight underestimate of makeup water consumption'],
+                   ['Exit air fully saturated','May differ at arid sites or high altitude']]
+                ))}
+              </div>
+              <div class="stk g-12">
+                ${callout('When Merkel Is the Right Tool','For WBT conditions of 20–32 °C, Merkel agrees within 1–2% of more rigorous methods. It is the prescribed method under CTI ATC-105 for all acceptance tests.','success')}
+                ${callout('Where Merkel Introduces Errors','At extreme ambient conditions, in precise makeup-water studies, or when designing visible-plume abatement systems, the assumptions introduce meaningful inaccuracies.','warning')}
+              </div>
+            </div>
+          </div>`
+      },
+
+      /* 09 · Poppe */
+      {
+        part: 'Part 2  ·  IDCT Design &amp; Sizing', partTone: 'success', title: 'Poppe Method',
+        html: () => `
+          <div class="stk g-18">
+            <div><div class="h1">The Poppe Method — When Precision Is Required</div>
+            <div class="slide-intro">The Poppe method resolves the core simplifications in Merkel, providing a complete picture of the exit air condition — essential for plume abatement design and precise water balance calculations.</div></div>
+            <div class="h2">Merkel vs. Poppe — A Direct Comparison</div>
+            ${tbl(
+              ['Parameter','Merkel Method','Poppe Method'],
+              [['Evaporated water mass','Ignored — constant liquid flow assumed','Tracked — liquid flow decreases as water evaporates'],
+               ['Lewis factor (Le)','Fixed at 1.0','Variable — calculated from local humidity'],
+               ['Exit air humidity','Assumed fully saturated','Calculated — can be subsaturated at low WBT'],
+               ['Exhaust air enthalpy','Not independently tracked','Fully resolved — required for plume modelling'],
+               ['Computational load','Low — Chebyshev 4-point integral','High — coupled ordinary differential equations'],
+               ['Makeup water estimate','Approximate','Accurate — preferred for water balance contracts'],
+               ['Plume abatement design','Not suitable — exit state unknown','The required method — exit state fully defined'],
+               ['Acceptance testing (ATC-105)','Prescribed method','Not standard — used for audit']]
+            )}
+            ${callout('Practical Guidance for NTPC','Use Merkel for procurement specifications and CTI ATC-105 acceptance testing. Use Poppe for detailed water balance studies, plume abatement engineering, and sites where the design WBT varies by more than 5 °C seasonally.','neutral')}
+          </div>`
+      },
+
+      /* 10 · KaV/L Supply vs Demand */
+      {
+        part: 'Part 2  ·  IDCT Design &amp; Sizing', partTone: 'success', title: 'KaV/L Supply vs. Demand',
+        html: () => `
+          <div class="stk g-18">
+            <div><div class="h1">KaV/L — Supply vs. Demand</div>
+            <div class="slide-intro">Cooling tower sizing reduces to one question: does the physical capability of the tower (Supply) meet the thermodynamic requirement of the process (Demand) at the design operating point?</div></div>
+            <div class="g2">
+              <div class="stk g-12">
+                ${card('Demand KaV/L',`
+                  <div class="t-sm lh-6">Calculated from process temperatures (HWT, CWT, WBT) and the L/G ratio. Quantifies how thermodynamically demanding the cooling job is.</div>
+                  <hr class="div">
+                  <div class="t-sm t-3rd mt-4">Increases with: higher L/G · tighter approach · wider range</div>
+                  <div class="t-sm t-3rd mt-4">Calculated by: Merkel integral (Chebyshev 4-point)</div>
+                `, pill('Thermodynamic','info'))}
+                ${card('Supply KaV/L',`
+                  <div class="t-sm lh-6">The actual heat transfer capability delivered by the tower's construction — fill type, fill depth, nozzle pattern, and geometry. Guaranteed by the manufacturer.</div>
+                  <hr class="div">
+                  <div class="t-sm t-3rd mt-4">Degrades with: fouling · scale on fill · poor water distribution</div>
+                  <div class="t-sm t-3rd mt-4">Sum of: Spray Zone + Fill Zone + Rain Zone contributions</div>
+                `, pill('Physical','success'))}
+                ${callout('The Design Guarantee','At the contracted design L/G, Supply KaV/L must equal or exceed Demand KaV/L. The manufacturer\'s guarantee is a commitment that this condition holds.','info')}
+              </div>
+              ${card('Characteristic Curve Intersection',`
+                ${lineSVG(['0.8','0.9','1.0','1.1','1.2','1.3','1.4','1.5'],
+                  [{ name:'Supply KaV/L (fill characteristic)', data:[2.10,1.95,1.80,1.65,1.52,1.40,1.30,1.22], tone:'success' },
+                   { name:'Demand KaV/L (process requirement)', data:[1.20,1.38,1.56,1.74,1.92,2.08,2.22,2.35], tone:'info' }], '', 240)}
+                <div class="chart-note">X-axis: L/G ratio — curves intersect at design point (≈ L/G 1.15)</div>`)}
+            </div>
+          </div>`
+      },
+
+      /* 11 · Zonal KaV/L */
+      {
+        part: 'Part 2  ·  IDCT Design &amp; Sizing', partTone: 'success', title: 'Zonal KaV/L Contributions',
+        html: () => `
+          <div class="stk g-18">
+            <div><div class="h1">Zonal Contributions to Total KaV/L</div>
+            <div class="slide-intro">The total tower KaV/L is the sum of contributions from all three physical zones. Accurate accounting of each zone avoids costly over-design of the fill section.</div></div>
+            <div class="g2">
+              ${card('KaV/L Split by Zone', barSVG(['Spray Zone','Fill Zone','Rain Zone'],[12,75,13],'%',240))}
+              <div class="stk g-12">
+                ${card('Zone Details', tbl(
+                  ['Zone','Typical Share','Primary Variable'],
+                  [['Spray Zone','10–15%','Nozzle pressure and droplet size distribution'],
+                   ['Fill Zone','70–80%','Fill type (film/splash), depth, and packing density'],
+                   ['Rain Zone','10–15%','Clearance height from fill to basin water level']]
+                ))}
+                ${callout('Practical Opportunity','Modern high-pressure nozzles (≥ 0.7 bar) and a rain zone height of 2–3 m together contribute 20–25% of total KaV/L, enabling a direct reduction in fill depth and structural loading.','success')}
+              </div>
+            </div>
+          </div>`
+      },
+
+      /* 12 · Recirculation */
+      {
+        part: 'Part 3  ·  Practical Engineering &amp; Layout', partTone: 'warning', title: 'Recirculation',
+        html: () => `
+          <div class="stk g-18">
+            <div><div class="h1">Recirculation — A Hidden Performance Loss</div>
+            <div class="slide-intro">A thermally well-designed tower will still fall short of its guarantee if the site allows hot exhaust air to re-enter the air intakes. Recirculation is the most common site-induced cause of underperformance.</div></div>
+            <div class="g2">
+              <div class="stk g-12">
+                ${card('What Recirculation Does',`
+                  <div class="t-sm lh-6">Hot, humid exhaust air leaving the fan stack is drawn back into the air intake louvers, artificially raising the effective inlet WBT.</div>
+                  <hr class="div">
+                  <div class="g2 mt-6">
+                    ${stat('+1.0–1.5 °C','Typical WBT Elevation','danger')}
+                    ${stat('+0.8–1.2 °C','Resulting CWT Rise','warning')}
+                  </div>
+                  <hr class="div">
+                  <div class="t-sm t-3rd lh-6">If design WBT is 28 °C but recirculation raises inlet to 29.5 °C, the tower will produce a CWT approximately 1.2 °C above the contractual guarantee.</div>`)}
+                ${card('Root Causes',`<div class="stk g-4">
+                  <div class="t-sm t-3rd">— Fan cylinder height insufficient relative to tower plan width</div>
+                  <div class="t-sm t-3rd">— Low exhaust exit velocity (below 8–10 m/s)</div>
+                  <div class="t-sm t-3rd">— Prevailing wind perpendicular to the long tower axis</div>
+                  <div class="t-sm t-3rd">— Close proximity of buildings, walls, or other structures</div>
+                  <div class="t-sm t-3rd">— Multi-cell blocks arranged in a closed court configuration</div>
+                </div>`)}
+              </div>
+              ${card('Mitigation Strategies', tbl(
+                ['Action','Benefit','Cost Impact'],
+                [['Increase fan cylinder height','Separates exhaust from intake zone','Low'],
+                 ['Raise exit velocity to ≥ 10 m/s','Exhaust rises clear of intake','None — design choice'],
+                 ['Align long axis with prevailing wind','Minimises cross-plume re-entry','None — siting decision'],
+                 ['Maintain 1:1 clearance from structures','Prevents wall-induced recirculation','Site layout adjustment'],
+                 ['Install wind screens','Redirects inlet airflow in strong winds','Moderate']]
+              ))}
+            </div>
+          </div>`
+      },
+
+      /* 13 · Altitude & Wind */
+      {
+        part: 'Part 3  ·  Practical Engineering &amp; Layout', partTone: 'warning', title: 'Altitude &amp; Wind',
+        html: () => `
+          <div class="stk g-18">
+            <div><div class="h1">Effect of Altitude and Ambient Wind</div>
+            <div class="slide-intro">Cooling is driven by air mass flow — not volume flow. At high altitude or in strong wind conditions, the tower's physical configuration must compensate to maintain the design air mass flow rate.</div></div>
+            <div class="g2">
+              ${card('Air Density and Fan Sizing',`
+                <div class="g2 mb-10">
+                  ${stat('1.225 kg/m³','Air Density at Sea Level')}
+                  ${stat('1.08 kg/m³','Air Density at 1,000 m','warning')}
+                  ${stat('~12%','Density Reduction at 1,000 m','danger')}
+                  ${stat('+12–15%','Volume Flow to Compensate','info')}
+                </div>
+                <div class="t-sm t-3rd lh-6">A tower designed at sea level needs a larger fan diameter, higher RPM, or wider blade pitch at altitude. Motor power increases accordingly.</div>
+              `, pill('Altitude Effect','warning'))}
+              <div class="stk g-12">
+                ${card('High Ambient Wind Effects',`
+                  <div class="t-sm lh-6 mb-8">Winds above 4–5 m/s perpendicular to air inlets create non-uniform distribution — windward cells receive excess air, leeward cells are starved.</div>
+                  ${tbl(
+                    ['Issue','Effect'],
+                    [['Leeward cell starvation','Local L/G rises → CWT deteriorates'],
+                     ['"Blow-through" in crossflow','Air bypasses fill → reduced KaV/L supply'],
+                     ['Fill media damage','Wind-induced uplift can dislodge fill blocks'],
+                     ['Increased drift','Higher plume visibility and water losses']]
+                  )}
+                `, pill('Wind Effect','danger'))}
+                ${callout('Design Response','Site-specific wind load analysis must be completed at the feasibility stage. Fan blade pitch auto-adjustment and intake wind screens are cost-effective responses for exposed locations.','neutral')}
+              </div>
+            </div>
+          </div>`
+      },
+
+      /* 14 · Mechanical Components */
+      {
+        part: 'Part 3  ·  Practical Engineering &amp; Layout', partTone: 'warning', title: 'Component Selection',
+        html: () => `
+          <div class="stk g-18">
+            <div><div class="h1">Mechanical Component Selection</div>
+            <div class="slide-intro">The thermal model assumes ideal airflow and perfect water distribution. Every mechanical component introduces a real-world deviation — the design must anticipate and accommodate each one.</div></div>
+            <div class="g2">
+              ${[
+                { comp:'Fill Media', tone:'info', rows:[
+                  ['Film Fill','High surface area, low pressure drop','Susceptible to clogging at high CoC or with suspended solids'],
+                  ['Splash Fill','Robust, handles turbid water','Lower thermal efficiency — ~20% less KaV/L per unit depth']]},
+                { comp:'Fan &amp; Drive System', tone:'success', rows:[
+                  ['FRP Fan Blades','Lightweight, corrosion-resistant, adjustable pitch','Hub blockage creates a central airflow dead zone'],
+                  ['Gearbox Drive','Proven speed reduction, standard maintenance','Oil leakage can contaminate fill and basin water'],
+                  ['Direct Drive (VFD)','Variable speed, no gearbox losses','Higher motor and VFD capital cost']]},
+                { comp:'Water Distribution', tone:'warning', rows:[
+                  ['Spray Nozzles','Precise coverage, controllable drop size','Clogging causes dry zones in fill — direct KaV/L loss'],
+                  ['Gravity Basin','Simple, robust, low maintenance','Uneven weir heights cause inter-cell flow imbalance']]},
+                { comp:'Drift Eliminators', tone:'neutral', rows:[
+                  ['Standard PVC (blade)','&lt;0.002% drift loss','Must be installed without gaps — bypass routes are critical'],
+                  ['High-efficiency type','&lt;0.0005% drift loss — required at sensitive sites','Higher pressure drop — slight increase in fan power']]}
+              ].map(({comp,tone,rows}) => card(comp, tbl(['Type','Advantage','Limitation'],rows), pill('Component',tone))).join('')}
+            </div>
+          </div>`
+      },
+
+      /* 15 · Layout & Orientation */
+      {
+        part: 'Part 3  ·  Practical Engineering &amp; Layout', partTone: 'warning', title: 'Layout &amp; Orientation',
+        html: () => `
+          <div class="stk g-18">
+            <div><div class="h1">Tower Layout and Site Orientation</div>
+            <div class="slide-intro">Correct siting decisions are as consequential as the thermal design. Poor orientation permanently penalises cooling performance for the entire operating life of the plant.</div></div>
+            <div class="g2">
+              ${card('Orientation Principles',`<div class="stk g-8">
+                <div class="t-sm fw-sb">1. Long Axis Parallel to the Prevailing Summer Wind</div>
+                <div class="t-sm t-3rd">Reduces recirculation and ensures even inlet air distribution across all cells during the peak-cooling season.</div>
+                <hr class="div">
+                <div class="t-sm fw-sb">2. Direct the Exhaust Plume Away from Critical Infrastructure</div>
+                <div class="t-sm t-3rd">Fan stacks must be oriented so the plume does not impinge on switchyard, switchgear rooms, or access roads — especially for winter icing risk.</div>
+                <hr class="div">
+                <div class="t-sm fw-sb">3. Avoid Enclosed Court Configurations</div>
+                <div class="t-sm t-3rd">Surrounding a tower block with buildings on multiple sides traps exhaust air. Multi-cell blocks should be in a single row or open L-shape at most.</div>
+              </div>`)}
+              <div class="stk g-12">
+                ${card('CTI Minimum Clearance Requirements', tbl(
+                  ['Clearance Requirement','Minimum Value'],
+                  [['Tower air inlet to adjacent building','≥ 1× tower height (H)'],
+                   ['Between parallel tower blocks','≥ 1.5× tower width (W)'],
+                   ['Tower inlet to solid wall or fence','≥ 2× inlet opening height'],
+                   ['Fan stack exit to overhead obstruction','≥ 2× fan stack diameter']]
+                ))}
+                ${callout('Wind Rose Analysis Is Non-Negotiable','A site wind rose based on at least 10 years of hourly data must be reviewed before finalising orientation. The dominant summer wind direction governs the optimal tower axis — not the annual average prevailing wind.','warning')}
+              </div>
+            </div>
+          </div>`
+      },
+
+      /* 16 · Water Chemistry */
+      {
+        part: 'Part 3  ·  Practical Engineering &amp; Layout', partTone: 'warning', title: 'Water Chemistry',
+        html: () => `
+          <div class="stk g-18">
+            <div><div class="h1">Water Chemistry — High Cycles of Concentration</div>
+            <div class="slide-intro">Water conservation is a standing priority at NTPC plants. Operating at high CoC reduces makeup water demand — but demands close attention to water quality management and fill type selection.</div></div>
+            <div class="g2">
+              <div class="stk g-12">
+                ${card('The CoC Relationship',`
+                  ${eq('CoC = Conductivity<sub>CW</sub> / Conductivity<sub>Makeup</sub>')}
+                  <div class="t-sm t-3rd mt-8 lh-6">Equivalently: CoC = Makeup flow rate / Blowdown flow rate. Each kg of evaporated water concentrates residual dissolved solids. At CoC 5, basin water is 5× more concentrated than the makeup source.</div>`)}
+                <div class="g2">
+                  ${stat('25–33%','Water saving: CoC 3 → 5','success')}
+                  ${stat('−10%','Efficiency per 1 mm scale','danger')}
+                  ${stat('CoC &gt; 5','Silica / CaCO₃ threshold','warning')}
+                  ${stat('Fill collapse','Structural risk from scale','danger')}
+                </div>
+              </div>
+              ${card('Chemistry Control at CoC 5', tbl(
+                ['Parameter','Limit','Risk if Exceeded'],
+                [['TDS','&lt; 3,000 mg/L','Generalised corrosion and deposition'],
+                 ['Calcium Hardness','&lt; 600 mg/L as CaCO₃','Calcium carbonate scale on film fill'],
+                 ['Silica','&lt; 150 mg/L as SiO₂','Amorphous silica scale — very hard to remove'],
+                 ['Langelier SI','0 to +0.5','Corrosion (LSI &lt; 0) or scale (LSI &gt; +1.0)'],
+                 ['Chlorides','&lt; 600 mg/L','Pitting corrosion of stainless steel internals'],
+                 ['Microbiological','ATP &lt; 1 ng/mL','Legionella growth, biofouling']]
+              ))}
+            </div>
+          </div>`
+      },
+
+      /* 17 · Sensitivity */
+      {
+        part: 'Part 3  ·  Practical Engineering &amp; Layout', partTone: 'warning', title: 'Sensitivity Analysis',
+        html: () => `
+          <div class="stk g-18">
+            <div><div class="h1">Sensitivity to Key Operating Parameters</div>
+            <div class="slide-intro">Cooling towers respond non-linearly to changes in ambient conditions and water circuit parameters. Quantifying these sensitivities is essential for operators managing condenser backpressure and seasonal heat load variations.</div></div>
+            <div class="g2">
+              ${card('CWT Response vs. Wet Bulb Temperature',`
+                ${lineSVG(['20°C','22°C','24°C','26°C','28°C','30°C','32°C'],
+                  [{ name:'Achieved CWT at design L/G (°C)', data:[25.2,27.0,28.9,30.9,33.0,35.3,37.8], tone:'info' },
+                   { name:'WBT reference line (°C)', data:[20,22,24,26,28,30,32], tone:'neutral' }], '°C', 220)}
+                <div class="chart-note">Note: The approach (CWT − WBT) widens at high WBT, reflecting reduced thermodynamic driving force</div>`)}
+              <div class="stk g-12">
+                ${card('Parameter Sensitivity Summary', tbl(
+                  ['Parameter Change','Effect on CWT','Severity'],
+                  [['WBT increases 1 °C','CWT rises 1.1–1.3 °C','High'],
+                   ['Water flow +10%','CWT rises 0.5–0.8 °C','Moderate'],
+                   ['Fan speed −10%','CWT rises 0.8–1.2 °C','Moderate'],
+                   ['1 mm uniform fill scale','CWT rises 0.8–1.0 °C','Significant'],
+                   ['Heat load +15%','CWT rises 1.5–2.0 °C','High'],
+                   ['Recirculation +1.5 °C WBT','CWT rises ~1.2 °C','High']],
+                  ['wrn',undefined,undefined,'dng','wrn','dng']
+                ))}
+                ${callout('Operational Opportunity','When winter WBT falls to 15–18 °C, fan speed can be reduced 20–30% while still maintaining CWT within limits — one of the clearest opportunities for heat-rate improvement.','info')}
+              </div>
+            </div>
+          </div>`
+      },
+
+      /* 18 · CTI ATC-105 Intro */
+      {
+        part: 'Part 4  ·  Performance Testing', partTone: 'neutral', title: 'CTI ATC-105 Introduction',
+        html: () => `
+          <div class="stk g-18">
+            <div><div class="h1">Performance Testing — CTI ATC-105</div>
+            <div class="slide-intro">Building the correct tower to specification is necessary but not sufficient. Proving it works — to the precision of an internationally accepted test code — is the contractual obligation that protects both the owner and the supplier.</div></div>
+            <div class="g2">
+              <div class="stk g-12">
+                ${card('About CTI ATC-105',`
+                  <div class="t-sm lh-6">The <span class="fw-sb">Cooling Technology Institute (CTI) Acceptance Test Code 105</span> is the global benchmark for evaluating the thermal performance of mechanical draft cooling towers.</div>
+                  <hr class="div">
+                  <div class="t-sm t-3rd mt-4">First published: 1967 · Latest revision: 2011</div>
+                  <div class="t-sm t-3rd mt-4">Recognised by NTPC procurement specifications, BHEL guarantees, and international EPC contracts</div>
+                  <div class="t-sm t-3rd mt-4">Applied in: power generation, petrochemicals, HVAC, and heavy industry</div>`)}
+                ${card('The Core Test Objective',`
+                  ${eq('Tower Capability (%) = (L<sub>test</sub> / L<sub>design</sub>) × 100')}
+                  <div class="t-sm t-3rd mt-8 lh-6">Where L<sub>test</sub> is the water flow rate at which the tested tower achieves the design CWT under design ambient conditions. A value of ≥ 100% confirms the thermal guarantee is met.</div>`)}
+              </div>
+              ${card('Test Execution Sequence', tbl(
+                ['Step','Activity'],
+                [['1 · Pre-test review','Confirm plant conditions within CTI tolerance bands; agree on instrument positions'],
+                 ['2 · Instrument install','Install and zero all calibrated psychrometers, RTDs, and flow meters'],
+                 ['3 · Steady-state hold','Allow 30 min of stable operation before formal recording begins'],
+                 ['4 · Continuous record','Log all parameters for a minimum of 60 min of stable, on-specification operation'],
+                 ['5 · Data reduction','Time-average all readings; apply exclusion criteria for off-tolerance windows'],
+                 ['6 · Capability calc.','Apply Merkel method to calculate Supply KaV/L and Tower Capability (%)'],
+                 ['7 · Test report','Issue signed report with raw data, calculations, calibration certs, and capability statement']]
+              ))}
+            </div>
+          </div>`
+      },
+
+      /* 19 · Instrumentation */
+      {
+        part: 'Part 4  ·  Performance Testing', partTone: 'neutral', title: 'Instrumentation',
+        html: () => `
+          <div class="stk g-18">
+            <div><div class="h1">Instrumentation and Data Collection</div>
+            <div class="slide-intro">The accuracy of a CTI ATC-105 acceptance test is entirely a function of instrument quality. Any systematic bias propagates directly into the capability calculation and can mask genuine performance shortfalls.</div></div>
+            <div class="h2">Required Instrumentation by Measured Parameter</div>
+            ${tbl(
+              ['Parameter','Instrument','Location','Accuracy','Notes'],
+              [['Inlet WBT','Mechanically aspirated psychrometer or chilled-mirror hygrometer','Distributed across all air inlet faces','± 0.1 °C','Min. 4 locations; weighted average by inlet face area'],
+               ['Hot Water Temp (HWT)','Calibrated Pt100 RTD in thermowell','Distribution header inlet to tower','± 0.1 °C','Ensure well-mixed flow upstream of sensor'],
+               ['Cold Water Temp (CWT)','Calibrated Pt100 RTD in thermowell','Collection basin outlet or pump suction','± 0.1 °C','Avoid measurement in stratification zones'],
+               ['Water Flow Rate','Pitot-tube traverse or portable ultrasonic flow meter','Straight pipe, ≥ 10 diameters upstream','± 2%','Ultrasonic preferred — non-invasive, no plant shutdown'],
+               ['Fan Motor Power','True RMS power transducer on each motor','Motor control panel (MCC)','± 1%','Required for fan power correction in capability calc.'],
+               ['Atmospheric Pressure','Calibrated barometer at tower elevation','Local weather station or tower platform','± 0.5 mbar','Used in air density and psychrometric calculations']]
+            )}
+            <div class="g3 mt-8">
+              ${callout('Data Averaging Protocol','All instruments record continuously. Test period minimum is 60 minutes. Any 10-minute window with WBT variation exceeding ± 0.5 °C is flagged and excluded from the average.','info')}
+              ${callout('Calibration Requirement','All instruments must be traceable to national standards and calibrated within six months of the test date. Calibration certificates are mandatory test report attachments.','warning')}
+              ${callout('Witness Protocol','Both the owner\'s representative and the supplier\'s engineer must be present throughout the test. All instrument positions must be mutually agreed before the recording period commences.','neutral')}
+            </div>
+          </div>`
+      },
+
+      /* 20 · CTI Tolerances */
+      {
+        part: 'Part 4  ·  Performance Testing', partTone: 'neutral', title: 'CTI Tolerances',
+        html: () => `
+          <div class="stk g-18">
+            <div><div class="h1">CTI ATC-105 — Acceptable Test Tolerances</div>
+            <div class="slide-intro">The test must be conducted within prescribed bands around the design conditions. Tests outside these bands are declared invalid — the correction equations used to normalise data to the design point are only reliable within these limits.</div></div>
+            <div class="h2">Test Envelope Requirements</div>
+            ${tbl(
+              ['Parameter','Design Reference','Permitted Test Range','Consequence if Exceeded'],
+              [['Water Flow Rate','Design flow (L/s)','90–110% of design (± 10%)','Test declared invalid'],
+               ['Heat Load (Range × Flow)','Design heat load (MW)','80–120% of design (± 20%)','Test declared invalid'],
+               ['Entering WBT','Design WBT','Design WBT ± 3 °C; preferred ± 1.5 °C','Extrapolation errors grow rapidly beyond ± 1.5 °C'],
+               ['WBT Stability During Test','Steady ambient','Maximum drift ± 1.5 °C over 60-min test','Affected windows excluded from average'],
+               ['Fan Speed / Blade Pitch','Design setting','No changes permitted during test','Any adjustment invalidates that recording period'],
+               ['HWT Variation During Test','Steady state','Maximum ± 1.0 °C over 60-min test','Readings outside band excluded from average']],
+              [undefined,undefined,'wrn','wrn',undefined,undefined]
+            )}
+            <div class="g3 mt-8">
+              ${stat('± 10%','Water Flow Tolerance')}
+              ${stat('± 20%','Heat Load Tolerance')}
+              ${stat('± 1.5 °C','WBT Stability Limit','warning')}
+            </div>
+            ${callout('Critical Point for NTPC Plant Operations Teams','If the unit cannot stabilise its condenser heat load within the ± 20% band — due to part-load generation or unit turndown — the test must be rescheduled. A test outside the valid envelope provides no contractual protection, regardless of the calculated capability result.','danger')}
+          </div>`
+      },
+
+      /* 21 · Extrapolation Risk */
+      {
+        part: 'Part 4  ·  Performance Testing', partTone: 'neutral', title: 'Extrapolation Risk',
+        html: () => `
+          <div class="stk g-18">
+            <div><div class="h1">Extrapolation vs. Interpolation — A Critical Distinction</div>
+            <div class="slide-intro">This is among the most underappreciated risks in cooling tower acceptance testing. Testing at conditions far from the design point does not merely reduce accuracy — it can make the results statistically unreliable and legally unenforceable.</div></div>
+            <div class="g2">
+              <div class="stk g-12">
+                ${card('Interpolation — Test Near the Design Point',`
+                  <div class="t-sm lh-6">The tower is tested within ± 1.5 °C of the design WBT. The correction algorithm moves the result to the exact design point by interpolation between close-in data.</div>
+                  <hr class="div">
+                  <div class="t-sm t-3rd mt-4">Small extrapolation (± 2–3% in correction factor) → small capability error (± 0.5%)</div>
+                  <div class="t-sm t-3rd mt-4">Result: Capability figure is statistically robust and contractually defensible</div>
+                `, pill('Correct Approach','success'))}
+                ${card('Extrapolation — Testing Far from Design',`
+                  <div class="t-sm lh-6">Testing at 15 °C WBT when the design is 28 °C forces the algorithm to project across 13 °C of untested operating range outside the verified characteristic curve.</div>
+                  <hr class="div">
+                  <div class="t-sm t-3rd mt-4">Small instrument errors (± 0.2 °C) amplify to capability errors of ± 5–10%</div>
+                  <div class="t-sm t-3rd mt-4">Result: A tower that misses its guarantee can appear to pass — and vice versa</div>
+                `, pill('High Risk','danger'))}
+              </div>
+              <div class="stk g-12">
+                ${card('Capability Error vs. Extrapolation Distance',`
+                  ${lineSVG(['0°C','2°C','4°C','6°C','8°C','10°C','12°C'],
+                    [{ name:'Capability result error band (± %)', data:[0.5,1.0,1.8,3.2,5.5,8.2,11.8], tone:'danger' }], '%', 220)}
+                  <div class="chart-note">X-axis: |Test WBT − Design WBT| — error grows rapidly beyond 3 °C</div>`)}
+                ${callout('Scheduling Recommendation for NTPC','Performance tests should be scheduled when ambient WBT is naturally closest to the design value. For most NTPC locations (design WBT 28 °C), this means May–June at full unit load — not in winter at partial load to suit outage schedules.','danger')}
+              </div>
+            </div>
+          </div>`
+      },
+
+      /* 22 · Conclusion */
+      {
+        part: 'Conclusion', partTone: 'neutral', title: 'Conclusion &amp; Q&amp;A',
+        html: () => `
+          <div class="stk g-18">
+            <div class="h1">Summary &amp; Key Takeaways</div>
+            <div class="g2">
+              ${[
+                { n:'01', tone:'info',    title:'Evaporation Drives Everything',
+                  body:'Latent heat accounts for 75–85% of the cooling duty. The wet bulb temperature is the absolute thermodynamic floor, and the entire design revolves around how closely the cold water temperature can approach it.' },
+                { n:'02', tone:'success', title:'Merkel for Sizing; Poppe for Precision',
+                  body:'Merkel delivers accurate results for standard sizing and CTI acceptance testing. Poppe is the right method for extreme climates, plume abatement engineering, and water balance audits.' },
+                { n:'03', tone:'warning', title:'Site Conditions Define Actual Performance',
+                  body:'Recirculation, altitude, wind patterns, fill fouling, and poor water chemistry can collectively reduce effective cooling capacity by 5–15%. These require deliberate design responses — not post-installation corrections.' },
+                { n:'04', tone:'neutral', title:'Test Near the Design Point — Always',
+                  body:'CTI ATC-105 testing is the only reliable method to validate a cooling tower guarantee. Testing must be done within the prescribed tolerance bands and as close to design WBT as operationally practicable.' }
+              ].map(({n,tone,title,body}) => card(
+                `<span style="color:var(--text-1);font-weight:700">${title}</span>`,
+                `<div class="t-sm lh-6">${body}</div>`, pill(n, tone)
+              )).join('')}
+            </div>
+            <hr class="div" style="margin:8px 0">
+            <div class="row row-between">
+              <div class="stk g-4">
+                <div class="fw-sb">Questions &amp; Discussion</div>
+                <div class="t-sm t-3rd">The floor is open. Please raise any technical points for further discussion.</div>
+              </div>
+              <div class="stk g-4" style="text-align:right">
+                <div class="t-xs t-4th">Prepared for NTPC Engineering Review &middot; 29 April 2026</div>
+                <div class="t-xs t-4th">CTI ATC-105 &middot; Merkel / Poppe Methods &middot; IDCT Design Fundamentals</div>
+              </div>
+            </div>
+          </div>`
+      }
+
+    ]; // end SLIDES
+
+    /* ═══════════════════════════════════════════════════════════════════
+       MODULE D · PRESENTATION ENGINE
+       ═══════════════════════════════════════════════════════════════════ */
+    let current = 0;
+
+    const $ = id => document.getElementById(id);
+    const container  = $('slides');
+    const partBadge  = $('part-badge');
+    const slideCount = $('slide-counter');
+    const progFill   = $('progress-fill');
+    const dotNav     = $('dot-nav');
+    const btnPrev    = $('btn-prev');
+    const btnNext    = $('btn-next');
+
+    function init() {
+      SLIDES.forEach((s, i) => {
+        const section = document.createElement('section');
+        section.className = 'slide';
+        section.setAttribute('aria-label', `Slide ${i+1}: ${s.title}`);
+        section.innerHTML = s.html();
+        container.appendChild(section);
+
+        const dot = document.createElement('div');
+        dot.className = 'dot';
+        dot.setAttribute('role', 'tab');
+        dot.title = `${i+1}. ${s.title}`;
+        dot.addEventListener('click', () => goto(i));
+        dotNav.appendChild(dot);
+      });
+
+      goto(0);
+    }
+
+    function goto(next) {
+      const slides = container.querySelectorAll('.slide');
+      const dots   = dotNav.querySelectorAll('.dot');
+
+      slides[current].classList.remove('active');
+      current = Math.max(0, Math.min(next, SLIDES.length - 1));
+      slides[current].classList.add('active');
+      container.scrollTop = 0;
+
+      const s = SLIDES[current];
+      partBadge.className  = `pill pill-${s.partTone}`;
+      partBadge.innerHTML  = s.part;
+      slideCount.textContent = `${current + 1} / ${SLIDES.length}`;
+      progFill.style.width = `${((current + 1) / SLIDES.length) * 100}%`;
+      dots.forEach((d, i) => d.classList.toggle('active', i === current));
+      btnPrev.disabled = current === 0;
+      btnNext.disabled = current === SLIDES.length - 1;
+    }
+
+    /* ═══════════════════════════════════════════════════════════════════
+       MODULE E · EVENT LISTENERS
+       ═══════════════════════════════════════════════════════════════════ */
+    btnPrev.addEventListener('click', () => goto(current - 1));
+    btnNext.addEventListener('click', () => goto(current + 1));
+
+    document.addEventListener('keydown', e => {
+      if (['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName)) return;
+      if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); goto(current + 1); }
+      if (e.key === 'ArrowLeft')                    { e.preventDefault(); goto(current - 1); }
+      if (e.key === 'Home')                         { e.preventDefault(); goto(0); }
+      if (e.key === 'End')                          { e.preventDefault(); goto(SLIDES.length - 1); }
+    });
+
+    /* ═══════════════════════════════════════════════════════════════════
+       MODULE F · INIT
+       ═══════════════════════════════════════════════════════════════════ */
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', init);
+    } else {
+      init();
+    }
+
+  })();
+  </script>
+</body>
+</html>

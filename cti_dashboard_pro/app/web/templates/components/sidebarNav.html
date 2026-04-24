@@ -120,6 +120,24 @@
                 </div>
             </div>
 
+            <!-- Curve Calibration -->
+            <div>
+                <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-2 mb-4">Auto-Calibration</h3>
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="group col-span-2">
+                        <label class="text-[10px] font-bold text-emerald-400 uppercase px-2 mb-1 block">Target CWT at Design WBT</label>
+                        <div class="flex gap-2">
+                            <input id="targetCWT" type="number" step="0.1" value="32.0"
+                                class="w-full input-premium rounded-lg px-3 py-2 text-sm font-mono border border-emerald-500/30 focus:border-emerald-500/60">
+                            <button id="btnCalibrateC" class="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 px-3 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-colors border border-emerald-500/30 whitespace-nowrap">
+                                Fit Curve
+                            </button>
+                        </div>
+                        <p class="text-[9px] text-slate-500 mt-1.5 px-2 font-medium">Auto-calculates Const C so the 100% curve perfectly hits this Target CWT.</p>
+                    </div>
+                </div>
+            </div>
+
             <!-- Visualization Control -->
             <div>
                 <h3 class="text-[10px] font-bold text-slate-500 uppercase tracking-widest px-2 mb-4">Chart Scaling</h3>

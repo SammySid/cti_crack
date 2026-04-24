@@ -66,6 +66,51 @@ export function bindEvents(ui) {
         }
     });
 
+    // ── Auto-Calibration ──────────────────────────────────────────────────────
+    document.getElementById('btnCalibrateC')?.addEventListener('click', async () => {
+        const btn = document.getElementById('btnCalibrateC');
+        const targetCWT = parseFloat(document.getElementById('targetCWT').value);
+        if (isNaN(targetCWT)) return alert('Please enter a valid Target CWT');
+        
+        btn.innerText = 'Fitting...';
+        btn.disabled = true;
+        
+        try {
+            const range = ui.inputs.designHWT - ui.inputs.designCWT;
+            const resp = await fetch('/api/calculate/calibrate', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    targetCWT: targetCWT,
+                    designWBT: ui.inputs.designWBT,
+                    designRange: range,
+                    lgRatio: ui.inputs.lgRatio,
+                    constantM: ui.inputs.constantM
+                })
+            });
+            const data = await resp.json();
+            if (!resp.ok) throw new Error(data.detail || 'Calibration failed');
+            
+            // Update the constant C input and trigger UI update
+            const cInput = document.getElementById('constantC');
+            cInput.value = data.constantC;
+            ui.inputs.constantC = data.constantC;
+            ui.saveInputs();
+            ui.updateFastMetrics();
+            debouncedUpdateAll();
+            
+            btn.innerText = 'Success!';
+            setTimeout(() => {
+                btn.innerText = 'Fit Curve';
+                btn.disabled = false;
+            }, 1000);
+        } catch (err) {
+            alert('Calibration Error: ' + err.message);
+            btn.innerText = 'Fit Curve';
+            btn.disabled = false;
+        }
+    });
+
     // ── Mobile export buttons (inline panel) ─────────────────────────────────
     document.getElementById('exportExcelMobile')?.addEventListener('click', () => ui.exportData());
     document.getElementById('exportPDFMobile')?.addEventListener('click',  () => window.print());
