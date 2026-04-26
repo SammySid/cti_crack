@@ -31,6 +31,13 @@ export function bindEvents(ui) {
                         // Brief highlight to show it updated automatically
                         targetEl.classList.add('bg-emerald-500/20');
                         setTimeout(() => targetEl.classList.remove('bg-emerald-500/20'), 500);
+                        
+                        // Ultra-smooth: Auto-trigger the Fit Curve so the chart never looks "broken"
+                        const btnFit = document.getElementById('btnCalibrateC');
+                        if (btnFit) {
+                            clearTimeout(window._autoFitTimeout);
+                            window._autoFitTimeout = setTimeout(() => btnFit.click(), 600);
+                        }
                     }
                 }
 
@@ -71,6 +78,12 @@ export function bindEvents(ui) {
                     targetEl.value = targetVal;
                     targetEl.classList.add('bg-emerald-500/20');
                     setTimeout(() => targetEl.classList.remove('bg-emerald-500/20'), 500);
+                    
+                    const btnFit = document.getElementById('btnCalibrateC');
+                    if (btnFit) {
+                        clearTimeout(window._autoFitTimeoutMobile);
+                        window._autoFitTimeoutMobile = setTimeout(() => btnFit.click(), 600);
+                    }
                 }
             }
 
