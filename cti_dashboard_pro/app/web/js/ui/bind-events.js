@@ -22,25 +22,6 @@ export function bindEvents(ui) {
                 const mirror = document.querySelector(`[data-mobile-mirror="${id}"]`);
                 if (mirror && mirror !== e.target) mirror.value = val;
 
-                // Smarter Auto-Fill: Sync Target CWT for calibration automatically based on Safety Margin
-                if (id === 'designCWT' || id === 'off100r100') {
-                    const targetEl = document.getElementById('targetCWT');
-                    if (targetEl) {
-                        const targetVal = (ui.inputs.designCWT - (ui.inputs.off100r100 || 0)).toFixed(2);
-                        targetEl.value = targetVal;
-                        // Brief highlight to show it updated automatically
-                        targetEl.classList.add('bg-emerald-500/20');
-                        setTimeout(() => targetEl.classList.remove('bg-emerald-500/20'), 500);
-                        
-                        // Ultra-smooth: Auto-trigger the Fit Curve so the chart never looks "broken"
-                        const btnFit = document.getElementById('btnCalibrateC');
-                        if (btnFit) {
-                            clearTimeout(window._autoFitTimeout);
-                            window._autoFitTimeout = setTimeout(() => btnFit.click(), 600);
-                        }
-                    }
-                }
-
                 ui.updateFastMetrics();
                 if (isCurveAffectingInput(id)) debouncedUpdateAll();
             });
@@ -69,23 +50,6 @@ export function bindEvents(ui) {
             // Keep sidebar canonical input in sync (value only, no re-trigger)
             const canonical = document.getElementById(id);
             if (canonical && canonical !== e.target) canonical.value = val;
-
-            // Smarter Auto-Fill: Sync Target CWT for calibration automatically based on Safety Margin
-            if (id === 'designCWT' || id === 'off100r100') {
-                const targetEl = document.getElementById('targetCWT');
-                if (targetEl) {
-                    const targetVal = (ui.inputs.designCWT - (ui.inputs.off100r100 || 0)).toFixed(2);
-                    targetEl.value = targetVal;
-                    targetEl.classList.add('bg-emerald-500/20');
-                    setTimeout(() => targetEl.classList.remove('bg-emerald-500/20'), 500);
-                    
-                    const btnFit = document.getElementById('btnCalibrateC');
-                    if (btnFit) {
-                        clearTimeout(window._autoFitTimeoutMobile);
-                        window._autoFitTimeoutMobile = setTimeout(() => btnFit.click(), 600);
-                    }
-                }
-            }
 
             ui.updateFastMetrics();
             if (isCurveAffectingInput(id)) debouncedUpdateAll();
@@ -173,14 +137,6 @@ export function bindEvents(ui) {
             setTimeout(() => constCEl.classList.remove('bg-amber-500/20'), 500);
         }
         
-        // Auto-update Target CWT
-        const targetEl = document.getElementById('targetCWT');
-        if (targetEl) {
-            targetEl.value = (ui.inputs.designCWT).toFixed(2);
-            targetEl.classList.add('bg-emerald-500/20');
-            setTimeout(() => targetEl.classList.remove('bg-emerald-500/20'), 500);
-        }
-        
         ui.saveInputs();
         
         // Update visually without auto-fitting
@@ -263,13 +219,6 @@ export function bindEvents(ui) {
     ui.initMobileNavigation();
     ui.updateExportUiState('Calculating curves...');
     ui.updateFilterUiState('Filter tool ready.');
-    
-    // Initial sync of Target CWT
-    const targetEl = document.getElementById('targetCWT');
-    if (targetEl) {
-        targetEl.value = (ui.inputs.designCWT - (ui.inputs.off100r100 || 0)).toFixed(2);
-    }
-    
     ui.switchTab('thermal');
     ui.syncFilterSettingsToUi();
     ui.calculatePsychrometrics();

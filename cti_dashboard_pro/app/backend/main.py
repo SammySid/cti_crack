@@ -218,25 +218,31 @@ async def api_calc_curves(req: CurveRequest):
                 else:
                     wbt_correction = req.inputs.offsetWbt20 if wbt_val == 20 else 0
                 
-                # 2. 3x3 Grid Offsets
-                off80 = off100 = off120 = 0.0
+                # 2. 3x3 Grid Offsets (Converted to Anchored Tilts)
+                raw_off80 = raw_off100 = raw_off120 = 0.0
                 if req.flowPercent == 90:
-                    off80 = req.inputs.off90r80
-                    off100 = req.inputs.off90r100
-                    off120 = req.inputs.off90r120
+                    raw_off80 = req.inputs.off90r80
+                    raw_off100 = req.inputs.off90r100
+                    raw_off120 = req.inputs.off90r120
                 elif req.flowPercent == 100:
-                    off80 = req.inputs.off100r80
-                    off100 = req.inputs.off100r100
-                    off120 = req.inputs.off100r120
+                    raw_off80 = req.inputs.off100r80
+                    raw_off100 = req.inputs.off100r100
+                    raw_off120 = req.inputs.off100r120
                 elif req.flowPercent == 110:
-                    off80 = req.inputs.off110r80
-                    off100 = req.inputs.off110r100
-                    off120 = req.inputs.off110r120
+                    raw_off80 = req.inputs.off110r80
+                    raw_off100 = req.inputs.off110r100
+                    raw_off120 = req.inputs.off110r120
 
-                # Apply base WBT tilt and grid-specific offsets
-                cwt80 = round(cwt80 + wbt_correction + off80, 3)
-                cwt100 = round(cwt100 + wbt_correction + off100, 3)
-                cwt120 = round(cwt120 + wbt_correction + off120, 3)
+                # Calculate the tilt multiplier: 1.0 at WBT=20, 0.0 at DesignWBT
+                if inputs_dict.get('designWBT') != 20:
+                    tilt_multiplier = (wbt_val - req.inputs.designWBT) / (20.0 - req.inputs.designWBT)
+                else:
+                    tilt_multiplier = 1.0 if wbt_val == 20 else 0.0
+
+                # Apply base WBT tilt and grid-specific tilted offsets
+                cwt80 = round(cwt80 + wbt_correction + (raw_off80 * tilt_multiplier), 3)
+                cwt100 = round(cwt100 + wbt_correction + (raw_off100 * tilt_multiplier), 3)
+                cwt120 = round(cwt120 + wbt_correction + (raw_off120 * tilt_multiplier), 3)
 
                 data.append({
                     "wbt": wbt_val,
