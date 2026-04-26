@@ -22,6 +22,18 @@ export function bindEvents(ui) {
                 const mirror = document.querySelector(`[data-mobile-mirror="${id}"]`);
                 if (mirror && mirror !== e.target) mirror.value = val;
 
+                // Smarter Auto-Fill: Sync Target CWT for calibration automatically based on Safety Margin
+                if (id === 'designCWT' || id === 'off100r100') {
+                    const targetEl = document.getElementById('targetCWT');
+                    if (targetEl) {
+                        const targetVal = (ui.inputs.designCWT - (ui.inputs.off100r100 || 0)).toFixed(2);
+                        targetEl.value = targetVal;
+                        // Brief highlight to show it updated automatically
+                        targetEl.classList.add('bg-emerald-500/20');
+                        setTimeout(() => targetEl.classList.remove('bg-emerald-500/20'), 500);
+                    }
+                }
+
                 ui.updateFastMetrics();
                 if (isCurveAffectingInput(id)) debouncedUpdateAll();
             });
@@ -50,6 +62,17 @@ export function bindEvents(ui) {
             // Keep sidebar canonical input in sync (value only, no re-trigger)
             const canonical = document.getElementById(id);
             if (canonical && canonical !== e.target) canonical.value = val;
+
+            // Smarter Auto-Fill: Sync Target CWT for calibration automatically based on Safety Margin
+            if (id === 'designCWT' || id === 'off100r100') {
+                const targetEl = document.getElementById('targetCWT');
+                if (targetEl) {
+                    const targetVal = (ui.inputs.designCWT - (ui.inputs.off100r100 || 0)).toFixed(2);
+                    targetEl.value = targetVal;
+                    targetEl.classList.add('bg-emerald-500/20');
+                    setTimeout(() => targetEl.classList.remove('bg-emerald-500/20'), 500);
+                }
+            }
 
             ui.updateFastMetrics();
             if (isCurveAffectingInput(id)) debouncedUpdateAll();
@@ -109,6 +132,41 @@ export function bindEvents(ui) {
             btn.innerText = 'Fit Curve';
             btn.disabled = false;
         }
+    });
+
+    // ── Clear Safety Margins & Reset Fit ──────────────────────────────────────
+    document.getElementById('btnClearMargins')?.addEventListener('click', () => {
+        const marginIds = [
+            'offsetWbt20', 
+            'off90r80', 'off90r100', 'off90r120',
+            'off100r80', 'off100r100', 'off100r120',
+            'off110r80', 'off110r100', 'off110r120'
+        ];
+        
+        // Zero them out in UI and state
+        marginIds.forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = 0;
+            ui.inputs[id] = 0;
+        });
+        
+        // Auto-update Target CWT
+        const targetEl = document.getElementById('targetCWT');
+        if (targetEl) {
+            targetEl.value = (ui.inputs.designCWT).toFixed(2);
+            targetEl.classList.add('bg-emerald-500/20');
+            setTimeout(() => targetEl.classList.remove('bg-emerald-500/20'), 500);
+        }
+        
+        ui.saveInputs();
+        
+        // Automatically run Fit Curve to reset the constantC to standard performance
+        const btnFit = document.getElementById('btnCalibrateC');
+        if (btnFit) btnFit.click();
+        
+        // If not already updated by Fit Curve, update visually
+        ui.updateFastMetrics();
+        debouncedUpdateAll();
     });
 
     // ── Mobile export buttons (inline panel) ─────────────────────────────────
@@ -186,6 +244,13 @@ export function bindEvents(ui) {
     ui.initMobileNavigation();
     ui.updateExportUiState('Calculating curves...');
     ui.updateFilterUiState('Filter tool ready.');
+    
+    // Initial sync of Target CWT
+    const targetEl = document.getElementById('targetCWT');
+    if (targetEl) {
+        targetEl.value = (ui.inputs.designCWT - (ui.inputs.off100r100 || 0)).toFixed(2);
+    }
+    
     ui.switchTab('thermal');
     ui.syncFilterSettingsToUi();
     ui.calculatePsychrometrics();
