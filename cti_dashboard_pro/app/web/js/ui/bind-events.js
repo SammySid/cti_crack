@@ -163,6 +163,16 @@ export function bindEvents(ui) {
             ui.inputs[id] = 0;
         });
         
+        // Remove the Fit Curve (restore constantC to its original default value)
+        const constCEl = document.getElementById('constantC');
+        if (constCEl) {
+            const defaultValue = parseFloat(constCEl.defaultValue) || 2.51;
+            constCEl.value = defaultValue;
+            ui.inputs.constantC = defaultValue;
+            constCEl.classList.add('bg-amber-500/20');
+            setTimeout(() => constCEl.classList.remove('bg-amber-500/20'), 500);
+        }
+        
         // Auto-update Target CWT
         const targetEl = document.getElementById('targetCWT');
         if (targetEl) {
@@ -173,11 +183,7 @@ export function bindEvents(ui) {
         
         ui.saveInputs();
         
-        // Automatically run Fit Curve to reset the constantC to standard performance
-        const btnFit = document.getElementById('btnCalibrateC');
-        if (btnFit) btnFit.click();
-        
-        // If not already updated by Fit Curve, update visually
+        // Update visually without auto-fitting
         ui.updateFastMetrics();
         debouncedUpdateAll();
     });
