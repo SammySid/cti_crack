@@ -40,10 +40,10 @@ function _trmLoad() {
 
 function _trmPill(label, value, unit = '') {
     const v = (value !== undefined && value !== null && value !== '') ? value : '—';
-    return `<span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg border border-white/[0.07] text-[10px] font-mono" style="background:rgba(12,18,32,0.8)">
-        <span class="text-slate-600 text-[9px] uppercase tracking-wide font-black">${label}</span>
-        <span class="text-violet-200 font-bold">${v}</span>
-        ${unit ? `<span class="text-slate-600 text-[9px]">${unit}</span>` : ''}
+    return `<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/[0.09] font-mono" style="background:rgba(12,18,32,0.85)">
+        <span class="text-slate-500 text-[10px] uppercase tracking-wider font-black">${label}</span>
+        <span class="text-violet-200 text-sm font-bold">${v}</span>
+        ${unit ? `<span class="text-slate-500 text-[10px]">${unit}</span>` : ''}
     </span>`;
 }
 
@@ -85,9 +85,9 @@ function _renderThermalContext(ui) {
         const flowLabels = ['90%', '100%', '110%'];
         const items = [];
         if (wbt20 !== 0) {
-            items.push(`<span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg border border-amber-500/20 text-[10px] font-mono" style="background:rgba(12,18,32,0.8)">
-                <span class="text-amber-600/70 text-[9px] uppercase tracking-wide font-black">@20°C</span>
-                <span class="text-amber-300 font-bold">${wbt20 > 0 ? '+' : ''}${wbt20}</span>
+            items.push(`<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-amber-500/25 font-mono" style="background:rgba(12,18,32,0.85)">
+                <span class="text-amber-500/70 text-[10px] uppercase tracking-wider font-black">@20°C</span>
+                <span class="text-amber-300 text-sm font-bold">${wbt20 > 0 ? '+' : ''}${wbt20}</span>
             </span>`);
         }
         [0, 1, 2].forEach(row => {
@@ -95,9 +95,9 @@ function _renderThermalContext(ui) {
             [v80, v100, v120].forEach((v, ci) => {
                 if (v !== 0) {
                     const rangeLabel = ['R80','R100','R120'][ci];
-                    items.push(`<span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg border border-amber-500/20 text-[10px] font-mono" style="background:rgba(12,18,32,0.8)">
-                        <span class="text-amber-600/70 text-[9px] uppercase tracking-wide font-black">${flowLabels[row]}·${rangeLabel}</span>
-                        <span class="text-amber-300 font-bold">${v > 0 ? '+' : ''}${v}</span>
+                    items.push(`<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-amber-500/25 font-mono" style="background:rgba(12,18,32,0.85)">
+                        <span class="text-amber-500/70 text-[10px] uppercase tracking-wider font-black">${flowLabels[row]}·${rangeLabel}</span>
+                        <span class="text-amber-300 text-sm font-bold">${v > 0 ? '+' : ''}${v}</span>
                     </span>`);
                 }
             });
