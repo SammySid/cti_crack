@@ -375,36 +375,44 @@
              ══════════════════════════════════════════════════════════════ -->
         <div class="flex-1 min-w-0 space-y-6 xl:space-y-8">
 
-            <!-- KaV/L stat cards -->
+            <!-- KaV/L stat cards — container-type on each card so cqw resolves per-card -->
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="glass-card rounded-3xl p-5 relative overflow-hidden group">
+                <div class="glass-card rounded-3xl p-4 xl:p-5 relative overflow-hidden group" style="container-type:inline-size">
                     <div class="absolute -right-4 -top-4 w-20 h-20 bg-cyan-500/5 rounded-full blur-2xl group-hover:bg-cyan-500/10 transition-colors"></div>
                     <p class="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-1">Supply KaV/L</p>
-                    <h2 id="displaySupply" class="text-3xl font-black text-white text-mono">--</h2>
+                    <h2 id="displaySupply"
+                        class="font-black text-white font-mono leading-tight"
+                        style="font-size:clamp(1rem,12cqw,1.875rem);word-break:break-all">--</h2>
                     <div class="mt-3 flex items-center gap-2 text-[10px] font-bold text-cyan-400">
                         <span class="px-2 py-0.5 rounded-full bg-cyan-500/10 uppercase">System Power</span>
                     </div>
                 </div>
-                <div class="glass-card rounded-3xl p-5 relative overflow-hidden group">
+                <div class="glass-card rounded-3xl p-4 xl:p-5 relative overflow-hidden group" style="container-type:inline-size">
                     <div class="absolute -right-4 -top-4 w-20 h-20 bg-blue-500/5 rounded-full blur-2xl group-hover:bg-blue-500/10 transition-colors"></div>
                     <p class="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-1">Demand KaV/L</p>
-                    <h2 id="displayDemand" class="text-3xl font-black text-white text-mono">--</h2>
+                    <h2 id="displayDemand"
+                        class="font-black text-white font-mono leading-tight"
+                        style="font-size:clamp(1rem,12cqw,1.875rem);word-break:break-all">--</h2>
                     <div class="mt-3 flex items-center gap-2 text-[10px] font-bold text-blue-400">
                         <span class="px-2 py-0.5 rounded-full bg-blue-500/10 uppercase">Required Load</span>
                     </div>
                 </div>
-                <div class="glass-card rounded-3xl p-5 relative overflow-hidden group">
+                <div class="glass-card rounded-3xl p-4 xl:p-5 relative overflow-hidden group" style="container-type:inline-size">
                     <div class="absolute -right-4 -top-4 w-20 h-20 bg-emerald-500/5 rounded-full blur-2xl group-hover:bg-emerald-500/10 transition-colors"></div>
                     <p class="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-1">Approach Angle</p>
-                    <h2 id="displayApproach" class="text-3xl font-black text-white text-mono">--</h2>
+                    <h2 id="displayApproach"
+                        class="font-black text-white font-mono leading-tight"
+                        style="font-size:clamp(1rem,12cqw,1.875rem);word-break:break-all">--</h2>
                     <div class="mt-3 flex items-center gap-2 text-[10px] font-bold text-emerald-400">
                         <span class="px-2 py-0.5 rounded-full bg-emerald-500/10 uppercase">Efficiency ΔT</span>
                     </div>
                 </div>
-                <div class="glass-card rounded-3xl p-5 relative overflow-hidden group">
+                <div class="glass-card rounded-3xl p-4 xl:p-5 relative overflow-hidden group" style="container-type:inline-size">
                     <div class="absolute -right-4 -top-4 w-20 h-20 bg-amber-500/5 rounded-full blur-2xl group-hover:bg-amber-500/10 transition-colors"></div>
                     <p class="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-1">Thermal Range</p>
-                    <h2 id="displayRange" class="text-3xl font-black text-white text-mono">--</h2>
+                    <h2 id="displayRange"
+                        class="font-black text-white font-mono leading-tight"
+                        style="font-size:clamp(1rem,12cqw,1.875rem);word-break:break-all">--</h2>
                     <div class="mt-3 flex items-center gap-2 text-[10px] font-bold text-amber-400">
                         <span class="px-2 py-0.5 rounded-full bg-amber-500/10 uppercase">Heat Delta</span>
                     </div>
