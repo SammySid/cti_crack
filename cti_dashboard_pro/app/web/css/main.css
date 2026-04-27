@@ -45,6 +45,54 @@ button.active-tt svg {
     color: #22d3ee;
 }
 
+/* ── Config Panel Collapse / Expand ───────────────────────────────────────── */
+#configPanel {
+    /* Only animate width on xl+ screens */
+    overflow: visible;
+}
+
+@media (min-width: 1280px) {
+    #configPanel {
+        transition: width 0.28s cubic-bezier(0.4, 0, 0.2, 1);
+        width: 420px;
+        flex-shrink: 0;
+    }
+
+    #configPanel.is-collapsed {
+        width: 48px;
+    }
+
+    /* Hide main content when collapsed */
+    #configPanel.is-collapsed #configContent {
+        opacity: 0;
+        pointer-events: none;
+        visibility: hidden;
+    }
+
+    /* Show/hide collapsed strip */
+    #configPanel.is-collapsed #configStrip {
+        display: flex !important;
+    }
+
+    #configPanel:not(.is-collapsed) #configStrip {
+        display: none !important;
+    }
+
+    /* Toggle tab button — sits on the right edge of the panel */
+    #configToggleTab {
+        display: flex;
+    }
+}
+
+@media (max-width: 1279px) {
+    #configToggleTab {
+        display: none !important;
+    }
+    #configStrip {
+        display: none !important;
+    }
+}
+
 .input-premium {
     background: rgba(15, 23, 42, 0.5);
     border: 1px solid rgba(148, 163, 184, 0.2);

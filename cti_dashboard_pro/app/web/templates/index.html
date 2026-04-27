@@ -768,6 +768,55 @@ Single cell isolated testing involves UNCERTAINTY in measurement due to turbulen
     <script type="module" src="/js/ui.js"></script>
 
     <script>
+    /* ── Collapsible Configuration Panel ────────────────────────────────────
+       Toggle button (#configToggleTab) collapses/expands the left config panel.
+       Charts in the right column flex to fill the freed space.
+       State persisted in localStorage so preference survives refresh.
+    ──────────────────────────────────────────────────────────────────────── */
+    (function () {
+        const STORAGE_KEY = 'ct_cfg_panel_collapsed';
+        const panel   = document.getElementById('configPanel');
+        const toggleBtn = document.getElementById('configToggleTab');
+
+        if (!panel || !toggleBtn) return;
+
+        // The path element inside the chevron SVG
+        const chevronPath = toggleBtn.querySelector('path');
+
+        function setCollapsed(collapse, persist) {
+            if (collapse) {
+                panel.classList.add('is-collapsed');
+                // Point right = expand indicator
+                if (chevronPath) chevronPath.setAttribute('d', 'M9 5l7 7-7 7');
+                toggleBtn.title = 'Expand configuration panel';
+            } else {
+                panel.classList.remove('is-collapsed');
+                // Point left = collapse indicator
+                if (chevronPath) chevronPath.setAttribute('d', 'M15 19l-7-7 7-7');
+                toggleBtn.title = 'Collapse configuration panel';
+            }
+            if (persist) {
+                try { localStorage.setItem(STORAGE_KEY, collapse ? '1' : '0'); } catch(e) {}
+            }
+        }
+
+        // Restore saved state on load (no animation on init)
+        let saved = false;
+        try { saved = localStorage.getItem(STORAGE_KEY) === '1'; } catch(e) {}
+        // Disable transition for initial paint, re-enable after
+        panel.style.transition = 'none';
+        setCollapsed(saved, false);
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+            panel.style.transition = '';
+        }));
+
+        toggleBtn.addEventListener('click', function () {
+            setCollapsed(!panel.classList.contains('is-collapsed'), true);
+        });
+    })();
+    </script>
+
+    <script>
     /* ── Tooltip System ──────────────────────────────────────────────────────
        Click any [data-tt="key"] button to toggle its tooltip.
        The overlay is fixed-positioned and auto-adjusts to stay within the

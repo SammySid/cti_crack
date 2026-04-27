@@ -2,11 +2,7 @@
 
     <!-- ═══════════════════════════════════════════════════════════════════
          TOOLTIP CONTENT TEMPLATES
-         Content for the JS click-toggle tooltip system (id="tt-overlay").
-         These are never rendered directly — they are cloned by the JS when
-         the user clicks an info button.
          ═══════════════════════════════════════════════════════════════════ -->
-
     <template id="tt-targetCWT">
         <div class="bg-emerald-500/15 border-b border-emerald-500/20 px-4 py-2.5">
             <p class="text-[10px] font-black uppercase tracking-widest text-emerald-400">Target CWT at Design WBT</p>
@@ -19,10 +15,8 @@
             <div>
                 <p class="font-bold text-white text-[11px] mb-1">When to use</p>
                 <p>After entering a 100% Flow / 100% Range safety margin, subtract that margin from the Design CWT and enter the result here, then click <span class="font-bold text-emerald-400">Fit Curve</span>.</p>
-                <p class="mt-2 font-mono text-emerald-300 text-[10px] bg-emerald-950/50 border border-emerald-500/20 rounded-lg px-3 py-2">
-                    Design CWT 33°C − Margin 1.2°C = Target 31.8°C
-                </p>
-                <p class="mt-2">The engine then back-calculates Const C so the 100% curve exactly hits 33°C at Design WBT — not 34.2°C.</p>
+                <p class="mt-2 font-mono text-emerald-300 text-[10px] bg-emerald-950/50 border border-emerald-500/20 rounded-lg px-3 py-2">Design CWT 33°C − Margin 1.2°C = Target 31.8°C</p>
+                <p class="mt-2">The engine back-calculates Const C so the 100% curve exactly hits 33°C at Design WBT — not 34.2°C.</p>
             </div>
             <div class="bg-amber-950/40 border border-amber-500/20 rounded-lg px-3 py-2.5">
                 <p class="text-amber-400 font-bold text-[10px] uppercase tracking-wider mb-1">⚠ Why this matters</p>
@@ -42,7 +36,7 @@
             </div>
             <div>
                 <p class="font-bold text-white text-[11px] mb-1">When to use</p>
-                <p>When you need conservative protection at low ambient temperatures where cooling tower performance is harder to predict and measurement uncertainty is highest.</p>
+                <p>When you need conservative protection at low ambient temperatures where cooling tower performance is less predictable and measurement uncertainty is highest.</p>
             </div>
             <div class="bg-slate-800/60 border border-white/5 rounded-lg px-3 py-2.5">
                 <p class="text-cyan-400 font-bold text-[10px] uppercase tracking-wider mb-1">🔬 Engineering Note</p>
@@ -53,167 +47,169 @@
 
     <!-- ═══════════════════════════════════════════════════════════════════
          MAIN LAYOUT
-         xl+: 2-column (sticky config left | scrollable charts right)
-         < xl: single column (config then charts, stacked)
+         xl+: side-by-side with collapsible left panel
+         < xl: single column stacked
          ═══════════════════════════════════════════════════════════════════ -->
     <div class="flex flex-col xl:flex-row xl:items-start gap-6">
 
-        <!-- ── LEFT: Sticky Configuration Panel ─────────────────────────── -->
-        <aside class="xl:sticky xl:top-[60px] xl:w-[420px] xl:shrink-0 xl:max-h-[calc(100vh-68px)] xl:overflow-y-auto xl:custom-scrollbar">
-            <div class="glass-card rounded-2xl border border-white/10 overflow-hidden">
+        <!-- ══════════════════════════════════════════════════════════════
+             LEFT: Collapsible Configuration Panel
+             On xl+: sticky, fixed width (420px ↔ 48px), toggle on edge
+             On < xl: full-width, no toggle
+             ══════════════════════════════════════════════════════════════ -->
+        <aside id="configPanel"
+               class="xl:sticky xl:top-[60px] xl:max-h-[calc(100vh-68px)] xl:overflow-visible relative">
 
-                <!-- Panel Header -->
-                <div class="px-5 py-3.5 border-b border-white/5 flex flex-wrap items-center justify-between gap-2">
-                    <div class="flex items-center gap-2">
-                        <div class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></div>
-                        <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">Configuration Panel</h3>
-                    </div>
-                    <p id="exportStatus" class="text-[10px] text-slate-500 font-semibold tracking-wide">Initializing...</p>
+            <!-- ── Toggle tab (xl only, sits on right edge of panel) ───── -->
+            <button id="configToggleTab"
+                    title="Collapse / expand configuration panel"
+                    class="hidden absolute -right-3 top-1/2 -translate-y-1/2 z-40
+                           w-6 h-14 bg-slate-800 hover:bg-slate-700
+                           border border-white/10 rounded-r-xl
+                           flex items-center justify-center
+                           transition-colors shadow-lg group">
+                <svg class="w-3.5 h-3.5 text-slate-400 group-hover:text-cyan-400 transition-all"
+                     fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M15 19l-7-7 7-7"/>
+                </svg>
+            </button>
+
+            <!-- ── Collapsed strip: thin icon bar (xl only, hidden when expanded) ── -->
+            <div id="configStrip"
+                 class="hidden h-full glass-card rounded-2xl border border-white/10 overflow-hidden
+                        flex-col items-center py-4 gap-4 cursor-pointer"
+                 onclick="document.getElementById('configToggleTab').click()"
+                 title="Click to expand configuration panel">
+                <!-- Rotated label -->
+                <div class="flex-1 flex items-center justify-center">
+                    <span class="text-[9px] font-black uppercase tracking-[0.25em] text-slate-500"
+                          style="writing-mode:vertical-rl;transform:rotate(180deg)">
+                        CONFIGURATION
+                    </span>
                 </div>
+                <!-- Section dots -->
+                <div class="flex flex-col items-center gap-2 pb-2">
+                    <div class="w-2 h-2 rounded-full bg-cyan-500/60"   title="Project Scope"></div>
+                    <div class="w-2 h-2 rounded-full bg-blue-500/60"   title="Heat Load"></div>
+                    <div class="w-2 h-2 rounded-full bg-violet-500/60" title="Transfer Constants"></div>
+                    <div class="w-2 h-2 rounded-full bg-emerald-500/60"title="Auto-Calibration"></div>
+                    <div class="w-2 h-2 rounded-full bg-amber-500/60"  title="Safety Margins"></div>
+                    <div class="w-2 h-2 rounded-full bg-slate-500/60"  title="Chart Scaling"></div>
+                </div>
+            </div>
 
-                <div class="p-5 space-y-5">
+            <!-- ── Main config content ────────────────────────────────── -->
+            <div id="configContent"
+                 class="xl:max-h-[calc(100vh-68px)] xl:overflow-y-auto xl:custom-scrollbar
+                        transition-opacity duration-200">
+                <div class="glass-card rounded-2xl border border-white/10 overflow-hidden">
 
-                    <!-- ── Project Scope ──────────────────────────────────── -->
-                    <div>
-                        <p class="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 flex items-center gap-1.5">
-                            <span class="w-1 h-3 bg-cyan-500/70 rounded-full"></span>Project Scope
-                        </p>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div class="col-span-2">
-                                <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Client Authority</label>
-                                <input id="companyName" type="text" value="SS Cooling tower LTD"
-                                    class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-semibold uppercase tracking-wide">
-                            </div>
-                            <div>
-                                <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Lead Engineer</label>
-                                <input id="engineerName" type="text" value="Suresh Sarma"
-                                    class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-semibold uppercase tracking-wide">
-                            </div>
-                            <div>
-                                <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Deployment Date</label>
-                                <input id="date" type="date"
-                                    class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-semibold">
-                            </div>
-                            <div class="col-span-2">
-                                <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Asset Identity</label>
-                                <input id="projectName" type="text" value="Tower Efficiency Analysis"
-                                    class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-semibold uppercase tracking-wide">
-                            </div>
+                    <!-- Panel Header -->
+                    <div class="px-5 py-3.5 border-b border-white/5 flex flex-wrap items-center justify-between gap-2">
+                        <div class="flex items-center gap-2">
+                            <div class="w-1.5 h-1.5 rounded-full bg-cyan-400 animate-pulse"></div>
+                            <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">Configuration Panel</h3>
                         </div>
+                        <p id="exportStatus" class="text-[10px] text-slate-500 font-semibold tracking-wide">Initializing...</p>
                     </div>
 
-                    <div class="h-px bg-white/5"></div>
+                    <div class="p-5 space-y-5">
 
-                    <!-- ── Heat Load Specs ────────────────────────────────── -->
-                    <div>
-                        <p class="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 flex items-center gap-1.5">
-                            <span class="w-1 h-3 bg-blue-500/70 rounded-full"></span>Heat Load Specs
-                        </p>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">L/G Ratio</label>
-                                <input id="lgRatio" type="number" step="0.1" value="1.7"
-                                    class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
-                            </div>
-                            <div>
-                                <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Flow (m³/h)</label>
-                                <input id="designWaterFlow" type="number" step="10" value="3860"
-                                    class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
-                            </div>
-                            <div>
-                                <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">WBT (°C)</label>
-                                <input id="designWBT" type="number" step="0.1" value="28.6"
-                                    class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
-                            </div>
-                            <div>
-                                <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">CWT (°C)</label>
-                                <input id="designCWT" type="number" step="0.1" value="33"
-                                    class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
-                            </div>
-                            <div class="col-span-2">
-                                <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">HWT (°C)</label>
-                                <input id="designHWT" type="number" step="0.1" value="43"
-                                    class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
+                        <!-- ── Project Scope ──────────────────────────── -->
+                        <div>
+                            <p class="section-label flex items-center gap-1.5 text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">
+                                <span class="w-1 h-3 bg-cyan-500/70 rounded-full"></span>Project Scope
+                            </p>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div class="col-span-2">
+                                    <label class="field-label text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Client Authority</label>
+                                    <input id="companyName" type="text" value="SS Cooling tower LTD"
+                                        class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-semibold uppercase tracking-wide">
+                                </div>
+                                <div>
+                                    <label class="field-label text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Lead Engineer</label>
+                                    <input id="engineerName" type="text" value="Suresh Sarma"
+                                        class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-semibold uppercase tracking-wide">
+                                </div>
+                                <div>
+                                    <label class="field-label text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Deployment Date</label>
+                                    <input id="date" type="date"
+                                        class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-semibold">
+                                </div>
+                                <div class="col-span-2">
+                                    <label class="field-label text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Asset Identity</label>
+                                    <input id="projectName" type="text" value="Tower Efficiency Analysis"
+                                        class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-semibold uppercase tracking-wide">
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="h-px bg-white/5"></div>
+                        <div class="h-px bg-white/5"></div>
 
-                    <!-- ── Transfer Constants ─────────────────────────────── -->
-                    <div>
-                        <p class="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 flex items-center gap-1.5">
-                            <span class="w-1 h-3 bg-violet-500/70 rounded-full"></span>Transfer Constants
-                        </p>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block underline decoration-cyan-500/30">Const C</label>
-                                <input id="constantC" type="number" step="0.1" value="2.51"
-                                    class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
+                        <!-- ── Heat Load Specs ────────────────────────── -->
+                        <div>
+                            <p class="flex items-center gap-1.5 text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">
+                                <span class="w-1 h-3 bg-blue-500/70 rounded-full"></span>Heat Load Specs
+                            </p>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">L/G Ratio</label>
+                                    <input id="lgRatio" type="number" step="0.1" value="1.7"
+                                        class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Flow (m³/h)</label>
+                                    <input id="designWaterFlow" type="number" step="10" value="3860"
+                                        class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">WBT (°C)</label>
+                                    <input id="designWBT" type="number" step="0.1" value="28.6"
+                                        class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">CWT (°C)</label>
+                                    <input id="designCWT" type="number" step="0.1" value="33"
+                                        class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
+                                </div>
+                                <div class="col-span-2">
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">HWT (°C)</label>
+                                    <input id="designHWT" type="number" step="0.1" value="43"
+                                        class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
+                                </div>
                             </div>
-                            <div>
-                                <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block underline decoration-amber-500/30">Const m</label>
-                                <input id="constantM" type="number" step="0.1" value="0.66"
-                                    class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
+                        </div>
+
+                        <div class="h-px bg-white/5"></div>
+
+                        <!-- ── Transfer Constants ─────────────────────── -->
+                        <div>
+                            <p class="flex items-center gap-1.5 text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">
+                                <span class="w-1 h-3 bg-violet-500/70 rounded-full"></span>Transfer Constants
+                            </p>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block underline decoration-cyan-500/30">Const C</label>
+                                    <input id="constantC" type="number" step="0.1" value="2.51"
+                                        class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block underline decoration-amber-500/30">Const m</label>
+                                    <input id="constantM" type="number" step="0.1" value="0.66"
+                                        class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="h-px bg-white/5"></div>
+                        <div class="h-px bg-white/5"></div>
 
-                    <!-- ── Auto-Calibration ───────────────────────────────── -->
-                    <div class="bg-emerald-950/25 border border-emerald-500/25 rounded-xl p-4">
-                        <div class="flex items-center justify-between mb-3">
-                            <p class="text-[9px] font-black text-emerald-400 uppercase tracking-[0.2em]">Auto-Calibration</p>
-                            <button type="button" data-tt="targetCWT"
-                                aria-expanded="false" aria-label="Help: Target CWT at Design WBT"
-                                class="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-600 hover:text-emerald-400 transition-colors focus:outline-none px-1.5 py-0.5 rounded border border-emerald-500/20 hover:border-emerald-500/50 hover:bg-emerald-500/10">
-                                <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <circle cx="12" cy="12" r="10" stroke-width="1.5"/>
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 16v-4m0-4h.01"/>
-                                </svg>
-                                Guide
-                            </button>
-                        </div>
-                        <label class="text-[10px] font-bold text-emerald-400 uppercase px-1 mb-1.5 block">Target CWT at Design WBT</label>
-                        <div class="flex gap-2">
-                            <input id="targetCWT" type="number" step="0.1" value="32.0"
-                                class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono border border-emerald-500/30 focus:border-emerald-500/60">
-                            <button id="btnCalibrateC"
-                                class="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 px-4 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all border border-emerald-500/30 whitespace-nowrap">
-                                Fit Curve
-                            </button>
-                        </div>
-                        <p class="text-[9px] text-slate-500 mt-2 px-1">Recalculates Const C so the 100% curve exactly hits the target at Design WBT.</p>
-                    </div>
-
-                    <div class="h-px bg-white/5"></div>
-
-                    <!-- ── Safety Margins ─────────────────────────────────── -->
-                    <div>
-                        <div class="flex items-center justify-between mb-3">
-                            <div class="flex items-center gap-2">
-                                <p class="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] flex items-center gap-1.5">
-                                    <span class="w-1 h-3 bg-amber-500/70 rounded-full"></span>Safety Margins
-                                </p>
-                                <span class="text-[8px] bg-amber-500/10 text-amber-500 px-1.5 py-0.5 rounded border border-amber-500/20">OFFSETS °C</span>
-                            </div>
-                            <button id="btnClearMargins"
-                                class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-amber-500/40 text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 active:scale-95 transition-all font-bold text-[9px] uppercase tracking-widest">
-                                <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                                </svg>
-                                Clear All
-                            </button>
-                        </div>
-
-                        <!-- Low WBT Rotation -->
-                        <div class="mb-3">
-                            <div class="flex items-center gap-1.5 px-1 mb-1.5">
-                                <label class="text-[10px] font-bold text-slate-400 uppercase">Low WBT Rotation (at 20°C)</label>
-                                <button type="button" data-tt="lowWbt"
-                                    aria-expanded="false" aria-label="Help: Low WBT Rotation"
-                                    class="inline-flex items-center gap-1 text-[9px] font-bold text-amber-600 hover:text-amber-400 transition-colors focus:outline-none px-1.5 py-0.5 rounded border border-amber-500/20 hover:border-amber-500/50 hover:bg-amber-500/10">
+                        <!-- ── Auto-Calibration ───────────────────────── -->
+                        <div class="bg-emerald-950/25 border border-emerald-500/25 rounded-xl p-4">
+                            <div class="flex items-center justify-between mb-3">
+                                <p class="text-[9px] font-black text-emerald-400 uppercase tracking-[0.2em]">Auto-Calibration</p>
+                                <button type="button" data-tt="targetCWT"
+                                    aria-expanded="false" aria-label="Help: Target CWT at Design WBT"
+                                    class="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-600 hover:text-emerald-400 transition-colors focus:outline-none px-1.5 py-0.5 rounded border border-emerald-500/20 hover:border-emerald-500/50 hover:bg-emerald-500/10">
                                     <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <circle cx="12" cy="12" r="10" stroke-width="1.5"/>
                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 16v-4m0-4h.01"/>
@@ -221,110 +217,152 @@
                                     Guide
                                 </button>
                             </div>
-                            <input id="offsetWbt20" type="number" step="0.05" value="0.0"
-                                class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono border border-amber-500/15 focus:border-amber-500/40">
+                            <label class="text-[10px] font-bold text-emerald-400 uppercase px-1 mb-1.5 block">Target CWT at Design WBT</label>
+                            <div class="flex gap-2">
+                                <input id="targetCWT" type="number" step="0.1" value="32.0"
+                                    class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono border border-emerald-500/30 focus:border-emerald-500/60">
+                                <button id="btnCalibrateC"
+                                    class="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 px-4 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all border border-emerald-500/30 whitespace-nowrap">
+                                    Fit Curve
+                                </button>
+                            </div>
+                            <p class="text-[9px] text-slate-500 mt-2 px-1">Recalculates Const C so the 100% curve exactly hits the target at Design WBT.</p>
                         </div>
 
-                        <!-- 3×3 Offsets Grid -->
-                        <div class="bg-slate-900/40 rounded-xl p-3 border border-white/5">
-                            <div class="grid grid-cols-4 gap-1.5 items-center text-center">
-                                <div></div>
-                                <div class="text-[9px] font-bold text-slate-500 uppercase">80% RNG</div>
-                                <div class="text-[9px] font-bold text-slate-500 uppercase">100% RNG</div>
-                                <div class="text-[9px] font-bold text-slate-500 uppercase">120% RNG</div>
+                        <div class="h-px bg-white/5"></div>
 
-                                <div class="text-[8px] font-bold text-slate-500 uppercase text-right pr-1">90% FLOW</div>
-                                <input id="off90r80"   type="number" step="0.05" value="0.0" class="w-full input-premium rounded-lg px-1 py-2 text-xs font-mono text-center border border-amber-500/5 focus:border-amber-500/40">
-                                <input id="off90r100"  type="number" step="0.05" value="0.0" class="w-full input-premium rounded-lg px-1 py-2 text-xs font-mono text-center border border-amber-500/5 focus:border-amber-500/40">
-                                <input id="off90r120"  type="number" step="0.05" value="0.0" class="w-full input-premium rounded-lg px-1 py-2 text-xs font-mono text-center border border-amber-500/5 focus:border-amber-500/40">
+                        <!-- ── Safety Margins ─────────────────────────── -->
+                        <div>
+                            <div class="flex items-center justify-between mb-3">
+                                <div class="flex items-center gap-2">
+                                    <p class="flex items-center gap-1.5 text-[9px] font-black text-slate-500 uppercase tracking-[0.2em]">
+                                        <span class="w-1 h-3 bg-amber-500/70 rounded-full"></span>Safety Margins
+                                    </p>
+                                    <span class="text-[8px] bg-amber-500/10 text-amber-500 px-1.5 py-0.5 rounded border border-amber-500/20">OFFSETS °C</span>
+                                </div>
+                                <button id="btnClearMargins"
+                                    class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-amber-500/40 text-amber-400 bg-amber-500/10 hover:bg-amber-500/20 active:scale-95 transition-all font-bold text-[9px] uppercase tracking-widest">
+                                    <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                    </svg>
+                                    Clear All
+                                </button>
+                            </div>
 
-                                <div class="text-[8px] font-bold text-slate-500 uppercase text-right pr-1">100% FLOW</div>
-                                <input id="off100r80"  type="number" step="0.05" value="0.0" class="w-full input-premium rounded-lg px-1 py-2 text-xs font-mono text-center border border-amber-500/5 focus:border-amber-500/40">
-                                <input id="off100r100" type="number" step="0.05" value="0.0" class="w-full input-premium rounded-lg px-1 py-2 text-xs font-mono text-center border border-amber-500/5 focus:border-amber-500/40">
-                                <input id="off100r120" type="number" step="0.05" value="0.0" class="w-full input-premium rounded-lg px-1 py-2 text-xs font-mono text-center border border-amber-500/5 focus:border-amber-500/40">
+                            <!-- Low WBT Rotation -->
+                            <div class="mb-3">
+                                <div class="flex items-center gap-1.5 px-1 mb-1.5">
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase">Low WBT Rotation (at 20°C)</label>
+                                    <button type="button" data-tt="lowWbt"
+                                        aria-expanded="false" aria-label="Help: Low WBT Rotation"
+                                        class="inline-flex items-center gap-1 text-[9px] font-bold text-amber-600 hover:text-amber-400 transition-colors focus:outline-none px-1.5 py-0.5 rounded border border-amber-500/20 hover:border-amber-500/50 hover:bg-amber-500/10">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <circle cx="12" cy="12" r="10" stroke-width="1.5"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 16v-4m0-4h.01"/>
+                                        </svg>
+                                        Guide
+                                    </button>
+                                </div>
+                                <input id="offsetWbt20" type="number" step="0.05" value="0.0"
+                                    class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono border border-amber-500/15 focus:border-amber-500/40">
+                            </div>
 
-                                <div class="text-[8px] font-bold text-slate-500 uppercase text-right pr-1">110% FLOW</div>
-                                <input id="off110r80"  type="number" step="0.05" value="0.0" class="w-full input-premium rounded-lg px-1 py-2 text-xs font-mono text-center border border-amber-500/5 focus:border-amber-500/40">
-                                <input id="off110r100" type="number" step="0.05" value="0.0" class="w-full input-premium rounded-lg px-1 py-2 text-xs font-mono text-center border border-amber-500/5 focus:border-amber-500/40">
-                                <input id="off110r120" type="number" step="0.05" value="0.0" class="w-full input-premium rounded-lg px-1 py-2 text-xs font-mono text-center border border-amber-500/5 focus:border-amber-500/40">
+                            <!-- 3×3 Grid -->
+                            <div class="bg-slate-900/40 rounded-xl p-3 border border-white/5">
+                                <div class="grid grid-cols-4 gap-1.5 items-center text-center">
+                                    <div></div>
+                                    <div class="text-[9px] font-bold text-slate-500 uppercase">80% RNG</div>
+                                    <div class="text-[9px] font-bold text-slate-500 uppercase">100% RNG</div>
+                                    <div class="text-[9px] font-bold text-slate-500 uppercase">120% RNG</div>
+
+                                    <div class="text-[8px] font-bold text-slate-500 uppercase text-right pr-1">90%</div>
+                                    <input id="off90r80"   type="number" step="0.05" value="0.0" class="w-full input-premium rounded-lg px-1 py-2 text-xs font-mono text-center border border-amber-500/5 focus:border-amber-500/40">
+                                    <input id="off90r100"  type="number" step="0.05" value="0.0" class="w-full input-premium rounded-lg px-1 py-2 text-xs font-mono text-center border border-amber-500/5 focus:border-amber-500/40">
+                                    <input id="off90r120"  type="number" step="0.05" value="0.0" class="w-full input-premium rounded-lg px-1 py-2 text-xs font-mono text-center border border-amber-500/5 focus:border-amber-500/40">
+
+                                    <div class="text-[8px] font-bold text-slate-500 uppercase text-right pr-1">100%</div>
+                                    <input id="off100r80"  type="number" step="0.05" value="0.0" class="w-full input-premium rounded-lg px-1 py-2 text-xs font-mono text-center border border-amber-500/5 focus:border-amber-500/40">
+                                    <input id="off100r100" type="number" step="0.05" value="0.0" class="w-full input-premium rounded-lg px-1 py-2 text-xs font-mono text-center border border-amber-500/5 focus:border-amber-500/40">
+                                    <input id="off100r120" type="number" step="0.05" value="0.0" class="w-full input-premium rounded-lg px-1 py-2 text-xs font-mono text-center border border-amber-500/5 focus:border-amber-500/40">
+
+                                    <div class="text-[8px] font-bold text-slate-500 uppercase text-right pr-1">110%</div>
+                                    <input id="off110r80"  type="number" step="0.05" value="0.0" class="w-full input-premium rounded-lg px-1 py-2 text-xs font-mono text-center border border-amber-500/5 focus:border-amber-500/40">
+                                    <input id="off110r100" type="number" step="0.05" value="0.0" class="w-full input-premium rounded-lg px-1 py-2 text-xs font-mono text-center border border-amber-500/5 focus:border-amber-500/40">
+                                    <input id="off110r120" type="number" step="0.05" value="0.0" class="w-full input-premium rounded-lg px-1 py-2 text-xs font-mono text-center border border-amber-500/5 focus:border-amber-500/40">
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="h-px bg-white/5"></div>
+                        <div class="h-px bg-white/5"></div>
 
-                    <!-- ── Chart Scaling ──────────────────────────────────── -->
-                    <div>
-                        <p class="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 flex items-center gap-1.5">
-                            <span class="w-1 h-3 bg-slate-500/70 rounded-full"></span>Chart Scaling
-                        </p>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div>
-                                <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">X-Min (WBT)</label>
-                                <input id="axXMin" type="number" step="1" value="18"
-                                    class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
-                            </div>
-                            <div>
-                                <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">X-Max (WBT)</label>
-                                <input id="axXMax" type="number" step="1" value="30"
-                                    class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
-                            </div>
-                            <div>
-                                <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Y-Min (CWT)</label>
-                                <input id="axYMin" type="number" step="1" value="25"
-                                    class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
-                            </div>
-                            <div>
-                                <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Y-Max (CWT)</label>
-                                <input id="axYMax" type="number" step="1" value="38"
-                                    class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
+                        <!-- ── Chart Scaling ──────────────────────────── -->
+                        <div>
+                            <p class="flex items-center gap-1.5 text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">
+                                <span class="w-1 h-3 bg-slate-500/70 rounded-full"></span>Chart Scaling
+                            </p>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">X-Min (WBT)</label>
+                                    <input id="axXMin" type="number" step="1" value="18"
+                                        class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">X-Max (WBT)</label>
+                                    <input id="axXMax" type="number" step="1" value="30"
+                                        class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Y-Min (CWT)</label>
+                                    <input id="axYMin" type="number" step="1" value="25"
+                                        class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Y-Max (CWT)</label>
+                                    <input id="axYMax" type="number" step="1" value="38"
+                                        class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
+                                </div>
                             </div>
                         </div>
-                    </div>
 
-                    <div class="h-px bg-white/5"></div>
+                        <div class="h-px bg-white/5"></div>
 
-                    <!-- ── Export Actions ─────────────────────────────────── -->
-                    <div class="space-y-2.5">
-                        <p class="text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3 flex items-center gap-1.5">
-                            <span class="w-1 h-3 bg-emerald-500/70 rounded-full"></span>Actions
-                        </p>
-                        <button id="exportExcel"
-                            class="w-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all border border-emerald-500/20 flex items-center justify-center gap-2">
-                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
-                            </svg>
-                            <span id="exportExcelLabel">Export Data &amp; Curves</span>
-                        </button>
-                        <button id="exportPDF"
-                            class="w-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all border border-rose-500/20 flex items-center justify-center gap-2">
-                            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
-                            </svg>
-                            Generate Report
-                        </button>
-                        <button id="resetDefaults"
-                            class="w-full bg-slate-800/40 hover:bg-slate-800/70 text-slate-500 hover:text-slate-400 py-2.5 rounded-xl font-bold text-[9px] uppercase tracking-widest transition-all border border-white/5">
-                            Reset All Parameters
-                        </button>
-                    </div>
+                        <!-- ── Export Actions ─────────────────────────── -->
+                        <div class="space-y-2.5">
+                            <p class="flex items-center gap-1.5 text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">
+                                <span class="w-1 h-3 bg-emerald-500/70 rounded-full"></span>Actions
+                            </p>
+                            <button id="exportExcel"
+                                class="w-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all border border-emerald-500/20 flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                <span id="exportExcelLabel">Export Data &amp; Curves</span>
+                            </button>
+                            <button id="exportPDF"
+                                class="w-full bg-rose-500/10 hover:bg-rose-500/20 text-rose-400 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all border border-rose-500/20 flex items-center justify-center gap-2">
+                                <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z"/>
+                                </svg>
+                                Generate Report
+                            </button>
+                            <button id="resetDefaults"
+                                class="w-full bg-slate-800/40 hover:bg-slate-800/70 text-slate-500 hover:text-slate-400 py-2.5 rounded-xl font-bold text-[9px] uppercase tracking-widest transition-all border border-white/5">
+                                Reset All Parameters
+                            </button>
+                        </div>
 
-                </div>
-            </div>
-        </aside>
+                    </div><!-- /p-5 -->
+                </div><!-- /glass-card -->
+            </div><!-- /#configContent -->
+        </aside><!-- /#configPanel -->
 
-        <!-- ── RIGHT: KaV/L Stats + Performance Charts ───────────────────── -->
+        <!-- ══════════════════════════════════════════════════════════════
+             RIGHT: KaV/L Stats + Full Performance Charts
+             ══════════════════════════════════════════════════════════════ -->
         <div class="flex-1 min-w-0 space-y-6 xl:space-y-8">
 
-            <!-- Section label visible only on xl (orient the user) -->
-            <div class="hidden xl:flex items-center gap-3 pt-1">
-                <div class="w-1 h-4 bg-cyan-500 rounded-full"></div>
-                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-400">Live Performance Output</p>
-                <div class="flex-1 h-px bg-white/5"></div>
-            </div>
-
-            <!-- Hero KaV/L Stats -->
-            <div class="grid grid-cols-2 lg:grid-cols-4 xl:grid-cols-2 2xl:grid-cols-4 gap-4">
+            <!-- KaV/L stat cards -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
                 <div class="glass-card rounded-3xl p-5 relative overflow-hidden group">
                     <div class="absolute -right-4 -top-4 w-20 h-20 bg-cyan-500/5 rounded-full blur-2xl group-hover:bg-cyan-500/10 transition-colors"></div>
                     <p class="text-[10px] font-extrabold text-slate-500 uppercase tracking-widest mb-1">Supply KaV/L</p>
@@ -359,7 +397,7 @@
                 </div>
             </div>
 
-            <!-- Performance Vector Analysis -->
+            <!-- Section header -->
             <div class="border-l-4 border-cyan-500 px-5">
                 <h3 class="text-xl font-black tracking-tighter uppercase italic text-slate-300">Performance Vector Analysis</h3>
                 <p class="text-slate-500 text-xs mt-1 font-semibold uppercase tracking-widest">Merkel Integration Mapping • Grid Resolution 0.25°C</p>
@@ -371,7 +409,7 @@
                     <div class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></div>
                     <span class="text-[10px] font-black uppercase tracking-widest text-slate-300">LOW FLOW ENGINE (90%)</span>
                 </div>
-                <div class="h-[280px] sm:h-[360px] xl:h-[420px] w-full mt-10">
+                <div class="h-[300px] sm:h-[380px] xl:h-[460px] w-full mt-10">
                     <canvas id="chart1"></canvas>
                 </div>
                 <div class="mt-5 pt-5 border-t border-white/5 flex justify-between items-center text-[10px] font-bold text-slate-500 tracking-widest">
@@ -386,7 +424,7 @@
                     <div class="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></div>
                     <span class="text-[10px] font-black uppercase tracking-widest text-slate-300">NOMINAL FLOW ENGINE (100%)</span>
                 </div>
-                <div class="h-[280px] sm:h-[360px] xl:h-[420px] w-full mt-10">
+                <div class="h-[300px] sm:h-[380px] xl:h-[460px] w-full mt-10">
                     <canvas id="chart2"></canvas>
                 </div>
                 <div class="mt-5 pt-5 border-t border-white/5 flex justify-between items-center text-[10px] font-bold text-slate-500 tracking-widest">
@@ -401,7 +439,7 @@
                     <div class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></div>
                     <span class="text-[10px] font-black uppercase tracking-widest text-slate-300">HIGH FLOW ENGINE (110%)</span>
                 </div>
-                <div class="h-[280px] sm:h-[360px] xl:h-[420px] w-full mt-10">
+                <div class="h-[300px] sm:h-[380px] xl:h-[460px] w-full mt-10">
                     <canvas id="chart3"></canvas>
                 </div>
                 <div class="mt-5 pt-5 border-t border-white/5 flex justify-between items-center text-[10px] font-bold text-slate-500 tracking-widest">
