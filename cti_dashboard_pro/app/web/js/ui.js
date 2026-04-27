@@ -112,8 +112,17 @@ export const ui = {
                     ui.isCalculating = false;
                     ui.resolveCurveWaiters(true);
                     ui.updateExportUiState('Curves ready. Export is enabled.');
-                    // Fetch base (no-offset) curves for comparison table if any offset is active
-                    if (hasOffsets) {
+                    // Global check — any offset across any flow active?
+                    // Must be done here (not per-flow) to avoid race: last flow to
+                    // return could be one with no offsets, wrongly clearing baseCurveData.
+                    const GLOBAL_OFFSET_KEYS = [
+                        'offsetWbt20',
+                        'off90r80',  'off90r100',  'off90r120',
+                        'off100r80', 'off100r100', 'off100r120',
+                        'off110r80', 'off110r100', 'off110r120',
+                    ];
+                    const anyOffsetActive = GLOBAL_OFFSET_KEYS.some(k => ui.inputs[k] !== 0);
+                    if (anyOffsetActive) {
                         ui.fetchAndRenderBaseComparison();
                     } else {
                         ui.baseCurveData = null;
