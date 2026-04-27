@@ -385,116 +385,253 @@ export const ui = {
 
         if (!hasOffsets || !ui.baseCurveData) return;
 
-        // ── Build the subtitle string ─────────────────────────────────────
-        const activeOffsets = OFFSET_KEYS
-            .filter(k => ui.inputs[k] !== 0)
-            .map(k => {
-                const labels = {
-                    offsetWbt20: 'WBT@20°C Tilt',
-                    off90r80: '90%F/80%R', off90r100: '90%F/100%R', off90r120: '90%F/120%R',
-                    off100r80:'100%F/80%R',off100r100:'100%F/100%R',off100r120:'100%F/120%R',
-                    off110r80:'110%F/80%R',off110r100:'110%F/100%R',off110r120:'110%F/120%R',
-                };
-                return `${labels[k] || k}: +${ui.inputs[k]}°C`;
-            });
+        // Subtitle
         const subtitle = document.getElementById('marginModalSubtitle');
-        if (subtitle) subtitle.textContent = `Active margins — ${activeOffsets.join(' · ')}`;
+        const activeCount = OFFSET_KEYS.filter(k => ui.inputs[k] !== 0).length;
+        if (subtitle) subtitle.textContent =
+            `${activeCount} active margin${activeCount > 1 ? 's' : ''} applied · 100% Range CWT comparison at 0.5°C resolution`;
 
-        // ── WBT points at 0.5°C resolution ───────────────────────────────
+        // Build all modal content in marginModalBody
+        const body = document.getElementById('marginModalBody');
+        if (!body) return;
+
+        // ── 1. Applied Margins Summary Grid ──────────────────────────────
+        const flows3  = [90, 100, 110];
+        const ranges3 = [80, 100, 120];
+        const rLabels = { 80: '80% Range', 100: '100% Range', 120: '120% Range' };
+        const fColors = { 90: '#10b981', 100: '#06b6d4', 110: '#f59e0b' };
+
+        function marginVal(f, r) {
+            if (f === 'wbt20') return ui.inputs.offsetWbt20;
+            const k = `off${f}r${r}`;
+            return ui.inputs[k] || 0;
+        }
+        function marginCell(val, isKey) {
+            const nonZero = Math.abs(val) > 0.001;
+            const bg  = nonZero ? (isKey ? 'bg-amber-500/20 border-amber-500/40' : 'bg-amber-500/10 border-amber-500/20')
+                                : 'bg-white/[0.03] border-white/8';
+            const txt = nonZero ? (isKey ? 'text-amber-300 font-black' : 'text-amber-400 font-bold')
+                                : 'text-slate-600 font-semibold';
+            const prefix = val > 0 ? '+' : '';
+            return `<div class="rounded-lg border px-2 py-1.5 text-center font-mono text-[11px] ${bg} ${txt}">
+                        ${nonZero ? prefix + val.toFixed(2) + '°C' : '—'}
+                    </div>`;
+        }
+
+        let gridRows = '';
+        flows3.forEach(f => {
+            gridRows += `<div class="contents">
+                <div class="flex items-center px-2 py-1 text-[10px] font-black uppercase tracking-wider" style="color:${fColors[f]}">${f}% Flow</div>`;
+            ranges3.forEach(r => {
+                const val = marginVal(f, r);
+                const isKey = (f === 100 && r === 100); // the "contractual" cell
+                gridRows += marginCell(val, isKey);
+            });
+            gridRows += `</div>`;
+        });
+
+        const wbtTilt = ui.inputs.offsetWbt20;
+
+        // ── 2. WBT points at 0.5°C ───────────────────────────────────────
         const wbtPoints = [];
         for (let w = ui.inputs.axXMin; w <= ui.inputs.axXMax + 0.01; w += 0.5) {
             wbtPoints.push(Math.round(w * 10) / 10);
         }
-        // Ensure design WBT is always included
         const dWBT = Math.round(ui.inputs.designWBT * 10) / 10;
         if (!wbtPoints.some(p => Math.abs(p - dWBT) < 0.01)) {
             wbtPoints.push(dWBT);
             wbtPoints.sort((a, b) => a - b);
         }
 
-        // ── Lookup helper ─────────────────────────────────────────────────
-        function lookup(curveArr, wbt, key) {
-            if (!curveArr || !curveArr.length) return null;
-            return curveArr.reduce((prev, curr) =>
-                Math.abs(curr.wbt - wbt) < Math.abs(prev.wbt - wbt) ? curr : prev
-            )[key];
+        // Lookup helper
+        function lookup(arr, wbt, key) {
+            if (!arr || !arr.length) return null;
+            return arr.reduce((p, c) => Math.abs(c.wbt - wbt) < Math.abs(p.wbt - wbt) ? c : p)[key];
         }
 
-        // ── Build table HTML ──────────────────────────────────────────────
-        const flows = [
-            { pct: 90,  label: '90% Flow',  baseCls: 'text-emerald-400', valCls: 'text-emerald-300' },
-            { pct: 100, label: '100% Flow', baseCls: 'text-cyan-400',    valCls: 'text-cyan-300'    },
-            { pct: 110, label: '110% Flow', baseCls: 'text-amber-400',   valCls: 'text-amber-300'   },
-        ];
+        // Store wbt/delta data for filter
+        ui._marginTableData = wbtPoints.map(wbt => {
+            const isDesign = Math.abs(wbt - dWBT) < 0.01;
+            const row = { wbt, isDesign, cells: [] };
+            flows3.forEach(f => {
+                const base   = lookup(ui.baseCurveData[f], wbt, 'range100');
+                const margin = lookup(ui.curveData[f],     wbt, 'range100');
+                const delta  = (base != null && margin != null) ? margin - base : null;
+                row.cells.push({ f, base, margin, delta });
+            });
+            return row;
+        });
 
-        // Column headers — 1 WBT col + 3 groups of (Base | Margin | Δ)
+        // ── 3. Assemble full modal body ───────────────────────────────────
+        const st = ui._marginModalState;
+
+        body.innerHTML = `
+        <!-- Applied Margins Summary -->
+        <div class="mb-5 p-4 rounded-2xl border border-white/8 bg-white/[0.015]">
+            <p class="text-[9px] font-black uppercase tracking-[0.22em] text-slate-500 mb-3">Applied Safety Margins (°C offset per cell)</p>
+            <div class="grid gap-2" style="grid-template-columns: auto repeat(3, 1fr)">
+                <!-- Header row -->
+                <div></div>
+                ${ranges3.map(r => `<div class="text-center text-[9px] font-black uppercase tracking-wider text-slate-500 pb-1">${rLabels[r]}</div>`).join('')}
+                ${gridRows}
+            </div>
+            ${Math.abs(wbtTilt) > 0.001 ? `
+            <div class="mt-3 pt-3 border-t border-white/5 flex items-center gap-3">
+                <span class="text-[9px] font-black uppercase tracking-wider text-slate-500">Low WBT Rotation (at 20°C)</span>
+                <span class="font-mono text-[11px] text-amber-300 font-black bg-amber-500/10 border border-amber-500/20 rounded-lg px-2.5 py-1">+${wbtTilt.toFixed(2)}°C</span>
+                <span class="text-[9px] text-slate-600">↳ tapers to zero at Design WBT ${dWBT.toFixed(1)}°C</span>
+            </div>` : `
+            <div class="mt-3 pt-3 border-t border-white/5 text-[9px] text-slate-700 italic">Low WBT Rotation: not applied</div>`}
+            <div class="mt-3 pt-3 border-t border-white/5 flex flex-wrap items-center gap-2 text-[9px] text-slate-500">
+                <span class="w-3 h-3 rounded bg-amber-500/20 border border-amber-500/40 inline-block"></span>Active offset &nbsp;·&nbsp;
+                <span class="w-3 h-3 rounded bg-white/[0.03] border border-white/8 inline-block"></span>Zero (no margin) &nbsp;·&nbsp;
+                <span class="text-amber-300 font-black">★ 100%F/100%R</span> = contractual guarantee cell
+            </div>
+        </div>
+
+        <!-- Table Controls -->
+        <div class="flex flex-wrap items-center gap-2 mb-3">
+            <span class="text-[9px] font-black uppercase tracking-wider text-slate-500 mr-1">Show flows:</span>
+            ${flows3.map(f => {
+                const on = st.flows.has(f);
+                const cls = on
+                    ? (f===90  ? 'bg-emerald-500/20 border-emerald-500/40 text-emerald-400'
+                      :f===100 ? 'bg-cyan-500/20 border-cyan-500/40 text-cyan-400'
+                               : 'bg-amber-500/20 border-amber-500/40 text-amber-400')
+                    : 'bg-white/5 border-white/10 text-slate-600';
+                return `<button onclick="window._toggleMarginFlow(${f}); event.stopPropagation();"
+                            class="px-3 py-1 rounded-lg border text-[10px] font-black uppercase tracking-wider transition-all ${cls}">
+                            ${f}% Flow
+                        </button>`;
+            }).join('')}
+            <div class="ml-auto">
+                <button onclick="window._toggleMarginChangedOnly(); event.stopPropagation();"
+                    class="px-3 py-1 rounded-lg border text-[10px] font-black uppercase tracking-wider transition-all
+                           ${st.changedOnly ? 'bg-violet-500/20 border-violet-500/40 text-violet-400' : 'bg-white/5 border-white/10 text-slate-500'}">
+                    ${st.changedOnly ? '✓ Changed rows only' : 'All rows'}
+                </button>
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div id="marginTableWrap"></div>`;
+
+        // Render table separately (also called on toggle)
+        ui._renderMarginTable();
+    },
+
+    _renderMarginTable: () => {
+        const wrap = document.getElementById('marginTableWrap');
+        if (!wrap || !ui._marginTableData) return;
+
+        const st     = ui._marginModalState;
+        const flows3 = [90, 100, 110];
+        const fMeta  = {
+            90:  { label: '90% Flow',  baseCls: 'text-emerald-400', valCls: 'text-emerald-300' },
+            100: { label: '100% Flow', baseCls: 'text-cyan-400',    valCls: 'text-cyan-300'    },
+            110: { label: '110% Flow', baseCls: 'text-amber-400',   valCls: 'text-amber-300'   },
+        };
+        const visFlows = flows3.filter(f => st.flows.has(f));
+        const dWBT = Math.round(ui.inputs.designWBT * 10) / 10;
+
+        // Filter rows
+        let rows = ui._marginTableData;
+        if (st.changedOnly) {
+            rows = rows.filter(r => r.isDesign || r.cells.some(c =>
+                visFlows.includes(c.f) && c.delta != null && Math.abs(c.delta) >= 0.01
+            ));
+        }
+
+        // thead
+        let colCount = 1 + visFlows.length * 3;
         let thead = `<tr class="border-b border-white/10 bg-slate-900/70">
-            <th rowspan="2" class="px-3 py-2 text-left text-[10px] text-slate-500 font-black uppercase tracking-wider sticky left-0 bg-slate-900/90 z-10">
-                WBT<br><span class="text-[8px] font-semibold normal-case tracking-normal text-slate-600">(°C)</span>
+            <th rowspan="2" class="px-3 py-2 text-left text-[10px] text-slate-500 font-black uppercase sticky left-0 bg-slate-900/90 z-10 min-w-[72px]">
+                WBT&nbsp;<span class="text-slate-700 font-semibold">(°C)</span>
             </th>`;
-        flows.forEach(f => {
-            thead += `<th colspan="3" class="px-2 py-2 text-center text-[10px] ${f.baseCls} font-black uppercase tracking-wider border-l border-white/5">
-                ${f.label}
-            </th>`;
+        visFlows.forEach(f => {
+            const m = fMeta[f];
+            thead += `<th colspan="3" class="px-2 py-2 text-center text-[10px] ${m.baseCls} font-black uppercase border-l border-white/8">${m.label}</th>`;
         });
         thead += `</tr><tr class="border-b border-white/8 bg-slate-900/50">`;
-        flows.forEach(() => {
-            thead += `
-                <th class="px-2 py-1.5 text-center text-[9px] text-slate-500 font-bold border-l border-white/5">Base</th>
-                <th class="px-2 py-1.5 text-center text-[9px] text-slate-400 font-bold">Margin</th>
-                <th class="px-2 py-1.5 text-center text-[9px] text-slate-500 font-bold">Δ</th>`;
+        visFlows.forEach(() => {
+            thead += `<th class="px-2 py-1 text-center text-[9px] text-slate-600 font-bold border-l border-white/8">Base</th>
+                      <th class="px-2 py-1 text-center text-[9px] text-slate-400 font-bold">Margin</th>
+                      <th class="px-2 py-1 text-center text-[9px] text-slate-600 font-bold">Δ</th>`;
         });
-        thead += '</tr>';
+        thead += `</tr>`;
 
+        // tbody
         let tbody = '';
-        wbtPoints.forEach(wbt => {
-            const isDesign = Math.abs(wbt - dWBT) < 0.01;
-            const trCls = isDesign
-                ? 'bg-emerald-950/30 border-y border-emerald-500/20 font-black'
-                : (Math.round(wbt * 2) % 2 === 0 ? 'border-b border-white/5' : 'border-b border-white/[0.03] bg-white/[0.01]');
+        if (rows.length === 0) {
+            tbody = `<tr><td colspan="${colCount}" class="px-4 py-6 text-center text-[11px] text-slate-600 italic">No rows with active delta in selected flows. Disable "Changed rows only" to see all points.</td></tr>`;
+        } else {
+            rows.forEach(row => {
+                const { wbt, isDesign } = row;
+                const trCls = isDesign
+                    ? 'bg-emerald-950/30 border-y border-emerald-500/20'
+                    : (Math.round(wbt * 2) % 2 === 0 ? 'border-b border-white/5' : 'border-b border-white/[0.03] bg-white/[0.01]');
 
-            let cells = `<td class="px-3 py-1.5 font-mono font-black ${isDesign ? 'text-slate-100' : 'text-slate-400'} whitespace-nowrap sticky left-0 ${isDesign ? 'bg-emerald-950/60' : 'bg-slate-900/80'} z-10">
-                ${wbt.toFixed(1)}${isDesign ? '&nbsp;<span class="text-emerald-400 text-[9px] not-italic">★</span>' : ''}
-            </td>`;
+                let cells = `<td class="px-3 py-1.5 font-mono font-black text-[12px] ${isDesign ? 'text-slate-100' : 'text-slate-400'} whitespace-nowrap sticky left-0 ${isDesign ? 'bg-emerald-950/60' : 'bg-slate-900/80'} z-10">
+                    ${wbt.toFixed(1)}${isDesign ? '&nbsp;<span class="text-emerald-400 text-[10px]">★</span>' : ''}
+                </td>`;
 
-            flows.forEach(f => {
-                const base   = lookup(ui.baseCurveData[f.pct], wbt, 'range100');
-                const margin = lookup(ui.curveData[f.pct],     wbt, 'range100');
-                if (base == null || margin == null) {
-                    cells += `<td colspan="3" class="px-2 py-1.5 text-center text-slate-700 border-l border-white/5">—</td>`;
-                    return;
-                }
-                const delta    = margin - base;
-                const deltaAbs = Math.abs(delta);
-                const isGuaranteed = isDesign && f.pct === 100 && deltaAbs < 0.05;
+                row.cells.filter(c => visFlows.includes(c.f)).forEach(c => {
+                    const m = fMeta[c.f];
+                    if (c.base == null || c.margin == null) {
+                        cells += `<td colspan="3" class="px-2 py-1.5 text-center text-slate-700 border-l border-white/8">—</td>`;
+                        return;
+                    }
+                    const isGuaranteed = isDesign && c.f === 100 && Math.abs(c.delta) < 0.05;
+                    const sign  = c.delta >= 0 ? '+' : '';
+                    const dCls  = isGuaranteed   ? 'text-emerald-400 font-black'
+                                : Math.abs(c.delta) < 0.01 ? 'text-slate-600'
+                                : c.delta > 0              ? 'text-amber-400'
+                                                           : 'text-sky-400';
+                    const dText = isGuaranteed ? '✓ guaranteed' : `${sign}${c.delta.toFixed(2)}`;
 
-                const sign  = delta >= 0 ? '+' : '';
-                const dCls  = isGuaranteed ? 'text-emerald-400 font-black'
-                            : deltaAbs < 0.01 ? 'text-slate-600'
-                            : delta > 0       ? 'text-amber-400'
-                                              : 'text-sky-400';
-                const dText = isGuaranteed ? '✓' : `${sign}${delta.toFixed(2)}`;
+                    cells += `
+                        <td class="px-2 py-1.5 text-right font-mono text-[11px] text-slate-500 border-l border-white/8">${c.base.toFixed(2)}</td>
+                        <td class="px-2 py-1.5 text-right font-mono text-[11px] ${m.valCls} font-bold">${c.margin.toFixed(2)}</td>
+                        <td class="px-2 py-1.5 text-center font-mono text-[11px] ${dCls} ${isGuaranteed ? 'text-[9px]' : ''}">${dText}</td>`;
+                });
 
-                cells += `
-                    <td class="px-2 py-1.5 text-right font-mono text-[11px] text-slate-500 border-l border-white/5">${base.toFixed(2)}</td>
-                    <td class="px-2 py-1.5 text-right font-mono text-[11px] ${f.valCls} font-bold">${margin.toFixed(2)}</td>
-                    <td class="px-2 py-1.5 text-center font-mono text-[10px] ${dCls}">${dText}</td>`;
+                tbody += `<tr class="${trCls}">${cells}</tr>`;
             });
-
-            tbody += `<tr class="${trCls}">${cells}</tr>`;
-        });
-
-        const body = document.getElementById('marginModalBody');
-        if (body) {
-            body.innerHTML = `
-                <div class="rounded-2xl border border-white/8 overflow-hidden">
-                    <table class="w-full border-collapse text-[11px] font-mono" style="min-width:680px">
-                        <thead>${thead}</thead>
-                        <tbody>${tbody}</tbody>
-                    </table>
-                </div>`;
         }
+
+        const minW = 200 + visFlows.length * 180;
+        wrap.innerHTML = `
+            <div class="rounded-2xl border border-white/8 overflow-hidden">
+                <table class="w-full border-collapse text-[11px] font-mono" style="min-width:${minW}px">
+                    <thead>${thead}</thead>
+                    <tbody>${tbody}</tbody>
+                </table>
+            </div>
+            <p class="text-[9px] text-slate-700 mt-2 px-1">
+                ★ Design WBT ${dWBT.toFixed(1)}°C — 100% Flow at this point must show ✓ guaranteed.
+                Showing ${rows.length} of ${ui._marginTableData.length} WBT points.
+            </p>`;
     }
+};
+
+// ── Margin Modal global state & toggle handlers ────────────────────────────
+ui._marginModalState = { flows: new Set([90, 100, 110]), changedOnly: false };
+ui._marginTableData  = null;
+
+window._toggleMarginFlow = function(pct) {
+    const st = ui._marginModalState;
+    if (st.flows.has(pct)) {
+        if (st.flows.size > 1) st.flows.delete(pct); // keep at least 1
+    } else {
+        st.flows.add(pct);
+    }
+    // Re-render just controls + table (re-call full render to refresh button states)
+    ui.renderMarginComparison();
+};
+
+window._toggleMarginChangedOnly = function() {
+    ui._marginModalState.changedOnly = !ui._marginModalState.changedOnly;
+    ui.renderMarginComparison();
 };
 
 window.addEventListener('DOMContentLoaded', ui.init);
