@@ -768,6 +768,33 @@ Single cell isolated testing involves UNCERTAINTY in measurement due to turbulen
     <script type="module" src="/js/ui.js"></script>
 
     <script>
+    /* ── Hard-refresh (Ctrl+Shift+R) clears saved inputs so defaults load ──
+       Normal F5 / browser reload keeps localStorage intact (state restored).
+       Only this specific gesture wipes it — giving a clean engineering slate.
+    ──────────────────────────────────────────────────────────────────────── */
+    document.addEventListener('keydown', function (e) {
+        if (e.ctrlKey && e.shiftKey && e.key.toLowerCase() === 'r') {
+            try {
+                localStorage.removeItem('sarma_thermal_inputs');
+                // Brief visual confirmation before the page reloads
+                const toast = document.createElement('div');
+                toast.textContent = 'Resetting to defaults…';
+                toast.style.cssText = [
+                    'position:fixed','bottom:24px','left:50%','transform:translateX(-50%)',
+                    'background:#0f172a','border:1px solid rgba(6,182,212,0.4)',
+                    'color:#67e8f9','font:700 12px/1 Inter,sans-serif',
+                    'padding:10px 20px','border-radius:12px','z-index:9999',
+                    'box-shadow:0 4px 20px rgba(0,0,0,0.5)','letter-spacing:.08em',
+                    'text-transform:uppercase'
+                ].join(';');
+                document.body.appendChild(toast);
+                // Allow toast to render before reload fires
+            } catch (err) { /* silently ignore */ }
+        }
+    }, { capture: true });
+    </script>
+
+    <script>
     /* ── Collapsible Configuration Panel ────────────────────────────────────
        Toggle button (#configToggleTab) collapses/expands the left config panel.
        Charts in the right column flex to fill the freed space.
