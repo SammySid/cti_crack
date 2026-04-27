@@ -547,9 +547,10 @@ export const ui = {
         // ── thead: row1 = group labels, row2 = sub-column labels ──────────
         // Row 1 — WBT + flow group headers
         let theadR1 = `
-            <tr>
+            <tr style="background:#0d1117">
                 <th rowspan="2"
-                    class="px-4 py-3 text-left align-bottom sticky left-0 z-20 bg-[#0d1117] border-b-2 border-white/10 border-r border-white/8 min-w-[80px]">
+                    class="px-4 py-3 text-left align-bottom sticky left-0 z-30 border-r border-white/8 min-w-[80px]"
+                    style="background:#0d1117">
                     <span class="text-[10px] font-black uppercase tracking-widest text-slate-300">WBT</span><br>
                     <span class="text-[9px] font-semibold text-slate-600 normal-case tracking-normal">(°C)</span>
                 </th>`;
@@ -557,28 +558,30 @@ export const ui = {
             const m = fMeta[f];
             theadR1 += `
                 <th colspan="3"
-                    class="px-3 py-2.5 text-center border-l border-white/8 border-b border-white/5 ${m.groupBg}">
+                    class="px-3 py-2.5 text-center border-l border-white/8 border-b border-white/10 ${m.groupBg}"
+                    style="background-color: var(--tw-bg-opacity, inherit)">
                     <span class="text-[11px] font-black uppercase tracking-wider ${m.groupTxt}">${m.label}</span>
                 </th>`;
         });
         theadR1 += `</tr>`;
 
-        // Row 2 — sub-column labels
-        let theadR2 = `<tr class="border-b-2 border-white/10">`;
+        // Row 2 — sub-column labels (solid bg to prevent bleed-through on scroll)
+        const subBgMap = { 90: '#0d1f18', 100: '#0d1c24', 110: '#1f1a0d' };
+        let theadR2 = `<tr style="background:#0d1117; box-shadow:0 3px 10px rgba(0,0,0,0.7)">`;
         visFlows.forEach(f => {
-            const m = fMeta[f];
+            const solidBg = subBgMap[f] || '#0d1117';
             theadR2 += `
-                <th class="px-3 py-2 text-right border-l border-white/8 ${m.groupBg}">
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-300">Base</span>
-                    <span class="block text-[8px] font-semibold text-slate-500 normal-case tracking-normal">no margin</span>
+                <th class="px-3 py-2 text-right border-l border-white/8 border-b-2 border-white/10" style="background:${solidBg}">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-200">Base</span>
+                    <span class="block text-[8px] font-medium text-slate-500 normal-case tracking-normal">no margin</span>
                 </th>
-                <th class="px-3 py-2 text-right ${m.groupBg}">
-                    <span class="text-[10px] font-bold uppercase tracking-wider ${m.groupTxt}">Margin</span>
-                    <span class="block text-[8px] font-semibold text-slate-500 normal-case tracking-normal">with offset</span>
+                <th class="px-3 py-2 text-right border-b-2 border-white/10" style="background:${solidBg}">
+                    <span class="text-[10px] font-bold uppercase tracking-wider ${fMeta[f].groupTxt}">Margin</span>
+                    <span class="block text-[8px] font-medium text-slate-500 normal-case tracking-normal">with offset</span>
                 </th>
-                <th class="px-3 py-2 text-center border-r border-white/8 ${m.groupBg}">
-                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-300">Δ</span>
-                    <span class="block text-[8px] font-semibold text-slate-500 normal-case tracking-normal">delta °C</span>
+                <th class="px-3 py-2 text-center border-r border-white/8 border-b-2 border-white/10" style="background:${solidBg}">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-200">Δ</span>
+                    <span class="block text-[8px] font-medium text-slate-500 normal-case tracking-normal">delta °C</span>
                 </th>`;
         });
         theadR2 += `</tr>`;
@@ -600,10 +603,11 @@ export const ui = {
                 const trBg   = isDesign ? 'bg-emerald-950/40' : (isEven ? '' : 'bg-white/[0.018]');
                 const trBorder = isDesign ? 'border-y-2 border-emerald-500/30' : 'border-b border-white/[0.06]';
 
-                // WBT cell
+                // WBT cell — inline bg required for sticky to be opaque
+                const wbtBg = isDesign ? '#0a1f14' : (isEven ? '#0d1117' : '#0e1219');
                 let cells = `
-                    <td class="px-4 py-2 sticky left-0 z-10 border-r border-white/8
-                               ${isDesign ? 'bg-emerald-950/60' : (isEven ? 'bg-[#0d1117]' : 'bg-[#0e1219]')}">
+                    <td class="px-4 py-2 sticky left-0 z-10 border-r border-white/8"
+                        style="background:${wbtBg}">
                         <span class="font-mono font-black text-[13px] ${isDesign ? 'text-white' : 'text-slate-300'}">${wbt.toFixed(1)}</span>
                         ${isDesign ? `<span class="ml-1 text-emerald-400 text-[10px] font-black">★</span>` : ''}
                     </td>`;
