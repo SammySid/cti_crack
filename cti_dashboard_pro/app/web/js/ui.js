@@ -478,10 +478,51 @@ export const ui = {
             return row;
         });
 
-        // ── 3. Assemble full modal body ───────────────────────────────────
+        // ── 3. Build compact active-offsets pill bar ─────────────────────
+        const offsetDefs = [
+            { key: 'off90r80',   label: '90%F · 80%R',  color: 'emerald' },
+            { key: 'off90r100',  label: '90%F · 100%R', color: 'emerald' },
+            { key: 'off90r120',  label: '90%F · 120%R', color: 'emerald' },
+            { key: 'off100r80',  label: '100%F · 80%R', color: 'cyan'    },
+            { key: 'off100r100', label: '100%F · 100%R',color: 'cyan'    },
+            { key: 'off100r120', label: '100%F · 120%R',color: 'cyan'    },
+            { key: 'off110r80',  label: '110%F · 80%R', color: 'amber'   },
+            { key: 'off110r100', label: '110%F · 100%R',color: 'amber'   },
+            { key: 'off110r120', label: '110%F · 120%R',color: 'amber'   },
+        ];
+        const colorMap = {
+            emerald: 'bg-emerald-500/15 border-emerald-500/30 text-emerald-300',
+            cyan:    'bg-cyan-500/15 border-cyan-500/30 text-cyan-300',
+            amber:   'bg-amber-500/15 border-amber-500/30 text-amber-300',
+        };
+        const activePills = offsetDefs
+            .filter(d => ui.inputs[d.key] !== 0)
+            .map(d => {
+                const v = ui.inputs[d.key];
+                const prefix = v > 0 ? '+' : '';
+                return `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-[10px] font-black font-mono ${colorMap[d.color]}">
+                    <span class="font-sans uppercase tracking-wider text-[8px] opacity-70">${d.label}</span>
+                    ${prefix}${v.toFixed(2)}°C
+                </span>`;
+            });
+        const wbtPill = Math.abs(wbtTilt) > 0.001
+            ? `<span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border bg-violet-500/15 border-violet-500/30 text-violet-300 text-[10px] font-black font-mono">
+                   <span class="font-sans uppercase tracking-wider text-[8px] opacity-70">WBT Tilt @20°C</span>
+                   +${wbtTilt.toFixed(2)}°C
+               </span>`
+            : '';
+        const pillsHtml = (activePills.length || wbtPill)
+            ? `<div class="flex flex-wrap items-center gap-2 mb-4 pb-3.5 border-b border-white/8">
+                   <span class="text-[9px] font-black uppercase tracking-widest text-slate-600 shrink-0">Active offsets:</span>
+                   ${activePills.join('')}${wbtPill}
+               </div>`
+            : '';
+
+        // ── 4. Assemble full modal body ───────────────────────────────────
         const st = ui._marginModalState;
 
         body.innerHTML = `
+        ${pillsHtml}
         <!-- Table Controls -->
         <div class="flex flex-wrap items-center gap-2 mb-3">
             <span class="text-[9px] font-black uppercase tracking-wider text-slate-500 mr-1">Show flows:</span>
