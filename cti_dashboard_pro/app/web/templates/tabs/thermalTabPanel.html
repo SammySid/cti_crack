@@ -46,6 +46,40 @@
     </template>
 
     <!-- ═══════════════════════════════════════════════════════════════════
+         PROJECT SCOPE HEADER — compact metadata bar, always at top
+         ═══════════════════════════════════════════════════════════════════ -->
+    <div class="glass-card rounded-2xl border border-white/10 px-5 py-3.5 mb-6 flex flex-wrap items-center gap-x-6 gap-y-3">
+        <!-- Section tag -->
+        <div class="flex items-center gap-2 shrink-0">
+            <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+            <p class="text-[9px] font-black uppercase tracking-[0.22em] text-slate-500">Project Scope</p>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-x-5 gap-y-2 flex-1 min-w-0">
+            <div class="flex items-center gap-2 min-w-[180px]">
+                <label class="text-[9px] font-black uppercase tracking-widest text-slate-600 shrink-0 w-[60px]">Client</label>
+                <input id="companyName" type="text" value="SS Cooling tower LTD"
+                    class="flex-1 input-premium rounded-lg px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wide min-w-0">
+            </div>
+            <div class="flex items-center gap-2 min-w-[160px]">
+                <label class="text-[9px] font-black uppercase tracking-widest text-slate-600 shrink-0 w-[60px]">Engineer</label>
+                <input id="engineerName" type="text" value="Suresh Sarma"
+                    class="flex-1 input-premium rounded-lg px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wide min-w-0">
+            </div>
+            <div class="flex items-center gap-2 min-w-[160px]">
+                <label class="text-[9px] font-black uppercase tracking-widest text-slate-600 shrink-0 w-[60px]">Project</label>
+                <input id="projectName" type="text" value="Tower Efficiency Analysis"
+                    class="flex-1 input-premium rounded-lg px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wide min-w-0">
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="text-[9px] font-black uppercase tracking-widest text-slate-600 shrink-0 w-[60px]">Date</label>
+                <input id="date" type="date"
+                    class="input-premium rounded-lg px-2.5 py-1.5 text-xs font-semibold">
+            </div>
+        </div>
+    </div>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
          MAIN LAYOUT
          xl+: side-by-side with collapsible left panel
          < xl: single column stacked
@@ -89,7 +123,6 @@
                 </div>
                 <!-- Section dots -->
                 <div class="flex flex-col items-center gap-2 pb-2">
-                    <div class="w-2 h-2 rounded-full bg-cyan-500/60"   title="Project Scope"></div>
                     <div class="w-2 h-2 rounded-full bg-blue-500/60"   title="Heat Load"></div>
                     <div class="w-2 h-2 rounded-full bg-violet-500/60" title="Transfer Constants"></div>
                     <div class="w-2 h-2 rounded-full bg-emerald-500/60"title="Auto-Calibration"></div>
@@ -114,37 +147,6 @@
                     </div>
 
                     <div class="p-5 space-y-5">
-
-                        <!-- ── Project Scope ──────────────────────────── -->
-                        <div>
-                            <p class="section-label flex items-center gap-1.5 text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">
-                                <span class="w-1 h-3 bg-cyan-500/70 rounded-full"></span>Project Scope
-                            </p>
-                            <div class="grid grid-cols-2 gap-3">
-                                <div class="col-span-2">
-                                    <label class="field-label text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Client Authority</label>
-                                    <input id="companyName" type="text" value="SS Cooling tower LTD"
-                                        class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-semibold uppercase tracking-wide">
-                                </div>
-                                <div>
-                                    <label class="field-label text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Lead Engineer</label>
-                                    <input id="engineerName" type="text" value="Suresh Sarma"
-                                        class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-semibold uppercase tracking-wide">
-                                </div>
-                                <div>
-                                    <label class="field-label text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Deployment Date</label>
-                                    <input id="date" type="date"
-                                        class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-semibold">
-                                </div>
-                                <div class="col-span-2">
-                                    <label class="field-label text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Asset Identity</label>
-                                    <input id="projectName" type="text" value="Tower Efficiency Analysis"
-                                        class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-semibold uppercase tracking-wide">
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="h-px bg-white/5"></div>
 
                         <!-- ── Heat Load Specs ────────────────────────── -->
                         <div>
