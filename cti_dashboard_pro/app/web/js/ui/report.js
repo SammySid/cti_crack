@@ -1,369 +1,39 @@
-// ── Thermal Report Modal ────────────────────────────────────────────────────
-// Launched from the Thermal Analysis tab.
-// Design values + safety margins are read directly from ui.inputs (no re-entry).
-// Only site test data (T1/T2/T3) and report metadata are collected in the modal.
+// ── Thermal Analysis → Report Builder: smart pre-fill + navigate ────────────
+// When the user clicks "Generate ATC-105 Report" in the Thermal Analysis tab,
+// this function syncs all design params and safety margin offsets into the
+// Report Builder fields, shows a confirmation banner, then switches tabs.
+// No duplicate UI needed — the Report Builder is the single source of truth.
 
-const _TRM_STORAGE_KEY = 'sarma_thermal_report_inputs';
-
-const _TRM_FIELD_IDS = [
-    'trm-title', 'trm-asset', 'trm-testdate', 'trm-repdate',
-    'trm-members-client', 'trm-members-ssctc',
-    'trm-preamble', 'trm-conclusions', 'trm-notes',
-    'trm-fan-area', 'trm-density-override',
-    'trm-t1-wbt', 'trm-t1-cwt', 'trm-t1-hwt', 'trm-t1-flow', 'trm-t1-fanpow',
-    'trm-t2-wbt', 'trm-t2-cwt', 'trm-t2-hwt', 'trm-t2-flow', 'trm-t2-fanpow',
-    'trm-t3-wbt', 'trm-t3-cwt', 'trm-t3-hwt', 'trm-t3-flow', 'trm-t3-fanpow',
-];
-
-function _trmSave() {
-    try {
-        const data = {};
-        _TRM_FIELD_IDS.forEach(id => {
-            const el = document.getElementById(id);
-            if (el) data[id] = el.value;
-        });
-        localStorage.setItem(_TRM_STORAGE_KEY, JSON.stringify(data));
-    } catch (_) {}
-}
-
-function _trmLoad() {
-    try {
-        const raw = localStorage.getItem(_TRM_STORAGE_KEY);
-        if (!raw) return;
-        const data = JSON.parse(raw);
-        Object.entries(data).forEach(([id, val]) => {
-            const el = document.getElementById(id);
-            if (el) el.value = val;
-        });
-    } catch (_) {}
-}
-
-function _trmPill(label, value, unit = '') {
-    const v = (value !== undefined && value !== null && value !== '') ? value : '—';
-    return `<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-white/[0.09] font-mono" style="background:rgba(12,18,32,0.85)">
-        <span class="text-slate-500 text-[10px] uppercase tracking-wider font-black">${label}</span>
-        <span class="text-violet-200 text-sm font-bold">${v}</span>
-        ${unit ? `<span class="text-slate-500 text-[10px]">${unit}</span>` : ''}
-    </span>`;
-}
-
-function _renderThermalContext(ui) {
-    const inp = ui.inputs;
-
-    // Compact pill strip: all key values in one row
-    const designGrid = document.getElementById('trm-ctx-design-grid');
-    if (designGrid) {
-        designGrid.innerHTML = [
-            _trmPill('WBT',  inp.designWBT,       '°C'),
-            _trmPill('CWT',  inp.designCWT,        '°C'),
-            _trmPill('HWT',  inp.designHWT,        '°C'),
-            _trmPill('L/G',  inp.lgRatio,           ''),
-            _trmPill('C',    inp.constantC,         ''),
-            _trmPill('M',    inp.constantM,         ''),
-            _trmPill('Flow', inp.designWaterFlow,  'm³/h'),
-        ].join('');
-    }
-
-    // Safety margins
-    const marginIds = [
-        'off90r80', 'off90r100', 'off90r120',
-        'off100r80', 'off100r100', 'off100r120',
-        'off110r80', 'off110r100', 'off110r120',
-    ];
-    const wbt20    = parseFloat(inp.offsetWbt20) || 0;
-    const gridVals = marginIds.map(id => parseFloat(inp[id]) || 0);
-    const anyActive = wbt20 !== 0 || gridVals.some(v => v !== 0);
-
-    const badge = document.getElementById('trm-ctx-margins-badge');
-    if (badge) badge.classList.toggle('hidden', !anyActive);
-
-    const marginsRow = document.getElementById('trm-ctx-margins-row');
-    if (marginsRow) marginsRow.classList.toggle('hidden', !anyActive);
-
-    const gridRows = document.getElementById('trm-ctx-grid-rows');
-    if (gridRows && anyActive) {
-        const flowLabels = ['90%', '100%', '110%'];
-        const items = [];
-        if (wbt20 !== 0) {
-            items.push(`<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-amber-500/25 font-mono" style="background:rgba(12,18,32,0.85)">
-                <span class="text-amber-500/70 text-[10px] uppercase tracking-wider font-black">@20°C</span>
-                <span class="text-amber-300 text-sm font-bold">${wbt20 > 0 ? '+' : ''}${wbt20}</span>
-            </span>`);
-        }
-        [0, 1, 2].forEach(row => {
-            const [v80, v100, v120] = gridVals.slice(row * 3, row * 3 + 3);
-            [v80, v100, v120].forEach((v, ci) => {
-                if (v !== 0) {
-                    const rangeLabel = ['R80','R100','R120'][ci];
-                    items.push(`<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-amber-500/25 font-mono" style="background:rgba(12,18,32,0.85)">
-                        <span class="text-amber-500/70 text-[10px] uppercase tracking-wider font-black">${flowLabels[row]}·${rangeLabel}</span>
-                        <span class="text-amber-300 text-sm font-bold">${v > 0 ? '+' : ''}${v}</span>
-                    </span>`);
-                }
-            });
-        });
-        gridRows.innerHTML = items.join('');
-    }
-
-    // Auto-fill metadata from thermal project fields if blank
-    const autoFill = (fieldId, val) => {
-        const el = document.getElementById(fieldId);
-        if (el && !el.value.trim() && val) el.value = val;
-    };
-    autoFill('trm-title', inp.projectName ? `CT PERFORMANCE EVALUATION REPORT — ${inp.projectName}` : '');
-}
-
-export function openThermalReportModal(ui) {
-    // DOM open animation
-    const modal = document.getElementById('thermalReportModal');
-    const panel = document.getElementById('trm-panel');
-    const bg    = document.getElementById('trm-bg');
-    if (!modal) return;
-    modal.classList.remove('hidden');
-    modal.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-    requestAnimationFrame(() => requestAnimationFrame(() => {
-        if (bg)    bg.style.opacity       = '1';
-        if (panel) { panel.style.opacity = '1'; panel.style.transform = 'scale(1) translateY(0)'; }
-    }));
-    const escHandler = (e) => { if (e.key === 'Escape') window.closeThermalReportModal?.(); };
-    modal._trmEsc = escHandler;
-    window.addEventListener('keydown', escHandler);
-
-    _trmLoad();
-    _renderThermalContext(ui);
-
-    // Wire localStorage save on every input change (once, using delegation)
-    if (panel && !panel._trmBound) {
-        panel._trmBound = true;
-        panel.addEventListener('input', _trmSave);
-        panel.addEventListener('change', _trmSave);
-    }
-
-    // Wire Refresh button
-    const refreshBtn = document.getElementById('trm-refresh-ctx');
-    if (refreshBtn && !refreshBtn._trmBound) {
-        refreshBtn._trmBound = true;
-        refreshBtn.addEventListener('click', () => _renderThermalContext(ui));
-    }
-
-    // Wire Generate button
-    const genBtn = document.getElementById('trm-generate-btn');
-    if (genBtn && !genBtn._trmBound) {
-        genBtn._trmBound = true;
-        genBtn.addEventListener('click', () => generateReportFromThermal(ui));
-    }
-
-    // Wire "Open Full Builder" button
-    const builderBtn = document.getElementById('trm-open-full-builder');
-    if (builderBtn && !builderBtn._trmBound) {
-        builderBtn._trmBound = true;
-        builderBtn.addEventListener('click', () => {
-            if (typeof closeThermalReportModal === 'function') closeThermalReportModal();
-            syncDesignFromThermal(ui);
-            const tab = document.getElementById('tabReport');
-            if (tab) tab.click();
-        });
-    }
-}
-
-// ── Build offset payload from ui.inputs ───────────────────────────────────
-
-function _getOffsets(ui) {
-    const i = ui.inputs;
+function _getOffsetsFromUi(ui) {
+    const i = ui?.inputs ?? {};
     return {
-        offset_wbt20: parseFloat(i.offsetWbt20)  || 0,
-        off90r80:     parseFloat(i.off90r80)      || 0,
-        off90r100:    parseFloat(i.off90r100)     || 0,
-        off90r120:    parseFloat(i.off90r120)     || 0,
-        off100r80:    parseFloat(i.off100r80)     || 0,
-        off100r100:   parseFloat(i.off100r100)    || 0,
-        off100r120:   parseFloat(i.off100r120)    || 0,
-        off110r80:    parseFloat(i.off110r80)     || 0,
-        off110r100:   parseFloat(i.off110r100)    || 0,
-        off110r120:   parseFloat(i.off110r120)    || 0,
+        offset_wbt20: parseFloat(i.offsetWbt20) || 0,
+        off90r80:     parseFloat(i.off90r80)    || 0,
+        off90r100:    parseFloat(i.off90r100)   || 0,
+        off90r120:    parseFloat(i.off90r120)   || 0,
+        off100r80:    parseFloat(i.off100r80)   || 0,
+        off100r100:   parseFloat(i.off100r100)  || 0,
+        off100r120:   parseFloat(i.off100r120)  || 0,
+        off110r80:    parseFloat(i.off110r80)   || 0,
+        off110r100:   parseFloat(i.off110r100)  || 0,
+        off110r120:   parseFloat(i.off110r120)  || 0,
     };
 }
 
-// ── Build ATC-105 payload using thermal design values + offsets ────────────
+export function launchReportFromThermal(ui) {
+    // Pre-fill all design fields in the Report Builder from Thermal Analysis
+    syncDesignFromThermal(ui);
 
-function _buildThermalAtcPayload(ui, test) {
-    const inp = ui.inputs;
-    const overrideVal = parseFloat(_v('trm-density-override', ''));
-    return {
-        design_wbt:             parseFloat(inp.designWBT),
-        design_cwt:             parseFloat(inp.designCWT),
-        design_hwt:             parseFloat(inp.designHWT),
-        design_flow:            parseFloat(inp.designWaterFlow),
-        design_fan_power:       parseFloat(inp.designFanPower) || 117.0,
-        test_wbt:               test.wbt,
-        test_cwt:               test.cwt,
-        test_hwt:               test.hwt,
-        test_flow:              test.flow,
-        test_fan_power:         test.fan_power,
-        lg_ratio:               parseFloat(inp.lgRatio),
-        constant_c:             parseFloat(inp.constantC),
-        constant_m:             parseFloat(inp.constantM),
-        density_ratio_override: isFinite(overrideVal) && overrideVal > 0 ? overrideVal : null,
-        ..._getOffsets(ui),
-    };
-}
+    // Show the "Loaded from Thermal Analysis" notice banner
+    const banner = document.getElementById('trm-loaded-banner');
+    if (banner) { banner.classList.remove('hidden'); banner.classList.add('flex'); }
 
-// ── Generate ATC-105 PDF from Thermal Analysis context ─────────────────────
+    // Switch to the Report Builder tab
+    const tab = document.getElementById('tabReport');
+    if (tab) tab.click();
 
-export async function generateReportFromThermal(ui) {
-    const btn       = document.getElementById('trm-generate-btn');
-    const statusEl  = document.getElementById('trm-status');
-    const origHtml  = btn.innerHTML;
-
-    const setStatus = (msg, isErr = false) => {
-        if (!statusEl) return;
-        statusEl.textContent = msg;
-        statusEl.className = `text-[11px] font-semibold px-1 ${isErr ? 'text-rose-400' : 'text-violet-400'}`;
-        statusEl.classList.remove('hidden');
-    };
-
-    btn.innerHTML = `<svg class="animate-spin w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-        Calculating ATC-105…`;
-    btn.disabled = true;
-    setStatus('Running ATC-105 for all 3 tests…');
-
-    const _tn = (id, fallback = 0) => {
-        const v = parseFloat(document.getElementById(id)?.value ?? '');
-        return isFinite(v) ? v : fallback;
-    };
-
-    try {
-        const inp = ui.inputs;
-
-        if (!parseFloat(inp.designWaterFlow)) throw new Error('Design water flow is not set in Thermal Analysis.');
-        if (!parseFloat(inp.lgRatio))         throw new Error('L/G ratio is not set in Thermal Analysis.');
-
-        const t1 = { wbt: _tn('trm-t1-wbt',25.25), cwt: _tn('trm-t1-cwt',35.08), hwt: _tn('trm-t1-hwt',44.67), flow: _tn('trm-t1-flow',2998),   fan_power: _tn('trm-t1-fanpow',97.04)  };
-        const t2 = { wbt: _tn('trm-t2-wbt',24.22), cwt: _tn('trm-t2-cwt',32.89), hwt: _tn('trm-t2-hwt',43.21), flow: _tn('trm-t2-flow',3067),   fan_power: _tn('trm-t2-fanpow',116.24) };
-        const t3 = { wbt: _tn('trm-t3-wbt',21.70), cwt: _tn('trm-t3-cwt',32.40), hwt: _tn('trm-t3-hwt',42.13), flow: _tn('trm-t3-flow',3680),   fan_power: _tn('trm-t3-fanpow',117.0)  };
-
-        const [atc_pre, atc_post, atc_dist] = await Promise.all([
-            _calcThermalAtc(ui, t1),
-            _calcThermalAtc(ui, t2),
-            _calcThermalAtc(ui, t3),
-        ]);
-
-        atc_pre.fan_power_design  = parseFloat(inp.designFanPower) || 117.0;
-        atc_pre.fan_power_test    = t1.fan_power;
-        atc_post.fan_power_design = parseFloat(inp.designFanPower) || 117.0;
-        atc_post.fan_power_test   = t2.fan_power;
-        atc_dist.fan_power_design = parseFloat(inp.designFanPower) || 117.0;
-        atc_dist.fan_power_test   = t3.fan_power;
-
-        btn.innerHTML = `<svg class="animate-spin w-3.5 h-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-            Generating PDF…`;
-        setStatus('Calculations done · Rendering PDF…');
-
-        const _tv = id => document.getElementById(id)?.value?.trim() ?? '';
-        const _tl = id => _tv(id).split('\n').map(s => s.trim()).filter(Boolean);
-
-        const testDate = _tv('trm-testdate');
-        const clientName = inp.companyName || _tv('trm-title') || 'Report';
-
-        const sf1 = atc_pre.shortfall,  sf2 = atc_post.shortfall, sf3 = atc_dist.shortfall;
-        const imp_2v1 = sf1 != null && sf2 != null ? parseFloat((sf1 - sf2).toFixed(2)) : '—';
-        const imp_3v2 = sf2 != null && sf3 != null ? parseFloat((sf2 - sf3).toFixed(2)) : '—';
-        const imp_3v1 = sf1 != null && sf3 != null ? parseFloat((sf1 - sf3).toFixed(2)) : '—';
-
-        const final_data_table = [
-            { name: 'Water Flow',                      unit: 'M3/hr', test1: t1.flow,   test2: t2.flow,   test3: t3.flow   },
-            { name: 'WBT',                             unit: 'Deg.C', test1: t1.wbt,    test2: t2.wbt,    test3: t3.wbt    },
-            { name: 'HWT',                             unit: 'Deg.C', test1: t1.hwt,    test2: t2.hwt,    test3: t3.hwt    },
-            { name: 'CWT',                             unit: 'Deg.C', test1: t1.cwt,    test2: t2.cwt,    test3: t3.cwt    },
-            { name: 'Fan Power At Motor Inlet',        unit: 'KW',    test1: t1.fan_power, test2: t2.fan_power, test3: t3.fan_power },
-            { name: 'Range',                           unit: 'Deg.C', test1: parseFloat((t1.hwt-t1.cwt).toFixed(2)), test2: parseFloat((t2.hwt-t2.cwt).toFixed(2)), test3: parseFloat((t3.hwt-t3.cwt).toFixed(2)) },
-            { name: 'Approach',                        unit: 'Deg.C', test1: parseFloat((t1.cwt-t1.wbt).toFixed(2)), test2: parseFloat((t2.cwt-t2.wbt).toFixed(2)), test3: parseFloat((t3.cwt-t3.wbt).toFixed(2)) },
-            { name: 'CWT Deviation from Design',       unit: 'Deg.C', test1: sf1 != null ? sf1.toFixed(2) : '—', test2: sf2 != null ? sf2.toFixed(2) : '—', test3: sf3 != null ? sf3.toFixed(2) : '—' },
-            { name: 'Capability',                      unit: '%',     test1: atc_pre.capability  != null ? atc_pre.capability.toFixed(1)  : '—', test2: atc_post.capability != null ? atc_post.capability.toFixed(1) : '—', test3: atc_dist.capability != null ? atc_dist.capability.toFixed(1) : '—' },
-            { name: 'Improvement vs Previous Test',    unit: 'Deg.C', test1: '—', test2: imp_2v1, test3: imp_3v2 },
-            { name: 'Cumulative Improvement vs Test 1',unit: 'Deg.C', test1: '—', test2: imp_2v1, test3: imp_3v1 },
-        ];
-
-        const preambleLines = _tl('trm-preamble');
-        const pdfPayload = {
-            report_title:  _tv('trm-title') || 'CT PERFORMANCE EVALUATION REPORT',
-            client:        inp.companyName  || _tv('trm-title'),
-            asset:         _tv('trm-asset'),
-            test_date:     testDate,
-            report_date:   _tv('trm-repdate'),
-            preamble_paragraphs: preambleLines.length ? preambleLines : [
-                'Performance testing of the cooling tower was conducted in accordance with CTI ATC-105 standards.',
-            ],
-            conclusions:         _tl('trm-conclusions').length ? _tl('trm-conclusions') : ['Refer to test results for performance evaluation.'],
-            members_client:      _tl('trm-members-client'),
-            members_ssctc:       _tl('trm-members-ssctc'),
-            assessment_method: [
-                `Pre test was conducted on ${testDate || 'the scheduled date'}.`,
-                'Cell has been isolated at the basin level for collection of cold water directly from the rain zone.',
-                'All required data was collected and reports have been prepared for each test stage.',
-                'Since different conditions apply in each test, both pre and post tests have been compared to the design conditions.',
-            ],
-            instrument_placement: [
-                'Air flow was measured using Data Logging anemometer as per CTI ATC-143 Method of equal area.',
-                'Hot water temperature was taken at inlet of the hot water to the cooling tower.',
-                'Cold water temperature: 24 RTD sensors placed at air-inlet sides of the isolated cell.',
-                'Water flow was measured using UFM on the riser.',
-                'WBT/DBT was measured using wet-bulb automatic stations recording every minute.',
-                'Power to the fan motor was noted from the client MCC.',
-            ],
-            suggestions:      _tl('trm-notes'),
-            atc105_pre:       atc_pre,
-            atc105_post:      atc_post,
-            atc105_dist:      atc_dist,
-            final_data_table,
-            data_notes:       _tl('trm-notes'),
-            airflow:          { area: parseFloat(_tv('trm-fan-area') || '92.25') || 92.25 },
-        };
-
-        const safeName = (inp.companyName || 'Report').replace(/[^a-zA-Z0-9]/g, '_').slice(0, 40);
-        const filename  = `ATC105_${safeName}_${testDate.replace(/\s/g, '_') || 'Report'}.pdf`;
-        pdfPayload._filename = filename;
-
-        const pdfResp = await fetch('/api/generate-pdf-report', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(pdfPayload),
-        });
-        if (!pdfResp.ok) {
-            const err = await pdfResp.text();
-            throw new Error(`PDF generation failed (${pdfResp.status}): ${err}`);
-        }
-
-        const { token } = await pdfResp.json();
-        window.location.href = `/api/download-pdf/${token}`;
-        setStatus(`PDF generated — ${filename}`);
-
-    } catch (err) {
-        console.error('Thermal report generation failed:', err);
-        setStatus(`Error: ${err.message}`, true);
-    } finally {
-        btn.innerHTML = origHtml;
-        btn.disabled  = false;
-    }
-}
-
-async function _calcThermalAtc(ui, test) {
-    const payload = _buildThermalAtcPayload(ui, test);
-    const resp = await fetch('/api/calculate/atc105', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-    });
-    if (!resp.ok) {
-        const err = await resp.json().catch(() => ({}));
-        throw new Error(err.detail || `ATC-105 API error ${resp.status}`);
-    }
-    return resp.json();
+    // Scroll to top of the page so the user sees the banner
+    window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 // ── Filter-Excel Parser (auto-fill test conditions) ───────────────────────
@@ -500,7 +170,7 @@ function _getDesign(ui) {
 // C and M come from Step 3 design fields (synced from Thermal Analysis tab),
 // making the cross-plots tower-specific rather than using generic defaults.
 
-function _buildPayloadForTest(design, test) {
+function _buildPayloadForTest(design, test, offsets = {}) {
     return {
         design_wbt:             design.wbt,
         design_cwt:             design.cwt,
@@ -516,6 +186,7 @@ function _buildPayloadForTest(design, test) {
         constant_c:             design.constant_c,
         constant_m:             design.constant_m,
         density_ratio_override: design.density_override,
+        ...offsets,
     };
 }
 
@@ -540,7 +211,7 @@ export async function updateAtcPreview(ui) {
         const resp = await fetch('/api/calculate/atc105', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(_buildPayloadForTest(design, currentTest)),
+            body: JSON.stringify(_buildPayloadForTest(design, currentTest, _getOffsetsFromUi(ui))),
         });
         if (!resp.ok) return;
         const r = await resp.json();
@@ -559,30 +230,29 @@ export async function updateAtcPreview(ui) {
 
 export function syncDesignFromThermal(ui) {
     const map = {
-        'rep-design-wbt':  'designWBT',
-        'rep-design-cwt':  'designCWT',
-        'rep-design-hwt':  'designHWT',
-        'rep-design-flow': 'designWaterFlow',
-        'rep-design-lg':   'lgRatio',
-        'rep-design-c':    'constantC',
-        'rep-design-m':    'constantM',
+        'rep-design-wbt':    'designWBT',
+        'rep-design-cwt':    'designCWT',
+        'rep-design-hwt':    'designHWT',
+        'rep-design-flow':   'designWaterFlow',
+        'rep-design-fanpow': 'designFanPower',
+        'rep-design-lg':     'lgRatio',
+        'rep-design-c':      'constantC',
+        'rep-design-m':      'constantM',
     };
     Object.entries(map).forEach(([repId, uiKey]) => {
         const el = document.getElementById(repId);
-        if (el && ui.inputs[uiKey] !== undefined) {
-            el.value = ui.inputs[uiKey];
-        }
+        if (el && ui.inputs[uiKey] !== undefined) el.value = ui.inputs[uiKey];
     });
     updateAtcPreview(ui);
 }
 
 // ── Fetch ATC-105 result for one test ──────────────────────────────────────
 
-async function _calcAtc(design, test) {
+async function _calcAtc(design, test, offsets = {}) {
     const resp = await fetch('/api/calculate/atc105', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(_buildPayloadForTest(design, test)),
+        body: JSON.stringify(_buildPayloadForTest(design, test, offsets)),
     });
     if (!resp.ok) {
         const err = await resp.json().catch(() => ({}));
@@ -882,8 +552,9 @@ export async function previewAllTests(ui) {
         const t2 = { flow: _n('rep-t2-flow',3067.21),  wbt: _n('rep-t2-wbt',24.22),  hwt: _n('rep-t2-hwt',43.21), cwt: _n('rep-t2-cwt',32.89), fan_power: _n('rep-t2-fanpow',116.24) };
         const t3 = { flow: _n('rep-flow',3680),         wbt: _n('rep-test-wbt',21.7), hwt: _n('rep-hwt',42.13),   cwt: _n('rep-cwt',32.4),     fan_power: _n('rep-test-fanpow',117) };
 
+        const offsets = _getOffsetsFromUi(ui);
         const [r1, r2, r3] = await Promise.all([
-            _calcAtc(design, t1), _calcAtc(design, t2), _calcAtc(design, t3),
+            _calcAtc(design, t1, offsets), _calcAtc(design, t2, offsets), _calcAtc(design, t3, offsets),
         ]);
 
         // ── Document header ────────────────────────────────────────────────────
@@ -1067,11 +738,12 @@ export async function generateReport(ui) {
             fan_power: _n('rep-test-fanpow', 117),
         };
 
-        // ── Run all 3 ATC-105 calculations in parallel ────────────────────
+        // ── Run all 3 ATC-105 calculations in parallel (offsets from Thermal Analysis) ──
+        const offsets = _getOffsetsFromUi(ui);
         const [atc_pre, atc_post, atc_dist] = await Promise.all([
-            _calcAtc(design, t1),
-            _calcAtc(design, t2),
-            _calcAtc(design, t3),
+            _calcAtc(design, t1, offsets),
+            _calcAtc(design, t2, offsets),
+            _calcAtc(design, t3, offsets),
         ]);
 
         // Annotate fan powers (not in API response; needed for Step 4 table)

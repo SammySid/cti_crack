@@ -1,5 +1,5 @@
 import { INPUT_IDS, isCurveAffectingInput } from './constants.js';
-import { generateReport, updateAtcPreview, syncDesignFromThermal, bindFilterUpload, previewAllTests, openThermalReportModal } from './report.js';
+import { generateReport, updateAtcPreview, syncDesignFromThermal, bindFilterUpload, previewAllTests, launchReportFromThermal } from './report.js';
 
 export function bindEvents(ui) {
     const debouncedUpdateAll = ui.debounce(ui.updateAll, 300);
@@ -23,7 +23,7 @@ export function bindEvents(ui) {
     });
 
     // ── Export / Reset buttons ───────────────────────────────────────────────
-    document.getElementById('btnThermalReport')?.addEventListener('click', () => openThermalReportModal(ui));
+    document.getElementById('btnThermalReport')?.addEventListener('click', () => launchReportFromThermal(ui));
     document.getElementById('exportExcel')?.addEventListener('click', () => ui.exportData());
     document.getElementById('exportPDF')?.addEventListener('click',   () => window.print());
     document.getElementById('resetDefaults')?.addEventListener('click', () => {
