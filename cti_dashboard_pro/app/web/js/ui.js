@@ -85,9 +85,16 @@ export const ui = {
                 ui.curveData[flowPercent] = data;
                 ui.pendingFlows.delete(flowPercent);
 
-                const hasOffsets = Object.keys(ui.inputs).some(k => (k.startsWith('offset') || k.startsWith('off')) && ui.inputs[k] !== 0);
-                const titleText = hasOffsets ? 
-                    [`Curve ${index + 1} (${flowPercent}% Flow)`, '(Safety Margins Applied)'] : 
+                // Check only the offsets that actually affect THIS flow (mirrors backend logic)
+                const wbtTilt = ui.inputs.offsetWbt20 !== 0;
+                const flowOffsetKeys = {
+                    90:  ['off90r80',  'off90r100',  'off90r120'],
+                    100: ['off100r80', 'off100r100', 'off100r120'],
+                    110: ['off110r80', 'off110r100', 'off110r120'],
+                };
+                const hasOffsets = wbtTilt || (flowOffsetKeys[flowPercent] || []).some(k => ui.inputs[k] !== 0);
+                const titleText = hasOffsets ?
+                    [`Curve ${index + 1} (${flowPercent}% Flow)`, '(Safety Margins Applied)'] :
                     `Curve ${index + 1} (${flowPercent}% Flow)`;
 
                 charts.render(
