@@ -368,9 +368,6 @@ export const ui = {
     },
 
     renderMarginComparison: () => {
-        const el = document.getElementById('marginComparison');
-        if (!el) return;
-
         const OFFSET_KEYS = [
             'offsetWbt20',
             'off90r80',  'off90r100',  'off90r120',
@@ -379,22 +376,43 @@ export const ui = {
         ];
         const hasOffsets = OFFSET_KEYS.some(k => ui.inputs[k] !== 0);
 
-        if (!hasOffsets || !ui.baseCurveData) {
-            el.innerHTML = '';
-            el.classList.add('hidden');
-            return;
+        // Show/hide trigger button
+        const btnWrap = document.getElementById('marginImpactBtnWrap');
+        if (btnWrap) {
+            if (hasOffsets && ui.baseCurveData) btnWrap.classList.remove('hidden');
+            else                                btnWrap.classList.add('hidden');
         }
 
-        // WBT points: step through axis range, always include design WBT
-        const step = Math.max(1, Math.round((ui.inputs.axXMax - ui.inputs.axXMin) / 9));
-        const pts = new Set();
-        for (let w = ui.inputs.axXMin; w <= ui.inputs.axXMax + 0.01; w += step) {
-            pts.add(Math.round(w * 10) / 10);
-        }
-        pts.add(Math.round(ui.inputs.designWBT * 10) / 10);
-        const wbtPoints = [...pts].sort((a, b) => a - b);
+        if (!hasOffsets || !ui.baseCurveData) return;
 
-        // Lookup closest data point in a curve array
+        // ── Build the subtitle string ─────────────────────────────────────
+        const activeOffsets = OFFSET_KEYS
+            .filter(k => ui.inputs[k] !== 0)
+            .map(k => {
+                const labels = {
+                    offsetWbt20: 'WBT@20°C Tilt',
+                    off90r80: '90%F/80%R', off90r100: '90%F/100%R', off90r120: '90%F/120%R',
+                    off100r80:'100%F/80%R',off100r100:'100%F/100%R',off100r120:'100%F/120%R',
+                    off110r80:'110%F/80%R',off110r100:'110%F/100%R',off110r120:'110%F/120%R',
+                };
+                return `${labels[k] || k}: +${ui.inputs[k]}°C`;
+            });
+        const subtitle = document.getElementById('marginModalSubtitle');
+        if (subtitle) subtitle.textContent = `Active margins — ${activeOffsets.join(' · ')}`;
+
+        // ── WBT points at 0.5°C resolution ───────────────────────────────
+        const wbtPoints = [];
+        for (let w = ui.inputs.axXMin; w <= ui.inputs.axXMax + 0.01; w += 0.5) {
+            wbtPoints.push(Math.round(w * 10) / 10);
+        }
+        // Ensure design WBT is always included
+        const dWBT = Math.round(ui.inputs.designWBT * 10) / 10;
+        if (!wbtPoints.some(p => Math.abs(p - dWBT) < 0.01)) {
+            wbtPoints.push(dWBT);
+            wbtPoints.sort((a, b) => a - b);
+        }
+
+        // ── Lookup helper ─────────────────────────────────────────────────
         function lookup(curveArr, wbt, key) {
             if (!curveArr || !curveArr.length) return null;
             return curveArr.reduce((prev, curr) =>
@@ -402,77 +420,80 @@ export const ui = {
             )[key];
         }
 
-        const flows   = [90, 100, 110];
-        const fColors = ['text-emerald-400', 'text-cyan-400', 'text-amber-400'];
-        const vColors = ['text-emerald-300', 'text-cyan-300',  'text-amber-300'];
+        // ── Build table HTML ──────────────────────────────────────────────
+        const flows = [
+            { pct: 90,  label: '90% Flow',  baseCls: 'text-emerald-400', valCls: 'text-emerald-300' },
+            { pct: 100, label: '100% Flow', baseCls: 'text-cyan-400',    valCls: 'text-cyan-300'    },
+            { pct: 110, label: '110% Flow', baseCls: 'text-amber-400',   valCls: 'text-amber-300'   },
+        ];
 
-        let rows = '';
+        // Column headers — 1 WBT col + 3 groups of (Base | Margin | Δ)
+        let thead = `<tr class="border-b border-white/10 bg-slate-900/70">
+            <th rowspan="2" class="px-3 py-2 text-left text-[10px] text-slate-500 font-black uppercase tracking-wider sticky left-0 bg-slate-900/90 z-10">
+                WBT<br><span class="text-[8px] font-semibold normal-case tracking-normal text-slate-600">(°C)</span>
+            </th>`;
+        flows.forEach(f => {
+            thead += `<th colspan="3" class="px-2 py-2 text-center text-[10px] ${f.baseCls} font-black uppercase tracking-wider border-l border-white/5">
+                ${f.label}
+            </th>`;
+        });
+        thead += `</tr><tr class="border-b border-white/8 bg-slate-900/50">`;
+        flows.forEach(() => {
+            thead += `
+                <th class="px-2 py-1.5 text-center text-[9px] text-slate-500 font-bold border-l border-white/5">Base</th>
+                <th class="px-2 py-1.5 text-center text-[9px] text-slate-400 font-bold">Margin</th>
+                <th class="px-2 py-1.5 text-center text-[9px] text-slate-500 font-bold">Δ</th>`;
+        });
+        thead += '</tr>';
+
+        let tbody = '';
         wbtPoints.forEach(wbt => {
-            const isDesign = Math.abs(wbt - ui.inputs.designWBT) < 0.06;
+            const isDesign = Math.abs(wbt - dWBT) < 0.01;
             const trCls = isDesign
-                ? 'bg-emerald-950/40 border-y border-emerald-500/25'
-                : 'border-b border-white/5';
+                ? 'bg-emerald-950/30 border-y border-emerald-500/20 font-black'
+                : (Math.round(wbt * 2) % 2 === 0 ? 'border-b border-white/5' : 'border-b border-white/[0.03] bg-white/[0.01]');
 
-            let cells = `<td class="px-2 py-1.5 font-black ${isDesign ? 'text-slate-200' : 'text-slate-400'} whitespace-nowrap">
-                            ${wbt.toFixed(1)}${isDesign ? ' <span class="text-emerald-500 text-[8px]">★</span>' : ''}
-                         </td>`;
+            let cells = `<td class="px-3 py-1.5 font-mono font-black ${isDesign ? 'text-slate-100' : 'text-slate-400'} whitespace-nowrap sticky left-0 ${isDesign ? 'bg-emerald-950/60' : 'bg-slate-900/80'} z-10">
+                ${wbt.toFixed(1)}${isDesign ? '&nbsp;<span class="text-emerald-400 text-[9px] not-italic">★</span>' : ''}
+            </td>`;
 
-            flows.forEach((flow, fi) => {
-                const base   = lookup(ui.baseCurveData[flow], wbt, 'range100');
-                const offset = lookup(ui.curveData[flow],     wbt, 'range100');
-                if (base == null || offset == null) {
-                    cells += `<td class="px-2 py-1.5 text-center text-slate-600">—</td>`;
+            flows.forEach(f => {
+                const base   = lookup(ui.baseCurveData[f.pct], wbt, 'range100');
+                const margin = lookup(ui.curveData[f.pct],     wbt, 'range100');
+                if (base == null || margin == null) {
+                    cells += `<td colspan="3" class="px-2 py-1.5 text-center text-slate-700 border-l border-white/5">—</td>`;
                     return;
                 }
-                const delta   = offset - base;
+                const delta    = margin - base;
                 const deltaAbs = Math.abs(delta);
+                const isGuaranteed = isDesign && f.pct === 100 && deltaAbs < 0.05;
 
-                let deltaHtml;
-                if (isDesign && flow === 100 && deltaAbs < 0.05) {
-                    deltaHtml = `<span class="text-emerald-400 font-black">✓ guaranteed</span>`;
-                } else {
-                    const sign = delta >= 0 ? '+' : '';
-                    const dCls = deltaAbs < 0.01 ? 'text-slate-600'
-                               : delta > 0       ? 'text-amber-400'
-                                                 : 'text-sky-400';
-                    deltaHtml = `<span class="${dCls}">${sign}${delta.toFixed(2)}</span>`;
-                }
+                const sign  = delta >= 0 ? '+' : '';
+                const dCls  = isGuaranteed ? 'text-emerald-400 font-black'
+                            : deltaAbs < 0.01 ? 'text-slate-600'
+                            : delta > 0       ? 'text-amber-400'
+                                              : 'text-sky-400';
+                const dText = isGuaranteed ? '✓' : `${sign}${delta.toFixed(2)}`;
 
                 cells += `
-                    <td class="px-2 py-1.5 text-center">
-                        <span class="text-slate-500">${base.toFixed(2)}</span>
-                        <span class="text-slate-600 mx-0.5">→</span>
-                        <span class="${vColors[fi]} font-bold">${offset.toFixed(2)}</span>
-                        <span class="block text-[9px] leading-none mt-0.5">${deltaHtml}</span>
-                    </td>`;
+                    <td class="px-2 py-1.5 text-right font-mono text-[11px] text-slate-500 border-l border-white/5">${base.toFixed(2)}</td>
+                    <td class="px-2 py-1.5 text-right font-mono text-[11px] ${f.valCls} font-bold">${margin.toFixed(2)}</td>
+                    <td class="px-2 py-1.5 text-center font-mono text-[10px] ${dCls}">${dText}</td>`;
             });
 
-            rows += `<tr class="${trCls}">${cells}</tr>`;
+            tbody += `<tr class="${trCls}">${cells}</tr>`;
         });
 
-        el.innerHTML = `
-            <div class="mt-4 pt-4 border-t border-white/5">
-                <div class="flex items-center gap-2 mb-2.5">
-                    <span class="w-1 h-3 bg-amber-500/70 rounded-full"></span>
-                    <p class="text-[9px] font-black uppercase tracking-[0.2em] text-amber-400">Margin Impact — 100% Range CWT</p>
-                    <span class="text-[8px] text-slate-600 normal-case font-normal tracking-normal">(base → with margins, Δ per WBT)</span>
-                </div>
-                <div class="overflow-x-auto rounded-xl border border-white/5 bg-slate-900/30">
-                    <table class="w-full text-[10px] font-mono border-collapse">
-                        <thead>
-                            <tr class="border-b border-white/10 bg-slate-900/60">
-                                <th class="px-2 py-1.5 text-left text-[9px] text-slate-500 font-black uppercase">WBT °C</th>
-                                <th class="px-2 py-1.5 text-center ${fColors[0]} text-[9px] font-black uppercase">90% Flow</th>
-                                <th class="px-2 py-1.5 text-center ${fColors[1]} text-[9px] font-black uppercase">100% Flow</th>
-                                <th class="px-2 py-1.5 text-center ${fColors[2]} text-[9px] font-black uppercase">110% Flow</th>
-                            </tr>
-                        </thead>
-                        <tbody>${rows}</tbody>
+        const body = document.getElementById('marginModalBody');
+        if (body) {
+            body.innerHTML = `
+                <div class="rounded-2xl border border-white/8 overflow-hidden">
+                    <table class="w-full border-collapse text-[11px] font-mono" style="min-width:680px">
+                        <thead>${thead}</thead>
+                        <tbody>${tbody}</tbody>
                     </table>
-                </div>
-                <p class="text-[8px] text-slate-600 mt-1.5 px-1">★ = Design WBT. 100% flow at design WBT must show ✓ guaranteed (anchored tilt — no contractual shift).</p>
-            </div>`;
-        el.classList.remove('hidden');
+                </div>`;
+        }
     }
 };
 

@@ -906,6 +906,41 @@ Single cell isolated testing involves UNCERTAINTY in measurement due to turbulen
 
     <!-- Global helpers — no ES module needed ──────────────────────────────── -->
     <script>
+        /* ── Margin Impact Modal ───────────────────────────────────────── */
+        function openMarginModal() {
+            const modal = document.getElementById('marginModal');
+            const panel = document.getElementById('marginModalPanel');
+            if (!modal) return;
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            requestAnimationFrame(() => requestAnimationFrame(() => {
+                panel.style.opacity   = '1';
+                panel.style.transform = 'scale(1)';
+            }));
+            modal._esc = (e) => { if (e.key === 'Escape') closeMarginModal(); };
+            window.addEventListener('keydown', modal._esc);
+        }
+
+        function closeMarginModal() {
+            const modal = document.getElementById('marginModal');
+            const panel = document.getElementById('marginModalPanel');
+            if (!modal || modal.classList.contains('hidden')) return;
+            panel.style.opacity   = '0';
+            panel.style.transform = 'scale(0.96)';
+            document.body.style.overflow = '';
+            if (modal._esc) { window.removeEventListener('keydown', modal._esc); delete modal._esc; }
+            setTimeout(() => modal.classList.add('hidden'), 200);
+        }
+
+        // Click backdrop to close
+        document.addEventListener('click', function(e) {
+            const modal = document.getElementById('marginModal');
+            const panel = document.getElementById('marginModalPanel');
+            if (modal && !modal.classList.contains('hidden') && !panel.contains(e.target)) {
+                closeMarginModal();
+            }
+        });
+
         function repToggle(bodyId, chevronId) {
             const body    = document.getElementById(bodyId);
             const chevron = document.getElementById(chevronId);

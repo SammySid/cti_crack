@@ -295,8 +295,17 @@
                             </div>
                         </div>
 
-                        <!-- ── Margin Comparison Table (auto-shown when offsets active) ── -->
-                        <div id="marginComparison" class="hidden"></div>
+                        <!-- ── Margin Impact trigger button (appears when any offset is active) ── -->
+                        <div id="marginImpactBtnWrap" class="hidden pt-1">
+                            <button id="marginImpactBtn"
+                                onclick="openMarginModal()"
+                                class="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 font-black text-[10px] uppercase tracking-widest transition-all">
+                                <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>
+                                </svg>
+                                View Margin Impact Table
+                            </button>
+                        </div>
 
                         <div class="h-px bg-white/5"></div>
 
@@ -466,4 +475,59 @@
         </div><!-- /right column -->
     </div><!-- /flex layout -->
 
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════════════════
+     MARGIN IMPACT ANALYSIS MODAL
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div id="marginModal"
+     class="hidden fixed inset-0 z-[400] flex items-start justify-center p-4 sm:p-6 overflow-y-auto"
+     style="background:rgba(5,7,12,0.82);backdrop-filter:blur(6px);">
+
+    <div id="marginModalPanel"
+         class="relative w-full max-w-5xl bg-[#0d1117] border border-white/10 rounded-3xl shadow-2xl
+                opacity-0 scale-95 transition-all duration-200 my-auto">
+
+        <!-- Modal Header -->
+        <div class="flex items-start justify-between gap-4 px-6 sm:px-8 py-5 border-b border-white/8">
+            <div>
+                <div class="flex items-center gap-2.5 mb-1">
+                    <div class="w-2 h-2 rounded-full bg-amber-400 animate-pulse"></div>
+                    <h2 class="text-sm font-black uppercase tracking-[0.18em] text-slate-100">Safety Margin Impact Analysis</h2>
+                </div>
+                <p id="marginModalSubtitle" class="text-[11px] text-slate-500 font-semibold pl-4"></p>
+            </div>
+            <button onclick="closeMarginModal()"
+                    class="shrink-0 w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center transition-colors group mt-0.5">
+                <svg class="w-4 h-4 text-slate-400 group-hover:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                </svg>
+            </button>
+        </div>
+
+        <!-- Legend -->
+        <div class="flex flex-wrap items-center gap-x-6 gap-y-2 px-6 sm:px-8 py-3 border-b border-white/5 bg-white/[0.015]">
+            <div class="flex items-center gap-2 text-[10px] text-slate-400">
+                <span class="w-8 h-px bg-slate-500 inline-block"></span>Base (no margins)
+            </div>
+            <div class="flex items-center gap-2 text-[10px] text-slate-400">
+                <span class="w-8 h-px bg-amber-400 inline-block"></span>With safety margins
+            </div>
+            <div class="flex items-center gap-2 text-[10px] text-slate-400">
+                <span class="w-3 h-3 rounded bg-emerald-950/60 border border-emerald-500/40 inline-block"></span>★ Design WBT — contractually protected
+            </div>
+            <div class="ml-auto text-[9px] font-black uppercase tracking-widest text-slate-600">100% Range CWT (°C)</div>
+        </div>
+
+        <!-- Table body — filled by JS -->
+        <div id="marginModalBody" class="px-4 sm:px-6 py-5 overflow-x-auto"></div>
+
+        <!-- Footer -->
+        <div class="px-6 sm:px-8 py-4 border-t border-white/5 rounded-b-3xl">
+            <p class="text-[9px] text-slate-600 leading-relaxed">
+                <span class="text-emerald-400 font-black">✓ Guaranteed</span> — 100% flow at Design WBT shows ≤ 0.05°C delta. The anchored-tilt model ensures the contractual CWT guarantee is never disturbed.
+                Δ in <span class="text-amber-400">amber</span> = margin pushing CWT higher (conservative, as intended).
+            </p>
+        </div>
+    </div>
 </div>
