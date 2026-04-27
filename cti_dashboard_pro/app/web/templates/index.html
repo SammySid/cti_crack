@@ -10,16 +10,10 @@
     <link rel="stylesheet" href="/css/main.css">
 </head>
 
-<body class="bg-[#0a0c10] text-[#f8fafc] h-screen flex overflow-hidden antialiased">
-
-    <!-- Mobile Sidebar Backdrop -->
-    <div id="mobileSidebarBackdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[70] hidden lg:hidden no-print"></div>
-
-    <!-- Sidebar Navigation -->
-    {% include 'components/sidebarNav.html' %}
+<body class="bg-[#0a0c10] text-[#f8fafc] min-h-screen antialiased overflow-x-hidden">
 
     <!-- Main Content Area -->
-    <main class="flex-1 overflow-y-auto bg-[#0a0c10] custom-scrollbar focus:outline-none relative">
+    <main class="w-full min-h-screen bg-[#0a0c10] custom-scrollbar focus:outline-none">
 
         <!-- Professional Print Header (Hidden on UI, Visible on PDF/Print) -->
         <div class="hidden print:block w-full border-b-2 border-black pb-6 mb-8">

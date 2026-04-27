@@ -40,10 +40,9 @@ body {
     transform: translateY(-2px);
 }
 
-.sidebar-glass {
-    background: rgba(15, 23, 42, 0.8);
-    backdrop-filter: blur(16px);
-    border-right: 1px solid var(--border-glass);
+/* Tooltip panels — always above charts and modals */
+[class*="group-hover:block"] {
+    z-index: 60;
 }
 
 .input-premium {
@@ -114,15 +113,14 @@ body {
     }
 
     .no-print,
-    aside,
-    header.lg\:hidden,
+    header,
     #resetDefaults,
+    #exportExcel,
+    #exportPDF,
+    #btnCalibrateC,
+    #btnClearMargins,
     .absolute.top-8.left-8,
-    /* Nominal Flow Engine label */
-    .absolute.mb-4,
-    /* Info labels */
     .absolute.-right-4,
-    /* Blurs */
     .animate-pulse {
         display: none !important;
     }
@@ -236,10 +234,6 @@ body {
         margin-top: 20mm !important;
         padding-top: 10mm !important;
     }
-}
-
-.sidebar-transition {
-    transition: transform 0.28s cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .no-scrollbar {
