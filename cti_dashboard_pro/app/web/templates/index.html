@@ -243,63 +243,62 @@ Single cell isolated testing involves UNCERTAINTY in measurement due to turbulen
                             </button>
                         </div>
 
-                        <!-- Design fields: 3-column compact grid -->
-                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                            <div>
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">WBT Design (°C)</label>
-                                <input id="rep-design-wbt" type="number" step="0.1" value="29" class="w-full input-premium rounded-lg px-3 py-2 text-sm font-mono">
+                        <!-- ── Design Point (mirrors Thermal Analysis Config Panel) ── -->
+                        <div>
+                            <p class="flex items-center gap-1.5 text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">
+                                <span class="w-1 h-3 bg-blue-500/70 rounded-full"></span>Design Point
+                            </p>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">L/G Ratio</label>
+                                    <input id="rep-design-lg" type="number" step="0.01" value="1.5" class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Water Flow (m³/h)</label>
+                                    <input id="rep-design-flow" type="number" step="10" value="3863.6" class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Design WBT (°C)</label>
+                                    <input id="rep-design-wbt" type="number" step="0.1" value="29" class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Design CWT (°C)</label>
+                                    <input id="rep-design-cwt" type="number" step="0.1" value="33" class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Design HWT (°C)</label>
+                                    <input id="rep-design-hwt" type="number" step="0.1" value="43" class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Fan Power (kW)</label>
+                                    <input id="rep-design-fanpow" type="number" step="1" value="117" class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
+                                </div>
                             </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">CWT Design (°C)</label>
-                                <input id="rep-design-cwt" type="number" step="0.1" value="33" class="w-full input-premium rounded-lg px-3 py-2 text-sm font-mono">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">HWT Design (°C)</label>
-                                <input id="rep-design-hwt" type="number" step="0.1" value="43" class="w-full input-premium rounded-lg px-3 py-2 text-sm font-mono">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Flow 100% (m³/hr)</label>
-                                <input id="rep-design-flow" type="number" step="1" value="3863.6" class="w-full input-premium rounded-lg px-3 py-2 text-sm font-mono">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1">Fan Power (kW)</label>
-                                <input id="rep-design-fanpow" type="number" step="1" value="117" class="w-full input-premium rounded-lg px-3 py-2 text-sm font-mono">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-cyan-400/80 uppercase tracking-widest mb-1 flex items-center gap-1">
-                                    L/G Ratio
-                                    <span class="relative group inline-flex items-center cursor-help">
-                                        <svg class="w-3 h-3 text-cyan-600 group-hover:text-cyan-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.5"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 16v-4m0-4h.01"/></svg>
-                                        <span class="pointer-events-none absolute left-0 top-4 z-50 w-72 hidden group-hover:block bg-slate-800 border border-slate-700/80 rounded-xl p-3 text-[11px] leading-relaxed shadow-2xl font-normal normal-case tracking-normal text-slate-200">
-                                            Key calibration parameter. Match to your tower's manufacturer performance curve. Default 1.5 — use ~1.1 for the Dhariwal tower based on validation.
-                                        </span>
-                                    </span>
-                                </label>
-                                <input id="rep-design-lg" type="number" step="0.01" value="1.5" class="w-full input-premium rounded-lg px-3 py-2 text-sm font-mono">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-violet-400/80 uppercase tracking-widest mb-1 flex items-center gap-1">
-                                    Const C
-                                    <span class="relative group inline-flex items-center cursor-help">
-                                        <svg class="w-3 h-3 text-violet-600 group-hover:text-violet-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.5"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 16v-4m0-4h.01"/></svg>
-                                        <span class="pointer-events-none absolute left-0 top-4 z-50 w-72 hidden group-hover:block bg-slate-800 border border-slate-700/80 rounded-xl p-3 text-[11px] leading-relaxed shadow-2xl font-normal normal-case tracking-normal text-slate-200">
-                                            Tower transfer coefficient C in KaV/L = C × (L/G)^−m. Take from your Thermal Analysis tab — this makes the cross-plots tower-specific. Syncs automatically via "↙ Sync from Thermal Tab".
-                                        </span>
-                                    </span>
-                                </label>
-                                <input id="rep-design-c" type="number" step="0.01" value="1.2" class="w-full input-premium rounded-lg px-3 py-2 text-sm font-mono">
-                            </div>
-                            <div>
-                                <label class="block text-[10px] font-bold text-violet-400/80 uppercase tracking-widest mb-1 flex items-center gap-1">
-                                    Const M
-                                    <span class="relative group inline-flex items-center cursor-help">
-                                        <svg class="w-3 h-3 text-violet-600 group-hover:text-violet-400 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10" stroke-width="1.5"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 16v-4m0-4h.01"/></svg>
-                                        <span class="pointer-events-none absolute left-0 top-4 z-50 w-72 hidden group-hover:block bg-slate-800 border border-slate-700/80 rounded-xl p-3 text-[11px] leading-relaxed shadow-2xl font-normal normal-case tracking-normal text-slate-200">
-                                            Tower exponent M in KaV/L = C × (L/G)^−m. Take from your Thermal Analysis tab. Together with Const C, defines the tower's unique performance curve used to build the ATC-105 cross-plots.
-                                        </span>
-                                    </span>
-                                </label>
-                                <input id="rep-design-m" type="number" step="0.01" value="0.6" class="w-full input-premium rounded-lg px-3 py-2 text-sm font-mono">
+                        </div>
+
+                        <div class="h-px bg-white/5"></div>
+
+                        <!-- ── Transfer Constants (mirrors Thermal Analysis Config Panel) ── -->
+                        <div>
+                            <p class="flex items-center gap-1.5 text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">
+                                <span class="w-1 h-3 bg-violet-500/70 rounded-full"></span>Transfer Constants
+                                <span class="text-[8px] font-semibold text-slate-600 normal-case tracking-normal">(Merkel)</span>
+                            </p>
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">
+                                        Const C
+                                        <span class="text-[8px] text-slate-600 normal-case font-semibold ml-1">(coefficient)</span>
+                                    </label>
+                                    <input id="rep-design-c" type="number" step="0.01" value="1.2" class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
+                                </div>
+                                <div>
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">
+                                        Const M
+                                        <span class="text-[8px] text-slate-600 normal-case font-semibold ml-1">(exponent)</span>
+                                    </label>
+                                    <input id="rep-design-m" type="number" step="0.01" value="0.6" class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
+                                </div>
                             </div>
                         </div>
 
