@@ -212,30 +212,51 @@
 
                         <div class="h-px bg-white/5"></div>
 
-                        <!-- ── Auto-Calibration ───────────────────────── -->
-                        <div class="bg-emerald-950/25 border border-emerald-500/25 rounded-xl p-4">
-                            <div class="flex items-center justify-between mb-3">
-                                <p class="text-[9px] font-black text-emerald-400 uppercase tracking-[0.2em]">Auto-Calibration</p>
-                                <button type="button" data-tt="targetCWT"
-                                    aria-expanded="false" aria-label="Help: Target CWT at Design WBT"
-                                    class="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-600 hover:text-emerald-400 transition-colors focus:outline-none px-1.5 py-0.5 rounded border border-emerald-500/20 hover:border-emerald-500/50 hover:bg-emerald-500/10">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <circle cx="12" cy="12" r="10" stroke-width="1.5"/>
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 16v-4m0-4h.01"/>
+                        <!-- ── Auto-Calibration (collapsed by default) ── -->
+                        <div class="bg-emerald-950/25 border border-emerald-500/25 rounded-xl overflow-hidden">
+                            <!-- Clickable header row -->
+                            <button type="button"
+                                onclick="(function(btn){
+                                    var body = document.getElementById('autocalBody');
+                                    var chev = document.getElementById('autocalChev');
+                                    var open = !body.classList.contains('hidden');
+                                    body.classList.toggle('hidden', open);
+                                    chev.style.transform = open ? 'rotate(-90deg)' : 'rotate(0deg)';
+                                })(this)"
+                                class="w-full flex items-center justify-between gap-2 px-4 py-3 hover:bg-emerald-500/5 transition-colors">
+                                <div class="flex items-center gap-2">
+                                    <p class="text-[9px] font-black text-emerald-400 uppercase tracking-[0.2em]">Auto-Calibration</p>
+                                    <span class="text-[8px] font-semibold text-emerald-700 normal-case tracking-normal">— expand to use</span>
+                                </div>
+                                <div class="flex items-center gap-2 shrink-0">
+                                    <button type="button" data-tt="targetCWT"
+                                        onclick="event.stopPropagation()"
+                                        aria-expanded="false" aria-label="Help: Target CWT at Design WBT"
+                                        class="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-600 hover:text-emerald-400 transition-colors focus:outline-none px-1.5 py-0.5 rounded border border-emerald-500/20 hover:border-emerald-500/50 hover:bg-emerald-500/10">
+                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <circle cx="12" cy="12" r="10" stroke-width="1.5"/>
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 16v-4m0-4h.01"/>
+                                        </svg>
+                                        Guide
+                                    </button>
+                                    <svg id="autocalChev" class="w-3.5 h-3.5 text-emerald-700 transition-transform duration-200 shrink-0" style="transform:rotate(-90deg)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
                                     </svg>
-                                    Guide
-                                </button>
+                                </div>
+                            </button>
+                            <!-- Collapsible body — hidden by default -->
+                            <div id="autocalBody" class="hidden px-4 pb-4 space-y-2 border-t border-emerald-500/15">
+                                <label class="text-[10px] font-bold text-emerald-400 uppercase px-1 mb-1.5 block pt-3">Target CWT at Design WBT</label>
+                                <div class="flex gap-2">
+                                    <input id="targetCWT" type="number" step="0.1" value="32.0"
+                                        class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono border border-emerald-500/30 focus:border-emerald-500/60">
+                                    <button id="btnCalibrateC"
+                                        class="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 px-4 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all border border-emerald-500/30 whitespace-nowrap">
+                                        Fit Curve
+                                    </button>
+                                </div>
+                                <p class="text-[9px] text-slate-500 px-1">Recalculates Const C so the 100% curve exactly hits the target at Design WBT.</p>
                             </div>
-                            <label class="text-[10px] font-bold text-emerald-400 uppercase px-1 mb-1.5 block">Target CWT at Design WBT</label>
-                            <div class="flex gap-2">
-                                <input id="targetCWT" type="number" step="0.1" value="32.0"
-                                    class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono border border-emerald-500/30 focus:border-emerald-500/60">
-                                <button id="btnCalibrateC"
-                                    class="bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 px-4 rounded-lg font-bold text-[10px] uppercase tracking-wider transition-all border border-emerald-500/30 whitespace-nowrap">
-                                    Fit Curve
-                                </button>
-                            </div>
-                            <p class="text-[9px] text-slate-500 mt-2 px-1">Recalculates Const C so the 100% curve exactly hits the target at Design WBT.</p>
                         </div>
 
                         <div class="h-px bg-white/5"></div>
@@ -258,22 +279,43 @@
                                 </button>
                             </div>
 
-                            <!-- Low WBT Rotation -->
-                            <div class="mb-3">
-                                <div class="flex items-center gap-1.5 px-1 mb-1.5">
-                                    <label class="text-[10px] font-bold text-slate-400 uppercase">Low WBT Rotation (at 20°C)</label>
-                                    <button type="button" data-tt="lowWbt"
-                                        aria-expanded="false" aria-label="Help: Low WBT Rotation"
-                                        class="inline-flex items-center gap-1 text-[9px] font-bold text-amber-600 hover:text-amber-400 transition-colors focus:outline-none px-1.5 py-0.5 rounded border border-amber-500/20 hover:border-amber-500/50 hover:bg-amber-500/10">
-                                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <circle cx="12" cy="12" r="10" stroke-width="1.5"/>
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 16v-4m0-4h.01"/>
+                            <!-- Low WBT Rotation (collapsed by default) -->
+                            <div class="mb-3 rounded-xl border border-amber-500/15 overflow-hidden">
+                                <!-- Clickable header -->
+                                <button type="button"
+                                    onclick="(function(){
+                                        var body = document.getElementById('wbtRotBody');
+                                        var chev = document.getElementById('wbtRotChev');
+                                        var open = !body.classList.contains('hidden');
+                                        body.classList.toggle('hidden', open);
+                                        chev.style.transform = open ? 'rotate(-90deg)' : 'rotate(0deg)';
+                                    })()"
+                                    class="w-full flex items-center justify-between gap-2 px-3 py-2.5 hover:bg-amber-500/5 transition-colors">
+                                    <div class="flex items-center gap-2">
+                                        <label class="text-[10px] font-bold text-slate-400 uppercase pointer-events-none">Low WBT Rotation (at 20°C)</label>
+                                        <span class="text-[8px] font-semibold text-slate-600 normal-case tracking-normal">— expand to use</span>
+                                    </div>
+                                    <div class="flex items-center gap-2 shrink-0">
+                                        <button type="button" data-tt="lowWbt"
+                                            onclick="event.stopPropagation()"
+                                            aria-expanded="false" aria-label="Help: Low WBT Rotation"
+                                            class="inline-flex items-center gap-1 text-[9px] font-bold text-amber-600 hover:text-amber-400 transition-colors focus:outline-none px-1.5 py-0.5 rounded border border-amber-500/20 hover:border-amber-500/50 hover:bg-amber-500/10">
+                                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <circle cx="12" cy="12" r="10" stroke-width="1.5"/>
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M12 16v-4m0-4h.01"/>
+                                            </svg>
+                                            Guide
+                                        </button>
+                                        <svg id="wbtRotChev" class="w-3.5 h-3.5 text-amber-700 transition-transform duration-200 shrink-0" style="transform:rotate(-90deg)" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M19 9l-7 7-7-7"/>
                                         </svg>
-                                        Guide
-                                    </button>
+                                    </div>
+                                </button>
+                                <!-- Collapsible body — hidden by default -->
+                                <div id="wbtRotBody" class="hidden px-3 pb-3 border-t border-amber-500/15">
+                                    <input id="offsetWbt20" type="number" step="0.05" value="0.0"
+                                        class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono border border-amber-500/15 focus:border-amber-500/40 mt-3">
                                 </div>
-                                <input id="offsetWbt20" type="number" step="0.05" value="0.0"
-                                    class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono border border-amber-500/15 focus:border-amber-500/40">
                             </div>
 
                             <!-- 3×3 Offset Grid -->
