@@ -994,7 +994,7 @@ Single cell isolated testing involves UNCERTAINTY in measurement due to turbulen
             const bg    = document.getElementById('trm-bg');
             if (!modal || modal.style.display !== 'flex') return;
             if (bg)    bg.style.opacity       = '0';
-            if (panel) { panel.style.opacity = '0'; panel.style.transform = 'scale(0.97)'; }
+            if (panel) { panel.style.opacity = '0'; panel.style.transform = 'scale(0.96) translateY(8px)'; }
             document.body.style.overflow = '';
             if (modal._trmEsc) { window.removeEventListener('keydown', modal._trmEsc); delete modal._trmEsc; }
             setTimeout(() => { modal.style.display = ''; modal.classList.add('hidden'); }, 230);

@@ -38,36 +38,29 @@ function _trmLoad() {
     } catch (_) {}
 }
 
-function _trmChip(label, value, unit = '') {
-    const v = value !== undefined && value !== null && value !== '' ? value : '—';
-    return `<div class="rounded-lg bg-slate-900/60 border border-white/[0.06] px-2.5 py-2 text-center">
-        <p class="text-[9px] font-black uppercase tracking-widest text-slate-600 mb-0.5">${label}</p>
-        <p class="text-[12px] font-black font-mono text-violet-200">${v}<span class="text-[9px] text-slate-500 ml-0.5">${unit}</span></p>
-    </div>`;
+function _trmPill(label, value, unit = '') {
+    const v = (value !== undefined && value !== null && value !== '') ? value : '—';
+    return `<span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg border border-white/[0.07] text-[10px] font-mono" style="background:rgba(12,18,32,0.8)">
+        <span class="text-slate-600 text-[9px] uppercase tracking-wide font-black">${label}</span>
+        <span class="text-violet-200 font-bold">${v}</span>
+        ${unit ? `<span class="text-slate-600 text-[9px]">${unit}</span>` : ''}
+    </span>`;
 }
 
 function _renderThermalContext(ui) {
     const inp = ui.inputs;
 
-    // Design values grid
+    // Compact pill strip: all key values in one row
     const designGrid = document.getElementById('trm-ctx-design-grid');
     if (designGrid) {
         designGrid.innerHTML = [
-            _trmChip('WBT',    inp.designWBT,        '°C'),
-            _trmChip('CWT',    inp.designCWT,         '°C'),
-            _trmChip('HWT',    inp.designHWT,         '°C'),
-            _trmChip('L/G',    inp.lgRatio,            ''),
-            _trmChip('Flow',   inp.designWaterFlow,   'm³/h'),
-            _trmChip('Fan P.', inp.designFanPower ?? '—', 'kW'),
-        ].join('');
-    }
-
-    // Constants grid
-    const constGrid = document.getElementById('trm-ctx-constants-grid');
-    if (constGrid) {
-        constGrid.innerHTML = [
-            _trmChip('Const C', inp.constantC, ''),
-            _trmChip('Const M', inp.constantM, ''),
+            _trmPill('WBT',  inp.designWBT,       '°C'),
+            _trmPill('CWT',  inp.designCWT,        '°C'),
+            _trmPill('HWT',  inp.designHWT,        '°C'),
+            _trmPill('L/G',  inp.lgRatio,           ''),
+            _trmPill('C',    inp.constantC,         ''),
+            _trmPill('M',    inp.constantM,         ''),
+            _trmPill('Flow', inp.designWaterFlow,  'm³/h'),
         ].join('');
     }
 
@@ -77,47 +70,51 @@ function _renderThermalContext(ui) {
         'off100r80', 'off100r100', 'off100r120',
         'off110r80', 'off110r100', 'off110r120',
     ];
-    const wbt20 = parseFloat(inp.offsetWbt20) || 0;
+    const wbt20    = parseFloat(inp.offsetWbt20) || 0;
     const gridVals = marginIds.map(id => parseFloat(inp[id]) || 0);
     const anyActive = wbt20 !== 0 || gridVals.some(v => v !== 0);
 
     const badge = document.getElementById('trm-ctx-margins-badge');
     if (badge) badge.classList.toggle('hidden', !anyActive);
 
-    const wbt20El = document.getElementById('trm-ctx-off-wbt20');
-    if (wbt20El) wbt20El.textContent = wbt20 !== 0 ? `${wbt20} °C` : '0';
+    const marginsRow = document.getElementById('trm-ctx-margins-row');
+    if (marginsRow) marginsRow.classList.toggle('hidden', !anyActive);
 
     const gridRows = document.getElementById('trm-ctx-grid-rows');
-    if (gridRows) {
+    if (gridRows && anyActive) {
         const flowLabels = ['90%', '100%', '110%'];
-        gridRows.innerHTML = [0, 1, 2].map(row => {
+        const items = [];
+        if (wbt20 !== 0) {
+            items.push(`<span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg border border-amber-500/20 text-[10px] font-mono" style="background:rgba(12,18,32,0.8)">
+                <span class="text-amber-600/70 text-[9px] uppercase tracking-wide font-black">@20°C</span>
+                <span class="text-amber-300 font-bold">${wbt20 > 0 ? '+' : ''}${wbt20}</span>
+            </span>`);
+        }
+        [0, 1, 2].forEach(row => {
             const [v80, v100, v120] = gridVals.slice(row * 3, row * 3 + 3);
-            const cl = v => v !== 0 ? 'text-amber-400 font-bold' : 'text-slate-700';
-            return `<div class="grid grid-cols-4 text-[10px] font-mono border-b border-white/[0.03] last:border-0">
-                <div class="px-1.5 py-1.5 text-slate-500 font-black text-[9px]">${flowLabels[row]}</div>
-                <div class="px-1.5 py-1.5 text-center ${cl(v80)}">${v80}</div>
-                <div class="px-1.5 py-1.5 text-center ${cl(v100)}">${v100}</div>
-                <div class="px-1.5 py-1.5 text-center ${cl(v120)}">${v120}</div>
-            </div>`;
-        }).join('');
+            [v80, v100, v120].forEach((v, ci) => {
+                if (v !== 0) {
+                    const rangeLabel = ['R80','R100','R120'][ci];
+                    items.push(`<span class="inline-flex items-center gap-1 px-2 py-1 rounded-lg border border-amber-500/20 text-[10px] font-mono" style="background:rgba(12,18,32,0.8)">
+                        <span class="text-amber-600/70 text-[9px] uppercase tracking-wide font-black">${flowLabels[row]}·${rangeLabel}</span>
+                        <span class="text-amber-300 font-bold">${v > 0 ? '+' : ''}${v}</span>
+                    </span>`);
+                }
+            });
+        });
+        gridRows.innerHTML = items.join('');
     }
 
-    // Project context
-    const setCtx = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val || '—'; };
-    setCtx('trm-ctx-client',   inp.companyName);
-    setCtx('trm-ctx-engineer', inp.engineerName);
-    setCtx('trm-ctx-project',  inp.projectName);
-
-    // Auto-fill metadata from thermal project fields if fields are blank
-    const autoFillIfEmpty = (fieldId, val) => {
+    // Auto-fill metadata from thermal project fields if blank
+    const autoFill = (fieldId, val) => {
         const el = document.getElementById(fieldId);
         if (el && !el.value.trim() && val) el.value = val;
     };
-    autoFillIfEmpty('trm-title',  inp.projectName ? `CT PERFORMANCE EVALUATION REPORT — ${inp.projectName}` : '');
+    autoFill('trm-title', inp.projectName ? `CT PERFORMANCE EVALUATION REPORT — ${inp.projectName}` : '');
 }
 
 export function openThermalReportModal(ui) {
-    // DOM open animation (mirrors index.html global pattern)
+    // DOM open animation
     const modal = document.getElementById('thermalReportModal');
     const panel = document.getElementById('trm-panel');
     const bg    = document.getElementById('trm-bg');
@@ -127,7 +124,7 @@ export function openThermalReportModal(ui) {
     document.body.style.overflow = 'hidden';
     requestAnimationFrame(() => requestAnimationFrame(() => {
         if (bg)    bg.style.opacity       = '1';
-        if (panel) { panel.style.opacity = '1'; panel.style.transform = 'scale(1)'; }
+        if (panel) { panel.style.opacity = '1'; panel.style.transform = 'scale(1) translateY(0)'; }
     }));
     const escHandler = (e) => { if (e.key === 'Escape') window.closeThermalReportModal?.(); };
     modal._trmEsc = escHandler;
