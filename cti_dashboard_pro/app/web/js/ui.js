@@ -482,29 +482,6 @@ export const ui = {
         const st = ui._marginModalState;
 
         body.innerHTML = `
-        <!-- Applied Margins Summary -->
-        <div class="mb-5 p-4 rounded-2xl border border-white/8 bg-white/[0.015]">
-            <p class="text-[9px] font-black uppercase tracking-[0.22em] text-slate-500 mb-3">Applied Safety Margins (°C offset per cell)</p>
-            <div class="grid gap-2" style="grid-template-columns: auto repeat(3, 1fr)">
-                <!-- Header row -->
-                <div></div>
-                ${ranges3.map(r => `<div class="text-center text-[9px] font-black uppercase tracking-wider text-slate-500 pb-1">${rLabels[r]}</div>`).join('')}
-                ${gridRows}
-            </div>
-            ${Math.abs(wbtTilt) > 0.001 ? `
-            <div class="mt-3 pt-3 border-t border-white/5 flex items-center gap-3">
-                <span class="text-[9px] font-black uppercase tracking-wider text-slate-500">Low WBT Rotation (at 20°C)</span>
-                <span class="font-mono text-[11px] text-amber-300 font-black bg-amber-500/10 border border-amber-500/20 rounded-lg px-2.5 py-1">+${wbtTilt.toFixed(2)}°C</span>
-                <span class="text-[9px] text-slate-600">↳ tapers to zero at Design WBT ${dWBT.toFixed(1)}°C</span>
-            </div>` : `
-            <div class="mt-3 pt-3 border-t border-white/5 text-[9px] text-slate-700 italic">Low WBT Rotation: not applied</div>`}
-            <div class="mt-3 pt-3 border-t border-white/5 flex flex-wrap items-center gap-2 text-[9px] text-slate-500">
-                <span class="w-3 h-3 rounded bg-amber-500/20 border border-amber-500/40 inline-block"></span>Active offset &nbsp;·&nbsp;
-                <span class="w-3 h-3 rounded bg-white/[0.03] border border-white/8 inline-block"></span>Zero (no margin) &nbsp;·&nbsp;
-                <span class="text-amber-300 font-black">★ 100%F/100%R</span> = contractual guarantee cell
-            </div>
-        </div>
-
         <!-- Table Controls -->
         <div class="flex flex-wrap items-center gap-2 mb-3">
             <span class="text-[9px] font-black uppercase tracking-wider text-slate-500 mr-1">Show flows:</span>
