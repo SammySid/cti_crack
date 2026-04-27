@@ -527,9 +527,9 @@ export const ui = {
         const st     = ui._marginModalState;
         const flows3 = [90, 100, 110];
         const fMeta  = {
-            90:  { label: '90% Flow',  baseCls: 'text-emerald-400', valCls: 'text-emerald-300' },
-            100: { label: '100% Flow', baseCls: 'text-cyan-400',    valCls: 'text-cyan-300'    },
-            110: { label: '110% Flow', baseCls: 'text-amber-400',   valCls: 'text-amber-300'   },
+            90:  { label: '90% Flow',  groupBg: 'bg-emerald-500/10', groupTxt: 'text-emerald-300', groupBorder: 'border-emerald-500/20', valCls: 'text-emerald-200' },
+            100: { label: '100% Flow', groupBg: 'bg-cyan-500/10',    groupTxt: 'text-cyan-300',    groupBorder: 'border-cyan-500/20',    valCls: 'text-cyan-200'    },
+            110: { label: '110% Flow', groupBg: 'bg-amber-500/10',   groupTxt: 'text-amber-300',   groupBorder: 'border-amber-500/20',   valCls: 'text-amber-200'   },
         };
         const visFlows = flows3.filter(f => st.flows.has(f));
         const dWBT = Math.round(ui.inputs.designWBT * 10) / 10;
@@ -542,75 +542,125 @@ export const ui = {
             ));
         }
 
-        // thead
-        let colCount = 1 + visFlows.length * 3;
-        let thead = `<tr class="border-b border-white/10 bg-slate-900/70">
-            <th rowspan="2" class="px-3 py-2 text-left text-[10px] text-slate-500 font-black uppercase sticky left-0 bg-slate-900/90 z-10 min-w-[72px]">
-                WBT&nbsp;<span class="text-slate-700 font-semibold">(°C)</span>
-            </th>`;
+        const colCount = 1 + visFlows.length * 3;
+
+        // ── thead: row1 = group labels, row2 = sub-column labels ──────────
+        // Row 1 — WBT + flow group headers
+        let theadR1 = `
+            <tr>
+                <th rowspan="2"
+                    class="px-4 py-3 text-left align-bottom sticky left-0 z-20 bg-[#0d1117] border-b-2 border-white/10 border-r border-white/8 min-w-[80px]">
+                    <span class="text-[10px] font-black uppercase tracking-widest text-slate-300">WBT</span><br>
+                    <span class="text-[9px] font-semibold text-slate-600 normal-case tracking-normal">(°C)</span>
+                </th>`;
         visFlows.forEach(f => {
             const m = fMeta[f];
-            thead += `<th colspan="3" class="px-2 py-2 text-center text-[10px] ${m.baseCls} font-black uppercase border-l border-white/8">${m.label}</th>`;
+            theadR1 += `
+                <th colspan="3"
+                    class="px-3 py-2.5 text-center border-l border-white/8 border-b border-white/5 ${m.groupBg}">
+                    <span class="text-[11px] font-black uppercase tracking-wider ${m.groupTxt}">${m.label}</span>
+                </th>`;
         });
-        thead += `</tr><tr class="border-b border-white/8 bg-slate-900/50">`;
-        visFlows.forEach(() => {
-            thead += `<th class="px-2 py-1 text-center text-[9px] text-slate-600 font-bold border-l border-white/8">Base</th>
-                      <th class="px-2 py-1 text-center text-[9px] text-slate-400 font-bold">Margin</th>
-                      <th class="px-2 py-1 text-center text-[9px] text-slate-600 font-bold">Δ</th>`;
-        });
-        thead += `</tr>`;
+        theadR1 += `</tr>`;
 
-        // tbody
+        // Row 2 — sub-column labels
+        let theadR2 = `<tr class="border-b-2 border-white/10">`;
+        visFlows.forEach(f => {
+            const m = fMeta[f];
+            theadR2 += `
+                <th class="px-3 py-2 text-right border-l border-white/8 ${m.groupBg}">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-300">Base</span>
+                    <span class="block text-[8px] font-semibold text-slate-500 normal-case tracking-normal">no margin</span>
+                </th>
+                <th class="px-3 py-2 text-right ${m.groupBg}">
+                    <span class="text-[10px] font-bold uppercase tracking-wider ${m.groupTxt}">Margin</span>
+                    <span class="block text-[8px] font-semibold text-slate-500 normal-case tracking-normal">with offset</span>
+                </th>
+                <th class="px-3 py-2 text-center border-r border-white/8 ${m.groupBg}">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-slate-300">Δ</span>
+                    <span class="block text-[8px] font-semibold text-slate-500 normal-case tracking-normal">delta °C</span>
+                </th>`;
+        });
+        theadR2 += `</tr>`;
+
+        // ── tbody ──────────────────────────────────────────────────────────
         let tbody = '';
         if (rows.length === 0) {
-            tbody = `<tr><td colspan="${colCount}" class="px-4 py-6 text-center text-[11px] text-slate-600 italic">No rows with active delta in selected flows. Disable "Changed rows only" to see all points.</td></tr>`;
+            tbody = `<tr>
+                <td colspan="${colCount}"
+                    class="px-4 py-8 text-center text-[12px] text-slate-600 italic">
+                    No rows with active delta in selected flows.<br>
+                    <span class="text-[10px]">Disable "Changed rows only" to see all WBT points.</span>
+                </td>
+            </tr>`;
         } else {
-            rows.forEach(row => {
+            rows.forEach((row, i) => {
                 const { wbt, isDesign } = row;
-                const trCls = isDesign
-                    ? 'bg-emerald-950/30 border-y border-emerald-500/20'
-                    : (Math.round(wbt * 2) % 2 === 0 ? 'border-b border-white/5' : 'border-b border-white/[0.03] bg-white/[0.01]');
+                const isEven = i % 2 === 0;
+                const trBg   = isDesign ? 'bg-emerald-950/40' : (isEven ? '' : 'bg-white/[0.018]');
+                const trBorder = isDesign ? 'border-y-2 border-emerald-500/30' : 'border-b border-white/[0.06]';
 
-                let cells = `<td class="px-3 py-1.5 font-mono font-black text-[12px] ${isDesign ? 'text-slate-100' : 'text-slate-400'} whitespace-nowrap sticky left-0 ${isDesign ? 'bg-emerald-950/60' : 'bg-slate-900/80'} z-10">
-                    ${wbt.toFixed(1)}${isDesign ? '&nbsp;<span class="text-emerald-400 text-[10px]">★</span>' : ''}
-                </td>`;
+                // WBT cell
+                let cells = `
+                    <td class="px-4 py-2 sticky left-0 z-10 border-r border-white/8
+                               ${isDesign ? 'bg-emerald-950/60' : (isEven ? 'bg-[#0d1117]' : 'bg-[#0e1219]')}">
+                        <span class="font-mono font-black text-[13px] ${isDesign ? 'text-white' : 'text-slate-300'}">${wbt.toFixed(1)}</span>
+                        ${isDesign ? `<span class="ml-1 text-emerald-400 text-[10px] font-black">★</span>` : ''}
+                    </td>`;
 
-                row.cells.filter(c => visFlows.includes(c.f)).forEach(c => {
+                row.cells.filter(c => visFlows.includes(c.f)).forEach((c, ci) => {
                     const m = fMeta[c.f];
                     if (c.base == null || c.margin == null) {
-                        cells += `<td colspan="3" class="px-2 py-1.5 text-center text-slate-700 border-l border-white/8">—</td>`;
+                        cells += `<td colspan="3" class="px-3 py-2 text-center text-slate-700 border-l border-white/8 text-[11px]">—</td>`;
                         return;
                     }
                     const isGuaranteed = isDesign && c.f === 100 && Math.abs(c.delta) < 0.05;
                     const sign  = c.delta >= 0 ? '+' : '';
-                    const dCls  = isGuaranteed   ? 'text-emerald-400 font-black'
-                                : Math.abs(c.delta) < 0.01 ? 'text-slate-600'
-                                : c.delta > 0              ? 'text-amber-400'
-                                                           : 'text-sky-400';
-                    const dText = isGuaranteed ? '✓ guaranteed' : `${sign}${c.delta.toFixed(2)}`;
+                    const dAbs  = Math.abs(c.delta);
+
+                    // Delta pill
+                    let deltaPill;
+                    if (isGuaranteed) {
+                        deltaPill = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black bg-emerald-500/20 border border-emerald-500/30 text-emerald-300">✓ locked</span>`;
+                    } else if (dAbs < 0.01) {
+                        deltaPill = `<span class="text-slate-600 font-mono text-[11px]">—</span>`;
+                    } else {
+                        const pillBg  = c.delta > 0 ? 'bg-amber-500/15 border-amber-500/25 text-amber-300' : 'bg-sky-500/15 border-sky-500/25 text-sky-300';
+                        deltaPill = `<span class="inline-flex items-center px-1.5 py-0.5 rounded font-mono font-bold text-[11px] border ${pillBg}">${sign}${c.delta.toFixed(2)}</span>`;
+                    }
 
                     cells += `
-                        <td class="px-2 py-1.5 text-right font-mono text-[11px] text-slate-500 border-l border-white/8">${c.base.toFixed(2)}</td>
-                        <td class="px-2 py-1.5 text-right font-mono text-[11px] ${m.valCls} font-bold">${c.margin.toFixed(2)}</td>
-                        <td class="px-2 py-1.5 text-center font-mono text-[11px] ${dCls} ${isGuaranteed ? 'text-[9px]' : ''}">${dText}</td>`;
+                        <td class="px-3 py-2 text-right font-mono text-[12px] font-semibold text-slate-300 border-l border-white/8">
+                            ${c.base.toFixed(2)}
+                        </td>
+                        <td class="px-3 py-2 text-right font-mono text-[12px] font-black ${m.valCls}">
+                            ${c.margin.toFixed(2)}
+                        </td>
+                        <td class="px-3 py-2 text-center border-r border-white/8">
+                            ${deltaPill}
+                        </td>`;
                 });
 
-                tbody += `<tr class="${trCls}">${cells}</tr>`;
+                tbody += `<tr class="${trBg} ${trBorder}">${cells}</tr>`;
             });
         }
 
-        const minW = 200 + visFlows.length * 180;
+        const minW = 160 + visFlows.length * 210;
         wrap.innerHTML = `
-            <div class="rounded-2xl border border-white/8 overflow-hidden">
-                <table class="w-full border-collapse text-[11px] font-mono" style="min-width:${minW}px">
-                    <thead>${thead}</thead>
+            <div class="rounded-2xl border border-white/10 overflow-auto" style="max-height:55vh">
+                <table class="w-full border-collapse" style="min-width:${minW}px">
+                    <thead class="sticky top-0 z-20">${theadR1}${theadR2}</thead>
                     <tbody>${tbody}</tbody>
                 </table>
             </div>
-            <p class="text-[9px] text-slate-700 mt-2 px-1">
-                ★ Design WBT ${dWBT.toFixed(1)}°C — 100% Flow at this point must show ✓ guaranteed.
-                Showing ${rows.length} of ${ui._marginTableData.length} WBT points.
-            </p>`;
+            <div class="flex items-center justify-between mt-2 px-1">
+                <p class="text-[9px] text-slate-700">
+                    ★ Design WBT ${dWBT.toFixed(1)}°C — 100% Flow Δ must show ✓ locked (anchored tilt guarantee).
+                </p>
+                <p class="text-[9px] text-slate-600">
+                    ${rows.length} / ${ui._marginTableData.length} rows shown
+                </p>
+            </div>`;
     }
 };
 
