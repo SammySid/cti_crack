@@ -762,7 +762,98 @@ Single cell isolated testing involves UNCERTAINTY in measurement due to turbulen
     <!-- ── Results Preview Modal ──────────────────────────────────────────── -->
     {% include 'components/preview_modal.html' %}<!-- /#previewModal -->
 
+    <!-- Fixed-position tooltip overlay (click-toggle, auto-positioned, never clipped) -->
+    <div id="tt-overlay" class="hidden fixed z-[300] w-72 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden" style="pointer-events:auto;"></div>
+
     <script type="module" src="/js/ui.js"></script>
+
+    <script>
+    /* ── Tooltip System ──────────────────────────────────────────────────────
+       Click any [data-tt="key"] button to toggle its tooltip.
+       The overlay is fixed-positioned and auto-adjusts to stay within the
+       viewport — no clipping, no scroll-away disappearing.
+    ──────────────────────────────────────────────────────────────────────── */
+    (function () {
+        const overlay  = document.getElementById('tt-overlay');
+        let   activeBtn = null;
+
+        function positionOverlay(anchorRect) {
+            const W  = window.innerWidth;
+            const H  = window.innerHeight;
+            const ow = overlay.offsetWidth  || 288;
+            const oh = overlay.offsetHeight || 240;
+            const GAP = 10;
+
+            // Prefer: below the anchor, left-aligned to it
+            let left = anchorRect.left;
+            let top  = anchorRect.bottom + GAP;
+
+            // If it would overflow the right edge, shift left
+            if (left + ow > W - GAP) left = W - ow - GAP;
+            // If it would overflow the bottom, show above instead
+            if (top + oh > H - GAP)  top  = anchorRect.top - oh - GAP;
+            // Keep left ≥ 8px
+            if (left < GAP) left = GAP;
+            // Keep top ≥ 8px
+            if (top  < GAP) top  = GAP;
+
+            overlay.style.left = left + 'px';
+            overlay.style.top  = top  + 'px';
+        }
+
+        function openTooltip(btn) {
+            const key = btn.dataset.tt;
+            const tpl = document.getElementById('tt-' + key);
+            if (!tpl) return;
+
+            overlay.innerHTML = '';
+            overlay.appendChild(tpl.content.cloneNode(true));
+            overlay.classList.remove('hidden');
+
+            // Position after paint so offsetHeight is accurate
+            requestAnimationFrame(() => {
+                positionOverlay(btn.getBoundingClientRect());
+            });
+
+            activeBtn = btn;
+            btn.setAttribute('aria-expanded', 'true');
+            btn.classList.add('active-tt');
+        }
+
+        function closeTooltip() {
+            overlay.classList.add('hidden');
+            if (activeBtn) {
+                activeBtn.setAttribute('aria-expanded', 'false');
+                activeBtn.classList.remove('active-tt');
+                activeBtn = null;
+            }
+        }
+
+        document.addEventListener('click', function (e) {
+            const btn = e.target.closest('[data-tt]');
+            if (btn) {
+                e.stopPropagation();
+                if (activeBtn === btn) { closeTooltip(); return; }
+                closeTooltip();
+                openTooltip(btn);
+            } else if (!overlay.contains(e.target)) {
+                closeTooltip();
+            }
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') closeTooltip();
+        });
+
+        // Reposition on scroll/resize while open
+        window.addEventListener('scroll', function () {
+            if (activeBtn) positionOverlay(activeBtn.getBoundingClientRect());
+        }, { passive: true });
+        window.addEventListener('resize', function () {
+            if (activeBtn) positionOverlay(activeBtn.getBoundingClientRect());
+        });
+    })();
+    </script>
 
     <!-- Global helpers — no ES module needed ──────────────────────────────── -->
     <script>

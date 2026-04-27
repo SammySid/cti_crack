@@ -40,9 +40,9 @@ body {
     transform: translateY(-2px);
 }
 
-/* Tooltip panels — always above charts and modals */
-[class*="group-hover:block"] {
-    z-index: 60;
+/* Active tooltip trigger button */
+button.active-tt svg {
+    color: #22d3ee;
 }
 
 .input-premium {
