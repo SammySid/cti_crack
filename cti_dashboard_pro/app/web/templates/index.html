@@ -73,20 +73,6 @@
 
             {% include 'tabs/psychroTabPanel.html' %}
             <div id="reportTabPanel" class="hidden space-y-6">
-                <!-- ── Thermal Analysis pre-fill notice (shown by launchReportFromThermal) ── -->
-                <div id="trm-loaded-banner" class="hidden flex items-center gap-3 px-5 py-3 rounded-2xl border border-violet-500/30 bg-violet-500/10"
-                     style="animation:fadeSlideIn 0.3s ease both">
-                    <span class="relative flex h-2 w-2 shrink-0">
-                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-60"></span>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-violet-500"></span>
-                    </span>
-                    <p class="text-sm text-violet-200 font-semibold flex-1">
-                        Design values &amp; safety margins loaded from Thermal Analysis — review and generate your report below.
-                    </p>
-                    <button type="button" onclick="this.parentElement.classList.add('hidden')"
-                            class="text-violet-400/60 hover:text-violet-300 transition-colors shrink-0 text-lg leading-none">&times;</button>
-                </div>
-
                 <!-- Header + Workflow Guide -->
                 <div class="glass-card rounded-3xl p-6 sm:p-8 border border-cyan-500/10 space-y-5">
                     <div>
@@ -453,6 +439,20 @@ Single cell isolated testing involves UNCERTAINTY in measurement due to turbulen
                             </div>
 
                         </div>
+                    </div>
+
+                    <!-- ── Thermal Analysis pre-fill notice (shown by launchReportFromThermal) ── -->
+                    <div id="trm-loaded-banner" class="hidden flex items-center gap-3 px-5 py-3 rounded-2xl border border-violet-500/30 bg-violet-500/10"
+                         style="animation:fadeSlideIn 0.3s ease both">
+                        <span class="relative flex h-2 w-2 shrink-0">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-60"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-violet-500"></span>
+                        </span>
+                        <p class="text-sm text-violet-200 font-semibold flex-1">
+                            Design values &amp; safety margins loaded from Thermal Analysis — review and generate your report below.
+                        </p>
+                        <button type="button" onclick="this.parentElement.classList.add('hidden')"
+                                class="text-violet-400/60 hover:text-violet-300 transition-colors shrink-0 text-lg leading-none">&times;</button>
                     </div>
 
                     <!-- RESULTS PREVIEW: Full in-browser report document -->
