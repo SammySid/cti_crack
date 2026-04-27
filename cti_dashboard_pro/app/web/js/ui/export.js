@@ -1,9 +1,7 @@
 export function updateExportUiState(ui, statusMessage = '') {
-    const exportBtn       = document.getElementById('exportExcel');
-    const exportBtnMobile = document.getElementById('exportExcelMobile');
-    const label           = document.getElementById('exportExcelLabel');
-    const statusEl        = document.getElementById('exportStatus');
-    const statusMobile    = document.getElementById('exportStatusMobile');
+    const exportBtn = document.getElementById('exportExcel');
+    const label     = document.getElementById('exportExcelLabel');
+    const statusEl  = document.getElementById('exportStatus');
     if (!exportBtn) return;
 
     const isDisabled = !ui.workerReady || ui.isCalculating || ui.isExporting;
@@ -11,15 +9,7 @@ export function updateExportUiState(ui, statusMessage = '') {
     exportBtn.classList.toggle('opacity-50', isDisabled);
     exportBtn.classList.toggle('cursor-not-allowed', isDisabled);
 
-    if (exportBtnMobile) {
-        exportBtnMobile.disabled = isDisabled;
-        exportBtnMobile.classList.toggle('opacity-50', isDisabled);
-        exportBtnMobile.classList.toggle('cursor-not-allowed', isDisabled);
-    }
-
-    if (label) {
-        label.innerText = ui.isExporting ? 'Generating Excel...' : 'Export Data & Curves';
-    }
+    if (label) label.innerText = ui.isExporting ? 'Generating Excel...' : 'Export Data & Curves';
 
     let resolvedMessage = statusMessage;
     if (!resolvedMessage) {
@@ -29,8 +19,7 @@ export function updateExportUiState(ui, statusMessage = '') {
         else                          resolvedMessage = 'Calculating curves...';
     }
 
-    if (statusEl)     statusEl.innerText     = resolvedMessage;
-    if (statusMobile) statusMobile.innerText = resolvedMessage;
+    if (statusEl) statusEl.innerText = resolvedMessage;
 }
 
 export function getDownloadFileName(contentDispositionHeader) {

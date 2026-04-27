@@ -1,7 +1,7 @@
 # CTI Toolkit — Reverse Engineering Handbook & Handoff Reference
 
-**Last Updated:** 2026-04-18  
-**Status:** Psychrometrics ✅ 100% | Merkel KaV/L ✅ 100% Cross-Platform | Pro Dashboard ✅ Live at `ct.ftp.sh` | ATC-105 Three-Stage Report Engine ✅ Operational
+**Last Updated:** 2026-04-27  
+**Status:** Psychrometrics ✅ 100% | Merkel KaV/L ✅ 100% Cross-Platform | Pro Dashboard ✅ Live at `ct.ftp.sh` | ATC-105 Three-Stage Report Engine ✅ Operational | Safety Margins + Anchored Tilt ✅ | Sidebar-Free Responsive UI ✅
 
 ---
 
@@ -164,7 +164,8 @@ cti-suite-final/
 │   ├── app/backend/core/data/              ← Binary lookup tables
 │   ├── app/backend/templates/
 │   │   └── report_template.html            ← Multi-test Jinja2 ATC-105 template (for loop)
-│   ├── app/web/index.html                  ← Frontend: Report Builder tab (T1/T2/T3 inputs)
+│   ├── app/web/templates/index.html        ← Full-width layout shell (no sidebar); brand header + tabs
+│   ├── app/web/templates/tabs/             ← Tab panels (thermal, psychro, filter, prediction)
 │   ├── app/web/js/ui/report.js             ← 3-test orchestration + parallel API calls
 │   ├── Dockerfile
 │   ├── docker-compose.yml
@@ -246,6 +247,11 @@ git push origin master
 
 | Date | Change |
 |---|---|
+| 2026-04-27 | Removed fixed sidebar entirely — all thermal controls (Project Scope, Heat Load, Transfer Constants, Auto-Calibration, Safety Margins, Chart Scaling, Export Actions) moved into a responsive Configuration Panel at the top of the Thermal tab; mobile-mirror input system removed; `mobile-nav.js` reduced to no-ops |
+| 2026-04-27 | Safety Margins reset button redesigned as a clearly labelled "Clear All Margins" button (amber, bordered, icon + text) |
+| 2026-04-27 | Rich hover-tooltip info cards added for **Target CWT at Design WBT** (what it is / when to use / engineering note) and **Low WBT Rotation at 20°C** (what it is / when to use / engineering note); tooltip positioned right-anchored to prevent viewport overflow |
+| 2026-04-27 | Safety Margins tilt model: 100% FLOW anchored-tilt (Const C back-calculated via Fit Curve so the 100% curve exactly hits Design CWT at Design WBT after applying margin); other curves use plain absolute offset |
+| 2026-04-26 | Safety Margins implemented: 3×3 grid (3 flows × 3 ranges) + Low WBT Rotation + Clear All Margins button + Auto-Calibration Target CWT auto-fill + debounced Fit Curve trigger |
 | 2026-04-18 | Three-stage ATC-105 report: pre/post-fan/post-distribution independent evaluations; parallel API calls; `_build_test_context` per-test helper; Jinja2 loop in template |
 | 2026-04-18 | Fixed duplicate STEP 2 and blank STEP 3 in PDF: corrected step order to 1→Table1, 2→CP1+Table2, 3→AdjFlow, 4→CP2, 5→Results |
 | 2026-04-18 | Fixed garbled table headers in PDF: replaced `<br/>` inside `<th>` (xhtml2pdf bug) with inline parenthetical text |

@@ -1,6 +1,6 @@
 # CTI Dashboard Pro — Complete Technical Documentation
 
-> **Last updated:** 2026-04-19
+> **Last updated:** 2026-04-27
 
 ---
 
@@ -72,18 +72,20 @@ See Section 4 for the complete calculation flow.
 
 | File | Purpose |
 |---|---|
-| `templates/index.html` | Jinja2 layout shell with modular `components/` and `tabs/` includes |
+| `templates/index.html` | Jinja2 layout shell — full-width single column, no sidebar; includes sticky brand header and tab switcher |
+| `templates/tabs/thermalTabPanel.html` | Thermal Analysis tab — Configuration Panel (Project Scope · Heat Load · Transfer Constants · Auto-Calibration · Safety Margins · Chart Scaling · Actions), stat cards, and 3 performance curve charts |
+| `templates/components/mobile_header.html` | Full-width sticky brand header (logo + company name), visible on all screen sizes |
 | `js/ui.js` | Central state store + orchestration |
 | `js/worker.js` | Web Worker proxy for curve API calls |
 | `js/charts.js` | Chart.js rendering wrapper |
-| `js/ui/bind-events.js` | All event listeners — inputs, buttons, tabs, file uploads |
+| `js/ui/bind-events.js` | All event listeners — all canonical inputs now in the main panel, no mobile-mirror system |
 | `js/ui/report.js` | ATC-105 three-stage orchestration: `_getDesign`, `_calcAtc`, `updateAtcPreview`, `previewAllTests` (full in-browser preview with Chart.js CP1/CP2 charts), `syncDesignFromThermal`, `bindFilterUpload`, `generateReport` |
 | `js/ui/filter.js` | Excel filter state + request flow |
 | `js/ui/export.js` | Excel export state + download |
 | `js/ui/prediction.js` | CWT prediction wrapper |
 | `js/ui/psychro.js` | Psychrometric display + validation |
-| `js/ui/tabs.js` | Tab activation + sidebar/inline panel toggling |
-| `js/ui/mobile-nav.js` | Mobile drawer open/close |
+| `js/ui/tabs.js` | Tab activation — shows/hides tab panels; no sidebar toggling |
+| `js/ui/mobile-nav.js` | No-op stubs (sidebar removed) |
 
 ### Backend Files
 

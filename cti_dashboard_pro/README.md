@@ -33,7 +33,7 @@ The report builder evaluates **three independent test phases** (Pre, Post Fan Ch
 All three tests run in **parallel API calls**. Each test gets its own complete set of cross-plots, tables, and result pages in the PDF. A final comparison table shows all three shortfalls and cumulative improvement.
 
 ### Tower Constants — C and m
-`constant_c = 1.2` and `constant_m = 0.6` (CTI standard defaults for cross-flow fill) are applied internally. They are **not exposed as UI inputs**. The key calibration parameter is the **L/G ratio** — this must be set correctly for the specific tower being evaluated.
+`constant_c` and `constant_m` are exposed in the **Thermal Analysis Configuration Panel** under "Transfer Constants". The CTI standard defaults are `C = 1.2`, `m = 0.6` (cross-flow fill). Use **Fit Curve** (Auto-Calibration) to back-calculate `C` for any specific tower. The **L/G ratio** is the primary calibration parameter for ATC-105 evaluations.
 
 ### Density Ratio Override
 The backend auto-computes water density ratio using the Kell (1975) formula. Enter a value from ATC-105 standard tables (e.g., `1.0337`) in the **Density Ratio** field to match a specific CTI printout.
