@@ -123,11 +123,11 @@
                 </div>
                 <!-- Section dots -->
                 <div class="flex flex-col items-center gap-2 pb-2">
-                    <div class="w-2 h-2 rounded-full bg-blue-500/60"   title="Heat Load"></div>
-                    <div class="w-2 h-2 rounded-full bg-violet-500/60" title="Transfer Constants"></div>
+                    <div class="w-2 h-2 rounded-full bg-blue-500/60"   title="Design Point"></div>
+                    <div class="w-2 h-2 rounded-full bg-violet-500/60" title="Transfer Constants (Merkel)"></div>
                     <div class="w-2 h-2 rounded-full bg-emerald-500/60"title="Auto-Calibration"></div>
                     <div class="w-2 h-2 rounded-full bg-amber-500/60"  title="Safety Margins"></div>
-                    <div class="w-2 h-2 rounded-full bg-slate-500/60"  title="Chart Scaling"></div>
+                    <div class="w-2 h-2 rounded-full bg-slate-500/60"  title="Chart Axis Range"></div>
                 </div>
             </div>
 
@@ -148,10 +148,10 @@
 
                     <div class="p-5 space-y-5">
 
-                        <!-- ── Heat Load Specs ────────────────────────── -->
+                        <!-- ── Design Point ───────────────────────────── -->
                         <div>
                             <p class="flex items-center gap-1.5 text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">
-                                <span class="w-1 h-3 bg-blue-500/70 rounded-full"></span>Heat Load Specs
+                                <span class="w-1 h-3 bg-blue-500/70 rounded-full"></span>Design Point
                             </p>
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
@@ -160,22 +160,22 @@
                                         class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
                                 </div>
                                 <div>
-                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Flow (m³/h)</label>
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Water Flow (m³/h)</label>
                                     <input id="designWaterFlow" type="number" step="10" value="3860"
                                         class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
                                 </div>
                                 <div>
-                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">WBT (°C)</label>
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Design WBT (°C)</label>
                                     <input id="designWBT" type="number" step="0.1" value="28.6"
                                         class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
                                 </div>
                                 <div>
-                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">CWT (°C)</label>
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Design CWT (°C)</label>
                                     <input id="designCWT" type="number" step="0.1" value="33"
                                         class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
                                 </div>
                                 <div class="col-span-2">
-                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">HWT (°C)</label>
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Design HWT (°C)</label>
                                     <input id="designHWT" type="number" step="0.1" value="43"
                                         class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
                                 </div>
@@ -188,15 +188,22 @@
                         <div>
                             <p class="flex items-center gap-1.5 text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">
                                 <span class="w-1 h-3 bg-violet-500/70 rounded-full"></span>Transfer Constants
+                                <span class="text-[8px] font-semibold text-slate-600 normal-case tracking-normal">(Merkel)</span>
                             </p>
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block underline decoration-cyan-500/30">Const C</label>
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">
+                                        Const C
+                                        <span class="text-[8px] text-slate-600 normal-case font-semibold ml-1">(coefficient)</span>
+                                    </label>
                                     <input id="constantC" type="number" step="0.1" value="2.51"
                                         class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
                                 </div>
                                 <div>
-                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block underline decoration-amber-500/30">Const m</label>
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">
+                                        Const M
+                                        <span class="text-[8px] text-slate-600 normal-case font-semibold ml-1">(exponent)</span>
+                                    </label>
                                     <input id="constantM" type="number" step="0.1" value="0.66"
                                         class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
                                 </div>
@@ -357,26 +364,26 @@
                         <!-- ── Chart Scaling ──────────────────────────── -->
                         <div>
                             <p class="flex items-center gap-1.5 text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">
-                                <span class="w-1 h-3 bg-slate-500/70 rounded-full"></span>Chart Scaling
+                                <span class="w-1 h-3 bg-slate-500/70 rounded-full"></span>Chart Axis Range
                             </p>
                             <div class="grid grid-cols-2 gap-3">
                                 <div>
-                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">X-Min (WBT)</label>
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">WBT Min (°C)</label>
                                     <input id="axXMin" type="number" step="1" value="18"
                                         class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
                                 </div>
                                 <div>
-                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">X-Max (WBT)</label>
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">WBT Max (°C)</label>
                                     <input id="axXMax" type="number" step="1" value="30"
                                         class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
                                 </div>
                                 <div>
-                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Y-Min (CWT)</label>
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">CWT Min (°C)</label>
                                     <input id="axYMin" type="number" step="1" value="25"
                                         class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
                                 </div>
                                 <div>
-                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Y-Max (CWT)</label>
+                                    <label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">CWT Max (°C)</label>
                                     <input id="axYMax" type="number" step="1" value="38"
                                         class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono">
                                 </div>
@@ -385,10 +392,10 @@
 
                         <div class="h-px bg-white/5"></div>
 
-                        <!-- ── Export Actions ─────────────────────────── -->
+                        <!-- ── Export & Reports ───────────────────────── -->
                         <div class="space-y-2.5">
                             <p class="flex items-center gap-1.5 text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">
-                                <span class="w-1 h-3 bg-emerald-500/70 rounded-full"></span>Actions
+                                <span class="w-1 h-3 bg-emerald-500/70 rounded-full"></span>Export &amp; Reports
                             </p>
                             <button id="exportExcel"
                                 class="w-full bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-400 py-3 rounded-xl font-bold text-xs uppercase tracking-widest transition-all border border-emerald-500/20 flex items-center justify-center gap-2">
