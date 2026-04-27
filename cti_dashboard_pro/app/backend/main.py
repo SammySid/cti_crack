@@ -146,6 +146,19 @@ class Atc105Request(BaseModel):
     # Optional: override density ratio with value from ATC-105 standard tables
     # (default None → auto-computed from Kell 1975 water density formula)
     density_ratio_override: float | None = None
+    # Safety margin offsets from Thermal Analysis (all optional, default 0)
+    # Applied to Table 1 CWT values using same anchored-tilt model as curve generation:
+    # zero correction at design_wbt, full offset_wbt20 at 20°C WBT.
+    offset_wbt20: float = 0.0
+    off90r80:     float = 0.0
+    off90r100:    float = 0.0
+    off90r120:    float = 0.0
+    off100r80:    float = 0.0
+    off100r100:   float = 0.0
+    off100r120:   float = 0.0
+    off110r80:    float = 0.0
+    off110r100:   float = 0.0
+    off110r120:   float = 0.0
 
 # Calculation endpoints
 @app.post("/api/calculate/kavl")
@@ -320,6 +333,31 @@ async def api_calc_atc105(req: Atc105Request):
                 val = find_cwt(base_inputs, req.test_wbt, rp, fp)
                 table1[fp][int(rp)] = round(val, 3) if not math.isnan(val) else None
 
+        # ── Apply safety margin offsets (if any non-zero) ─────────────────────
+        # Same anchored-tilt model used by the Thermal Analysis curve generator:
+        # offset = 0 at design_wbt, full offset_wbt20 at 20°C (linearly tapered).
+        _offsets = {
+            90:  (req.off90r80,  req.off90r100,  req.off90r120),
+            100: (req.off100r80, req.off100r100, req.off100r120),
+            110: (req.off110r80, req.off110r100, req.off110r120),
+        }
+        _has_offsets = req.offset_wbt20 != 0 or any(v != 0 for g in _offsets.values() for v in g)
+        if _has_offsets:
+            if req.design_wbt != 20:
+                _wbt_slope       = req.offset_wbt20 / (20.0 - req.design_wbt)
+                _wbt_correction  = _wbt_slope * (req.test_wbt - req.design_wbt)
+                _tilt_multiplier = (req.test_wbt - req.design_wbt) / (20.0 - req.design_wbt)
+            else:
+                _wbt_correction  = req.offset_wbt20 if req.test_wbt == 20 else 0.0
+                _tilt_multiplier = 1.0 if req.test_wbt == 20 else 0.0
+            for fp in flow_pcts:
+                o80, o100, o120 = _offsets[fp]
+                for rp_key, raw_off in zip([80, 100, 120], [o80, o100, o120]):
+                    if table1[fp][rp_key] is not None:
+                        table1[fp][rp_key] = round(
+                            table1[fp][rp_key] + _wbt_correction + raw_off * _tilt_multiplier, 3
+                        )
+
         # ── STEP 2: Cross Plot 1 – interpolate at test_range_pct ─────────────
         cross1 = {}
         for fp in flow_pcts:
@@ -416,6 +454,13 @@ async def api_calc_atc105(req: Atc105Request):
             "test_cwt":    req.test_cwt,
             "test_hwt":    req.test_hwt,
             "test_flow":   req.test_flow,
+            # Safety margins applied (non-empty only if offsets were used)
+            "offsets_applied": {
+                "offset_wbt20": req.offset_wbt20,
+                "off90r80":  req.off90r80,  "off90r100":  req.off90r100,  "off90r120":  req.off90r120,
+                "off100r80": req.off100r80, "off100r100": req.off100r100, "off100r120": req.off100r120,
+                "off110r80": req.off110r80, "off110r100": req.off110r100, "off110r120": req.off110r120,
+            } if _has_offsets else {},
         }
     except Exception as exc:
         import traceback

@@ -124,6 +124,40 @@ def _page_a(ctx: dict, label: str, styles: dict) -> list:
     cw_t1 = [AVAIL_W * 0.12, AVAIL_W * 0.18, AVAIL_W * 0.23, AVAIL_W * 0.24, AVAIL_W * 0.23]
     items.append(data_table(t1_hdr, t1_rows, cw_t1, styles))
     items.append(Spacer(1, 6))
+
+    # ── Safety Margins Applied note (only when offsets were used) ─────────────
+    offsets = ctx.get('offsets_applied', {})
+    if offsets and any(float(v) != 0 for v in offsets.values() if v is not None):
+        items.append(Spacer(1, 6))
+        items.append(sub_bar('SAFETY MARGINS APPLIED (FROM THERMAL ANALYSIS)', styles))
+        items.append(Spacer(1, 4))
+        wbt20 = float(offsets.get('offset_wbt20', 0))
+        items.append(Paragraph(
+            f'<b>Low-WBT Rotation anchor at 20\u00b0C WBT: {wbt20:+.3f} \u00b0C</b> '
+            '\u2014 linearly tapered to 0 \u00b0C at design WBT. '
+            'These offsets were applied to all Table 1 CWT values via the anchored-tilt model.',
+            styles['StepDesc'],
+        ))
+        items.append(Spacer(1, 6))
+        mg_hdr  = ['Flow Condition', '80% Range (\u00b0C)', '100% Range (\u00b0C)', '120% Range (\u00b0C)']
+        mg_rows = [
+            (' 90% Flow',
+             f"{float(offsets.get('off90r80',  0)):+.3f}",
+             f"{float(offsets.get('off90r100', 0)):+.3f}",
+             f"{float(offsets.get('off90r120', 0)):+.3f}"),
+            ('100% Flow',
+             f"{float(offsets.get('off100r80',  0)):+.3f}",
+             f"{float(offsets.get('off100r100', 0)):+.3f}",
+             f"{float(offsets.get('off100r120', 0)):+.3f}"),
+            ('110% Flow',
+             f"{float(offsets.get('off110r80',  0)):+.3f}",
+             f"{float(offsets.get('off110r100', 0)):+.3f}",
+             f"{float(offsets.get('off110r120', 0)):+.3f}"),
+        ]
+        cw_mg = [AVAIL_W * 0.25, AVAIL_W * 0.25, AVAIL_W * 0.25, AVAIL_W * 0.25]
+        items.append(data_table(mg_hdr, mg_rows, cw_mg, styles))
+        items.append(Spacer(1, 4))
+
     return items
 
 

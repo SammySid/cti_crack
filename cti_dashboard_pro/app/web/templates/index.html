@@ -762,6 +762,9 @@ Single cell isolated testing involves UNCERTAINTY in measurement due to turbulen
     <!-- ── Results Preview Modal ──────────────────────────────────────────── -->
     {% include 'components/preview_modal.html' %}<!-- /#previewModal -->
 
+    <!-- ── ATC-105 Thermal Report Modal ──────────────────────────────────── -->
+    {% include 'components/thermal_report_modal.html' %}<!-- /#thermalReportModal -->
+
     <!-- Fixed-position tooltip overlay (click-toggle, auto-positioned, never clipped) -->
     <div id="tt-overlay" class="hidden fixed z-[300] w-72 bg-slate-900 border border-slate-700 rounded-xl shadow-2xl overflow-hidden" style="pointer-events:auto;"></div>
 
@@ -974,6 +977,27 @@ Single cell isolated testing involves UNCERTAINTY in measurement due to turbulen
             if (!body || !chevron) return;
             const isCollapsed = body.classList.toggle('hidden');
             chevron.style.transform = isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)';
+        }
+
+        function trmToggle(bodyId, chevronId) {
+            const body    = document.getElementById(bodyId);
+            const chevron = document.getElementById(chevronId);
+            if (!body || !chevron) return;
+            const isCollapsed = body.classList.toggle('hidden');
+            chevron.style.transform = isCollapsed ? 'rotate(-90deg)' : 'rotate(0deg)';
+        }
+
+        /* ── Thermal Report Modal (close only — open is handled in report.js) ── */
+        function closeThermalReportModal() {
+            const modal = document.getElementById('thermalReportModal');
+            const panel = document.getElementById('trm-panel');
+            const bg    = document.getElementById('trm-bg');
+            if (!modal || modal.style.display !== 'flex') return;
+            if (bg)    bg.style.opacity       = '0';
+            if (panel) { panel.style.opacity = '0'; panel.style.transform = 'scale(0.97)'; }
+            document.body.style.overflow = '';
+            if (modal._trmEsc) { window.removeEventListener('keydown', modal._trmEsc); delete modal._trmEsc; }
+            setTimeout(() => { modal.style.display = ''; modal.classList.add('hidden'); }, 230);
         }
 
         /* ── Results Preview Modal ─────────────────────────────────────── */
