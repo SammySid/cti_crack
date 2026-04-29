@@ -1,4 +1,84 @@
 /* Main CSS for Premium Cooling Tower App */
+
+/* ── GLOBAL: Strip ALL native number-input spin buttons ─────────────────── */
+input[type="number"]::-webkit-inner-spin-button,
+input[type="number"]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    appearance: none;
+    margin: 0;
+}
+input[type="number"] { -moz-appearance: textfield; }
+
+/* ── TELEMETRY FIELD CARD ────────────────────────────────────────────────── */
+.tele-field {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    padding: 14px 16px;
+    border-radius: 14px;
+    background: rgba(10, 14, 26, 0.65);
+    border: 1px solid rgba(255,255,255,0.06);
+    transition: border-color 0.18s ease, background 0.18s ease;
+    min-width: 0;
+}
+.tele-field:focus-within {
+    border-color: rgba(34,211,238,0.35);
+    background: rgba(10, 14, 26, 0.85);
+}
+.tele-field .tele-label {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    color: #64748b;
+    white-space: nowrap;
+    transition: color 0.18s ease;
+    line-height: 1;
+    pointer-events: none;
+    user-select: none;
+}
+.tele-field .tele-label .tele-unit {
+    font-size: 8px;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: none;
+    color: #475569;
+}
+.tele-field:focus-within .tele-label { color: #94a3b8; }
+.tele-field .tele-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    padding: 0;
+    margin: 0;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 22px;
+    font-weight: 700;
+    color: #e2e8f0;
+    line-height: 1;
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: textfield;
+}
+.tele-field .tele-input:focus { color: #f8fafc; }
+
+/* Amber tint for Test 2 */
+.tele-field.tele-amber { border-color: rgba(245,158,11,0.12); }
+.tele-field.tele-amber:focus-within { border-color: rgba(245,158,11,0.35); }
+.tele-field.tele-amber .tele-label { color: rgba(217,119,6,0.7); }
+.tele-field.tele-amber:focus-within .tele-label { color: #f59e0b; }
+
+/* Cyan tint for Test 3 */
+.tele-field.tele-cyan { border-color: rgba(6,182,212,0.18); }
+.tele-field.tele-cyan:focus-within { border-color: rgba(6,182,212,0.5); }
+.tele-field.tele-cyan .tele-label { color: rgba(6,182,212,0.6); }
+.tele-field.tele-cyan:focus-within .tele-label { color: #22d3ee; }
+.tele-field.tele-cyan .tele-input { color: #f0fdff; }
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {

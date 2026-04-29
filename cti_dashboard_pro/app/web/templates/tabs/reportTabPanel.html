@@ -152,7 +152,7 @@
         <div class="flex-1 min-w-0 space-y-8">
             
             <!-- FIELD TELEMETRY (Top Half) -->
-            <div class="glass-card rounded-3xl border border-white/10 p-6 md:p-8 shadow-2xl">
+            <div class="glass-card rounded-3xl border border-white/10 p-6 md:p-8 shadow-2xl" style="hover:transform:none">
                 <div class="flex flex-wrap items-center justify-between mb-8 gap-4 pb-4 border-b border-white/5">
                     <div>
                         <h3 class="text-sm font-black tracking-[0.25em] text-slate-200 uppercase flex items-center gap-3">
@@ -166,65 +166,62 @@
                 <div class="space-y-6">
                     
                     <!-- TEST 1 -->
-                    <div class="rounded-3xl border border-white/5 bg-slate-900/40 p-6 md:p-8 hover:bg-slate-900/60 transition-all">
-                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-white/5">
-                            <div class="flex items-center gap-3">
-                                <span class="px-3 py-1 bg-slate-800 text-slate-300 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-inner">TEST 1</span>
-                                <span class="text-xs font-bold uppercase tracking-[0.2em] text-slate-400">Pre-Cleaning Baseline</span>
-                            </div>
+                    <div class="rounded-3xl border border-white/5 bg-slate-900/40 p-6 md:p-8 transition-all hover:bg-slate-900/60">
+                        <div class="flex items-center gap-3 mb-6 pb-4 border-b border-white/5">
+                            <span class="px-3 py-1 bg-slate-800 text-slate-300 rounded-lg text-[10px] font-black uppercase tracking-widest">T1</span>
+                            <span class="text-xs font-bold uppercase tracking-[0.18em] text-slate-400">Pre-Cleaning Baseline</span>
                         </div>
-                        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
-                            <div class="rounded-2xl border border-white/5 bg-slate-950/50 p-4 focus-within:border-slate-500/40 focus-within:bg-slate-900 transition-all group">
-                                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1 group-focus-within:text-slate-300 transition-colors">Flow <span class="text-[9px] font-semibold normal-case text-slate-600 ml-1">m³/h</span></label>
-                                <input id="rep-t1-flow" type="number" value="2998" class="w-full bg-transparent border-none p-0 text-xl font-black font-mono text-slate-200 focus:ring-0 appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                            <div class="tele-field">
+                                <span class="tele-label">Flow <span class="tele-unit">m³/h</span></span>
+                                <input id="rep-t1-flow" type="number" value="2998" class="tele-input">
                             </div>
-                            <div class="rounded-2xl border border-white/5 bg-slate-950/50 p-4 focus-within:border-slate-500/40 focus-within:bg-slate-900 transition-all group">
-                                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1 group-focus-within:text-slate-300 transition-colors">WBT <span class="text-[9px] font-semibold normal-case text-slate-600 ml-1">°C</span></label>
-                                <input id="rep-t1-wbt" type="number" step="0.01" value="25.25" class="w-full bg-transparent border-none p-0 text-xl font-black font-mono text-slate-200 focus:ring-0 appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                            <div class="tele-field">
+                                <span class="tele-label">WBT <span class="tele-unit">°C</span></span>
+                                <input id="rep-t1-wbt" type="number" step="0.01" value="25.25" class="tele-input">
                             </div>
-                            <div class="rounded-2xl border border-white/5 bg-slate-950/50 p-4 focus-within:border-slate-500/40 focus-within:bg-slate-900 transition-all group">
-                                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1 group-focus-within:text-slate-300 transition-colors">HWT <span class="text-[9px] font-semibold normal-case text-slate-600 ml-1">°C</span></label>
-                                <input id="rep-t1-hwt" type="number" step="0.01" value="44.67" class="w-full bg-transparent border-none p-0 text-xl font-black font-mono text-slate-200 focus:ring-0 appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                            <div class="tele-field">
+                                <span class="tele-label">HWT <span class="tele-unit">°C</span></span>
+                                <input id="rep-t1-hwt" type="number" step="0.01" value="44.67" class="tele-input">
                             </div>
-                            <div class="rounded-2xl border border-white/5 bg-slate-950/50 p-4 focus-within:border-slate-500/40 focus-within:bg-slate-900 transition-all group">
-                                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1 group-focus-within:text-slate-300 transition-colors">CWT <span class="text-[9px] font-semibold normal-case text-slate-600 ml-1">°C</span></label>
-                                <input id="rep-t1-cwt" type="number" step="0.01" value="35.08" class="w-full bg-transparent border-none p-0 text-xl font-black font-mono text-slate-200 focus:ring-0 appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                            <div class="tele-field">
+                                <span class="tele-label">CWT <span class="tele-unit">°C</span></span>
+                                <input id="rep-t1-cwt" type="number" step="0.01" value="35.08" class="tele-input">
                             </div>
-                            <div class="col-span-2 md:col-span-1 rounded-2xl border border-white/5 bg-slate-950/50 p-4 focus-within:border-slate-500/40 focus-within:bg-slate-900 transition-all group">
-                                <label class="block text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1 group-focus-within:text-slate-300 transition-colors">Fan Pow <span class="text-[9px] font-semibold normal-case text-slate-600 ml-1">kW</span></label>
-                                <input id="rep-t1-fanpow" type="number" step="0.01" value="97.04" class="w-full bg-transparent border-none p-0 text-xl font-black font-mono text-slate-200 focus:ring-0 appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                            <div class="tele-field col-span-2 sm:col-span-1">
+                                <span class="tele-label">Fan Power <span class="tele-unit">kW</span></span>
+                                <input id="rep-t1-fanpow" type="number" step="0.01" value="97.04" class="tele-input">
                             </div>
                         </div>
                     </div>
 
                     <!-- TEST 2 -->
-                    <div class="rounded-3xl border border-amber-500/10 bg-amber-950/10 p-6 md:p-8 hover:bg-amber-950/20 transition-all">
-                        <div class="flex items-center justify-between mb-6 pb-4 border-b border-amber-500/10">
-                            <div class="flex items-center gap-3">
-                                <span class="px-3 py-1 bg-amber-900/40 text-amber-400 rounded-lg text-[10px] font-black uppercase tracking-widest border border-amber-500/20">TEST 2</span>
-                                <span class="text-xs font-bold uppercase tracking-[0.2em] text-amber-500/70">Post Fan Pitch</span>
-                            </div>
+                    <div class="rounded-3xl border border-amber-500/10 bg-amber-950/10 p-6 md:p-8 transition-all hover:bg-amber-950/20">
+                        <div class="flex items-center gap-3 mb-6 pb-4 border-b border-amber-500/10">
+                            <span class="px-3 py-1 bg-amber-900/40 text-amber-400 rounded-lg text-[10px] font-black uppercase tracking-widest border border-amber-500/20">T2</span>
+                            <span class="text-xs font-bold uppercase tracking-[0.18em] text-amber-500/80">Post Fan Pitch</span>
                         </div>
-                        <div class="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
-                            <div class="rounded-2xl border border-amber-500/10 bg-slate-950/50 p-4 focus-within:border-amber-500/40 focus-within:bg-slate-900 transition-all group">
-                                <label class="block text-[10px] font-black uppercase tracking-widest text-amber-500/60 mb-1 group-focus-within:text-amber-400 transition-colors">Flow <span class="text-[9px] font-semibold normal-case text-amber-500/40 ml-1">m³/h</span></label>
-                                <input id="rep-t2-flow" type="number" value="3067.21" class="w-full bg-transparent border-none p-0 text-xl font-black font-mono text-slate-200 focus:ring-0 appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+                            <div class="tele-field tele-amber">
+                                <span class="tele-label">Flow <span class="tele-unit">m³/h</span></span>
+                                <input id="rep-t2-flow" type="number" value="3067.21" class="tele-input">
                             </div>
-                            <div class="rounded-2xl border border-amber-500/10 bg-slate-950/50 p-4 focus-within:border-amber-500/40 focus-within:bg-slate-900 transition-all group">
-                                <label class="block text-[10px] font-black uppercase tracking-widest text-amber-500/60 mb-1 group-focus-within:text-amber-400 transition-colors">WBT <span class="text-[9px] font-semibold normal-case text-amber-500/40 ml-1">°C</span></label>
-                                <input id="rep-t2-wbt" type="number" step="0.01" value="24.22" class="w-full bg-transparent border-none p-0 text-xl font-black font-mono text-slate-200 focus:ring-0 appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                            <div class="tele-field tele-amber">
+                                <span class="tele-label">WBT <span class="tele-unit">°C</span></span>
+                                <input id="rep-t2-wbt" type="number" step="0.01" value="24.22" class="tele-input">
                             </div>
-                            <div class="rounded-2xl border border-amber-500/10 bg-slate-950/50 p-4 focus-within:border-amber-500/40 focus-within:bg-slate-900 transition-all group">
-                                <label class="block text-[10px] font-black uppercase tracking-widest text-amber-500/60 mb-1 group-focus-within:text-amber-400 transition-colors">HWT <span class="text-[9px] font-semibold normal-case text-amber-500/40 ml-1">°C</span></label>
-                                <input id="rep-t2-hwt" type="number" step="0.01" value="43.21" class="w-full bg-transparent border-none p-0 text-xl font-black font-mono text-slate-200 focus:ring-0 appearance-none [&::-webkit-inner-spin-button]:appearance-none">
-                            </div>
+                            <div class="tele-field tele-amber">
+                                <span class="tele-label">HWT <span class="tele-unit">°C</span></span>
+                                <input id="rep-t2-hwt" type="number" step="0.01" value="43.21" class="tele-input">
                             <div class="rounded-2xl border border-amber-500/10 bg-slate-950/50 p-4 focus-within:border-amber-500/40 focus-within:bg-slate-900 transition-all group">
                                 <label class="block text-[10px] font-black uppercase tracking-widest text-amber-500/60 mb-1 group-focus-within:text-amber-400 transition-colors">CWT <span class="text-[9px] font-semibold normal-case text-amber-500/40 ml-1">°C</span></label>
-                                <input id="rep-t2-cwt" type="number" step="0.01" value="32.89" class="w-full bg-transparent border-none p-0 text-xl font-black font-mono text-slate-200 focus:ring-0 appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                            <div class="tele-field tele-amber">
+                                <span class="tele-label">CWT <span class="tele-unit">°C</span></span>
+                                <input id="rep-t2-cwt" type="number" step="0.01" value="32.89" class="tele-input">
                             </div>
-                            <div class="col-span-2 md:col-span-1 rounded-2xl border border-amber-500/10 bg-slate-950/50 p-4 focus-within:border-amber-500/40 focus-within:bg-slate-900 transition-all group">
-                                <label class="block text-[10px] font-black uppercase tracking-widest text-amber-500/60 mb-1 group-focus-within:text-amber-400 transition-colors">Fan Pow <span class="text-[9px] font-semibold normal-case text-amber-500/40 ml-1">kW</span></label>
-                                <input id="rep-t2-fanpow" type="number" step="0.01" value="116.24" class="w-full bg-transparent border-none p-0 text-xl font-black font-mono text-slate-200 focus:ring-0 appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                            <div class="tele-field tele-amber col-span-2 sm:col-span-1">
+                                <span class="tele-label">Fan Power <span class="tele-unit">kW</span></span>
+                                <input id="rep-t2-fanpow" type="number" step="0.01" value="116.24" class="tele-input">
                             </div>
                         </div>
                     </div>
@@ -253,30 +250,30 @@
                                 </div>
                             </div>
                             
-                            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-3 md:gap-4">
-                                <div class="rounded-2xl border border-cyan-500/20 bg-slate-950/60 p-4 focus-within:border-cyan-400 focus-within:bg-slate-900 transition-all group shadow-inner">
-                                    <label class="block text-[10px] font-black uppercase tracking-widest text-cyan-500/80 mb-1 group-focus-within:text-cyan-300 transition-colors">Flow <span class="text-[9px] font-semibold normal-case text-cyan-500/50 ml-1">m³/h</span></label>
-                                    <input id="rep-flow" type="number" step="1" value="3680" class="w-full bg-transparent border-none p-0 text-xl font-black font-mono text-slate-100 focus:ring-0 appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+                                <div class="tele-field tele-cyan">
+                                    <span class="tele-label">Flow <span class="tele-unit">m³/h</span></span>
+                                    <input id="rep-flow" type="number" step="1" value="3680" class="tele-input">
                                 </div>
-                                <div class="rounded-2xl border border-cyan-500/20 bg-slate-950/60 p-4 focus-within:border-cyan-400 focus-within:bg-slate-900 transition-all group shadow-inner">
-                                    <label class="block text-[10px] font-black uppercase tracking-widest text-cyan-500/80 mb-1 group-focus-within:text-cyan-300 transition-colors">WBT <span class="text-[9px] font-semibold normal-case text-cyan-500/50 ml-1">°C</span></label>
-                                    <input id="rep-test-wbt" type="number" step="0.1" value="21.7" class="w-full bg-transparent border-none p-0 text-xl font-black font-mono text-slate-100 focus:ring-0 appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                                <div class="tele-field tele-cyan">
+                                    <span class="tele-label">WBT <span class="tele-unit">°C</span></span>
+                                    <input id="rep-test-wbt" type="number" step="0.1" value="21.7" class="tele-input">
                                 </div>
-                                <div class="rounded-2xl border border-cyan-500/20 bg-slate-950/60 p-4 focus-within:border-cyan-400 focus-within:bg-slate-900 transition-all group shadow-inner">
-                                    <label class="block text-[10px] font-black uppercase tracking-widest text-cyan-500/80 mb-1 group-focus-within:text-cyan-300 transition-colors">HWT <span class="text-[9px] font-semibold normal-case text-cyan-500/50 ml-1">°C</span></label>
-                                    <input id="rep-hwt" type="number" step="0.1" value="42.13" class="w-full bg-transparent border-none p-0 text-xl font-black font-mono text-slate-100 focus:ring-0 appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                                <div class="tele-field tele-cyan">
+                                    <span class="tele-label">HWT <span class="tele-unit">°C</span></span>
+                                    <input id="rep-hwt" type="number" step="0.1" value="42.13" class="tele-input">
                                 </div>
-                                <div class="rounded-2xl border border-cyan-500/20 bg-slate-950/60 p-4 focus-within:border-cyan-400 focus-within:bg-slate-900 transition-all group shadow-inner">
-                                    <label class="block text-[10px] font-black uppercase tracking-widest text-cyan-500/80 mb-1 group-focus-within:text-cyan-300 transition-colors">CWT <span class="text-[9px] font-semibold normal-case text-cyan-500/50 ml-1">°C</span></label>
-                                    <input id="rep-cwt" type="number" step="0.1" value="32.4" class="w-full bg-transparent border-none p-0 text-xl font-black font-mono text-slate-100 focus:ring-0 appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                                <div class="tele-field tele-cyan">
+                                    <span class="tele-label">CWT <span class="tele-unit">°C</span></span>
+                                    <input id="rep-cwt" type="number" step="0.1" value="32.4" class="tele-input">
                                 </div>
-                                <div class="rounded-2xl border border-cyan-500/20 bg-slate-950/60 p-4 focus-within:border-cyan-400 focus-within:bg-slate-900 transition-all group shadow-inner">
-                                    <label class="block text-[10px] font-black uppercase tracking-widest text-cyan-500/80 mb-1 group-focus-within:text-cyan-300 transition-colors">Fan Pow <span class="text-[9px] font-semibold normal-case text-cyan-500/50 ml-1">kW</span></label>
-                                    <input id="rep-test-fanpow" type="number" step="1" value="117" class="w-full bg-transparent border-none p-0 text-xl font-black font-mono text-slate-100 focus:ring-0 appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                                <div class="tele-field tele-cyan">
+                                    <span class="tele-label">Fan Power <span class="tele-unit">kW</span></span>
+                                    <input id="rep-test-fanpow" type="number" step="1" value="117" class="tele-input">
                                 </div>
-                                <div class="rounded-2xl border border-cyan-500/20 bg-slate-950/60 p-4 focus-within:border-cyan-400 focus-within:bg-slate-900 transition-all group shadow-inner">
-                                    <label class="block text-[10px] font-black uppercase tracking-widest text-cyan-500/80 mb-1 group-focus-within:text-cyan-300 transition-colors">Fan Area <span class="text-[9px] font-semibold normal-case text-cyan-500/50 ml-1">m²</span></label>
-                                    <input id="rep-fan-area" type="number" step="0.01" value="92.25" class="w-full bg-transparent border-none p-0 text-xl font-black font-mono text-slate-100 focus:ring-0 appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                                <div class="tele-field tele-cyan">
+                                    <span class="tele-label">Fan Area <span class="tele-unit">m²</span></span>
+                                    <input id="rep-fan-area" type="number" step="0.01" value="92.25" class="tele-input">
                                 </div>
                             </div>
                             <div id="rep-parsed-preview" class="hidden grid grid-cols-2 gap-3 mt-5 text-[10px] text-center border-t border-cyan-500/20 pt-4"></div>
