@@ -1,144 +1,123 @@
 <div id="reportTabPanel" class="hidden">
 
     <!-- ═══════════════════════════════════════════════════════════════════
-         PROJECT SCOPE HEADER — compact metadata bar, always at top
+         PROJECT SCOPE HEADER — clean, spacious top bar
          ═══════════════════════════════════════════════════════════════════ -->
-    <div class="glass-card rounded-2xl border border-white/10 px-5 py-3.5 mb-6 flex flex-wrap items-center justify-between gap-x-6 gap-y-3">
-        <div class="flex items-center gap-x-5 gap-y-2 flex-1 min-w-0">
-            <div class="flex items-center gap-2 shrink-0">
-                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400"></span>
-                <p class="text-[9px] font-black uppercase tracking-[0.22em] text-slate-500">Document Metadata</p>
+    <div class="glass-card rounded-2xl border border-white/10 px-6 py-5 mb-6 flex flex-wrap items-center justify-between gap-4">
+        <div>
+            <div class="flex items-center gap-2 mb-1">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(16,185,129,0.8)]"></span>
+                <h2 class="text-[11px] font-black uppercase tracking-[0.25em] text-slate-400">ATC-105 Report Builder</h2>
             </div>
-            
-            <div class="flex items-center gap-2 min-w-[180px]">
-                <label class="text-[9px] font-black uppercase tracking-widest text-slate-600 shrink-0">Client</label>
-                <input id="rep-client" type="text" value="DHARIWAL INFRASTRUCTURE LTD CHANDRAPUR"
-                    class="flex-1 input-premium rounded-lg px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wide min-w-0">
-            </div>
-            <div class="flex items-center gap-2 min-w-[160px]">
-                <label class="text-[9px] font-black uppercase tracking-widest text-slate-600 shrink-0">Asset</label>
-                <input id="rep-asset" type="text" value="CT - 02 , CELL 02"
-                    class="flex-1 input-premium rounded-lg px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wide min-w-0">
-            </div>
-            <div class="flex items-center gap-2 min-w-[180px]">
-                <label class="text-[9px] font-black uppercase tracking-widest text-slate-600 shrink-0">Title</label>
-                <input id="rep-title" type="text" value="CT PERFORMANCE EVALUATION REPORT"
-                    class="flex-1 input-premium rounded-lg px-2.5 py-1.5 text-xs font-semibold uppercase tracking-wide min-w-0">
-            </div>
-            <div class="flex items-center gap-2">
-                <label class="text-[9px] font-black uppercase tracking-widest text-slate-600 shrink-0">Date</label>
-                <input id="rep-test-date" type="text" value="27 March 2026"
-                    class="input-premium rounded-lg px-2.5 py-1.5 text-xs font-semibold">
-                <input id="rep-report-date" type="hidden" value="15 April 2026">
-            </div>
+            <p class="text-sm font-semibold text-slate-200">Final PDF Compilation Engine</p>
         </div>
         
         <!-- Button to open the Document Setup Modal -->
         <button type="button" onclick="document.getElementById('repDocSetupModal').classList.remove('hidden')"
-            class="shrink-0 flex items-center gap-2 px-3 py-1.5 rounded-lg border border-cyan-500/30 text-cyan-400 bg-cyan-500/10 hover:bg-cyan-500/20 transition-all font-bold text-[9px] uppercase tracking-widest">
-            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            class="shrink-0 flex items-center gap-2 px-5 py-3 rounded-xl border border-cyan-500/30 text-cyan-400 bg-cyan-500/10 hover:bg-cyan-500/20 transition-all font-bold text-[10px] uppercase tracking-[0.15em] shadow-[0_0_15px_rgba(6,182,212,0.15)]">
+            <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
             </svg>
-            Setup &amp; Narrative
+            Document Setup &amp; Narrative
         </button>
     </div>
 
     <!-- MAIN DUAL-COLUMN LAYOUT -->
-    <div class="flex flex-col xl:flex-row xl:items-start gap-6">
+    <div class="flex flex-col xl:flex-row xl:items-start gap-8">
 
         <!-- ══════════════════════════════════════════════════════════════
              LEFT SIDEBAR: Baseline Specifications
              ══════════════════════════════════════════════════════════════ -->
-        <aside class="xl:sticky xl:top-[60px] w-full xl:w-[420px] shrink-0">
-            <div class="glass-card rounded-2xl border border-white/10 overflow-hidden">
+        <aside class="xl:sticky xl:top-[60px] w-full xl:w-[380px] shrink-0">
+            <div class="glass-card rounded-3xl border border-white/10 overflow-hidden shadow-2xl">
                 <!-- Panel Header -->
-                <div class="px-5 py-3.5 border-b border-white/5 flex flex-wrap items-center justify-between gap-2">
-                    <div class="flex items-center gap-2">
-                        <div class="w-1.5 h-1.5 rounded-full bg-blue-400 animate-pulse"></div>
-                        <h3 class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">Baseline Specifications</h3>
+                <div class="px-6 py-5 border-b border-white/5 flex flex-wrap items-center justify-between gap-2 bg-slate-900/40">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></div>
+                        <h3 class="text-[11px] font-black uppercase tracking-[0.25em] text-slate-300">Baseline Specs</h3>
                     </div>
                     <button id="rep-sync-from-thermal" type="button"
-                        class="px-2 py-1 text-[9px] font-black uppercase tracking-widest rounded border border-cyan-500/30 text-cyan-400 bg-cyan-500/10 hover:bg-cyan-500/20 transition-all">
+                        class="px-3 py-1.5 text-[9px] font-black uppercase tracking-widest rounded-lg border border-cyan-500/30 text-cyan-400 bg-cyan-500/10 hover:bg-cyan-500/20 transition-all">
                         ↙ Sync Thermal
                     </button>
                 </div>
                 
-                <div class="p-5 space-y-5">
+                <div class="p-6 space-y-6">
                     <!-- Design Point -->
                     <div>
-                        <p class="flex items-center gap-1.5 text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">
+                        <p class="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.25em] mb-4">
                             <span class="w-1 h-3 bg-blue-500/70 rounded-full"></span>Design Point
                         </p>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div><label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">L/G Ratio</label>
-                                <input id="rep-design-lg" type="number" step="0.01" value="1.5" class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono"></div>
-                            <div><label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Water Flow (m³/h)</label>
-                                <input id="rep-design-flow" type="number" step="10" value="3863.6" class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono"></div>
-                            <div><label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Design WBT (°C)</label>
-                                <input id="rep-design-wbt" type="number" step="0.1" value="29" class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono"></div>
-                            <div><label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Design CWT (°C)</label>
-                                <input id="rep-design-cwt" type="number" step="0.1" value="33" class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono"></div>
-                            <div class="col-span-2"><label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Design HWT (°C)</label>
-                                <input id="rep-design-hwt" type="number" step="0.1" value="43" class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono"></div>
-                            <div class="col-span-2"><label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Fan Power (kW)</label>
-                                <input id="rep-design-fanpow" type="number" step="1" value="117" class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono"></div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="text-[10px] font-bold text-slate-400 uppercase mb-1.5 block">L/G Ratio</label>
+                                <input id="rep-design-lg" type="number" step="0.01" value="1.5" class="w-full input-premium rounded-xl px-4 py-2.5 text-sm font-mono text-center bg-slate-900/60"></div>
+                            <div><label class="text-[10px] font-bold text-slate-400 uppercase mb-1.5 block">Water (m³/h)</label>
+                                <input id="rep-design-flow" type="number" step="10" value="3863.6" class="w-full input-premium rounded-xl px-4 py-2.5 text-sm font-mono text-center bg-slate-900/60"></div>
+                            <div><label class="text-[10px] font-bold text-slate-400 uppercase mb-1.5 block">WBT (°C)</label>
+                                <input id="rep-design-wbt" type="number" step="0.1" value="29" class="w-full input-premium rounded-xl px-4 py-2.5 text-sm font-mono text-center bg-slate-900/60"></div>
+                            <div><label class="text-[10px] font-bold text-slate-400 uppercase mb-1.5 block">CWT (°C)</label>
+                                <input id="rep-design-cwt" type="number" step="0.1" value="33" class="w-full input-premium rounded-xl px-4 py-2.5 text-sm font-mono text-center bg-slate-900/60"></div>
+                            <div class="col-span-2"><label class="text-[10px] font-bold text-slate-400 uppercase mb-1.5 block">HWT (°C)</label>
+                                <input id="rep-design-hwt" type="number" step="0.1" value="43" class="w-full input-premium rounded-xl px-4 py-2.5 text-sm font-mono text-center bg-slate-900/60"></div>
+                            <div class="col-span-2"><label class="text-[10px] font-bold text-slate-400 uppercase mb-1.5 block">Fan Power (kW)</label>
+                                <input id="rep-design-fanpow" type="number" step="1" value="117" class="w-full input-premium rounded-xl px-4 py-2.5 text-sm font-mono text-center bg-slate-900/60"></div>
                         </div>
                     </div>
                     
-                    <div class="h-px bg-white/5"></div>
+                    <div class="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
                     
                     <!-- Transfer Constants -->
                     <div>
-                        <p class="flex items-center gap-1.5 text-[9px] font-black text-slate-500 uppercase tracking-[0.2em] mb-3">
-                            <span class="w-1 h-3 bg-violet-500/70 rounded-full"></span>Transfer Constants <span class="text-[8px] font-semibold text-slate-600 normal-case tracking-normal">(Merkel)</span>
+                        <p class="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.25em] mb-4">
+                            <span class="w-1 h-3 bg-violet-500/70 rounded-full"></span>Transfer Constants <span class="text-[8px] font-semibold text-slate-500 normal-case tracking-normal">(Merkel)</span>
                         </p>
-                        <div class="grid grid-cols-2 gap-3">
-                            <div><label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Const C <span class="text-[8px] text-slate-600 normal-case font-semibold ml-1">(coeff)</span></label>
-                                <input id="rep-design-c" type="number" step="0.01" value="1.2" class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono"></div>
-                            <div><label class="text-[10px] font-bold text-slate-400 uppercase px-1 mb-1 block">Const M <span class="text-[8px] text-slate-600 normal-case font-semibold ml-1">(exp)</span></label>
-                                <input id="rep-design-m" type="number" step="0.01" value="0.6" class="w-full input-premium rounded-lg px-3 py-2.5 text-sm font-mono"></div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div><label class="text-[10px] font-bold text-slate-400 uppercase mb-1.5 block">Const C <span class="text-[8px] text-slate-500 normal-case font-semibold ml-1">(coeff)</span></label>
+                                <input id="rep-design-c" type="number" step="0.01" value="1.2" class="w-full input-premium rounded-xl px-4 py-2.5 text-sm font-mono text-center bg-slate-900/60"></div>
+                            <div><label class="text-[10px] font-bold text-slate-400 uppercase mb-1.5 block">Const M <span class="text-[8px] text-slate-500 normal-case font-semibold ml-1">(exp)</span></label>
+                                <input id="rep-design-m" type="number" step="0.01" value="0.6" class="w-full input-premium rounded-xl px-4 py-2.5 text-sm font-mono text-center bg-slate-900/60"></div>
                         </div>
                     </div>
 
-                    <div class="h-px bg-white/5"></div>
+                    <div class="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
 
                     <!-- Density Ratio Override -->
-                    <div class="bg-amber-950/20 border border-amber-500/20 rounded-xl p-3 flex flex-col gap-2">
-                        <div class="flex items-center gap-1.5">
-                            <p class="text-[10px] font-black uppercase tracking-[0.15em] text-amber-400">Density Ratio Override</p>
+                    <div class="bg-amber-950/20 border border-amber-500/20 rounded-2xl p-4 flex flex-col gap-3">
+                        <div class="flex items-center gap-2">
+                            <p class="text-[10px] font-black uppercase tracking-[0.2em] text-amber-400">Density Ratio Override</p>
                         </div>
                         <input id="rep-density-override" type="number" step="0.0001" placeholder="Auto from Kell (1975)"
-                                class="w-full input-premium rounded-lg px-3 py-2 text-sm font-mono">
+                                class="w-full input-premium rounded-xl px-4 py-2.5 text-sm font-mono text-center bg-slate-900/80">
                     </div>
 
-                    <div id="rep-margins-strip" class="hidden rounded-xl border border-amber-500/25 bg-amber-500/[0.07] px-4 py-3">
-                        <div class="flex items-center gap-2 mb-2">
-                            <svg class="w-3.5 h-3.5 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                    <div id="rep-margins-strip" class="hidden rounded-2xl border border-amber-500/25 bg-amber-500/[0.07] px-5 py-4">
+                        <div class="flex items-center gap-2 mb-3">
+                            <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
                             <p class="text-[10px] font-black uppercase tracking-wider text-amber-400">Safety Margins Active</p>
                         </div>
-                        <div id="rep-margins-pills" class="flex flex-wrap gap-1.5"></div>
+                        <div id="rep-margins-pills" class="flex flex-wrap gap-2"></div>
                     </div>
                     
-                    <button id="generateReportBtn" class="w-full mt-4 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 py-3.5 rounded-xl font-bold text-[11px] uppercase tracking-widest transition-all border border-emerald-500/30 flex items-center justify-center gap-2 shadow-[0_0_20px_rgba(16,185,129,0.1)]">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
-                        ATC-105 Compilation Engine
+                    <button id="generateReportBtn" class="w-full mt-6 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 py-4 rounded-xl font-black text-[11px] uppercase tracking-[0.2em] transition-all border border-emerald-500/30 flex items-center justify-center gap-3 shadow-[0_0_20px_rgba(16,185,129,0.15)]">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        ATC-105 Engine
                     </button>
-                    <p id="reportStatus" class="text-[10px] text-cyan-400 font-semibold hidden text-center mt-2">Calculating ATC-105 results…</p>
+                    <p id="reportStatus" class="text-[10px] text-cyan-400 font-semibold hidden text-center mt-3 tracking-widest">CALCULATING RESULTS…</p>
 
                 </div>
             </div>
             
-            <div id="trm-loaded-banner" class="hidden mt-4 flex items-center gap-3 px-4 py-3 rounded-2xl border border-violet-500/30 bg-violet-500/10"
+            <div id="trm-loaded-banner" class="hidden mt-4 flex items-center gap-3 px-5 py-4 rounded-2xl border border-violet-500/30 bg-violet-500/10 shadow-lg"
                  style="animation:fadeSlideIn 0.3s ease both">
-                <span class="relative flex h-2 w-2 shrink-0">
+                <span class="relative flex h-2.5 w-2.5 shrink-0">
                     <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-60"></span>
-                    <span class="relative inline-flex rounded-full h-2 w-2 bg-violet-500"></span>
+                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-violet-500"></span>
                 </span>
-                <p class="text-[11px] text-violet-200 font-semibold flex-1">
+                <p class="text-[11px] text-violet-200 font-semibold flex-1 tracking-wide">
                     Design values loaded from Thermal Analysis.
                 </p>
-                <button type="button" onclick="this.parentElement.classList.add('hidden')" class="text-violet-400/60 hover:text-violet-300 transition-colors shrink-0 text-lg leading-none">&times;</button>
+                <button type="button" onclick="this.parentElement.classList.add('hidden')" class="text-violet-400/60 hover:text-violet-300 transition-colors shrink-0 text-xl leading-none">&times;</button>
             </div>
             
             <!-- Hidden elements for preview compability -->
@@ -152,387 +131,389 @@
         <!-- ══════════════════════════════════════════════════════════════
              RIGHT WORKSPACE: Field Telemetry & Verification
              ══════════════════════════════════════════════════════════════ -->
-        <div class="flex-1 min-w-0 space-y-6">
+        <div class="flex-1 min-w-0 space-y-8">
             
             <!-- FIELD TELEMETRY (Top Half) -->
-            <div class="glass-card rounded-2xl border border-white/10 p-5">
-                <div class="flex items-center justify-between mb-4 pb-3 border-b border-white/5">
-                    <h3 class="text-xs font-black tracking-widest text-slate-200 uppercase flex items-center gap-2">
-                        <span class="w-2 h-2 rounded-full bg-slate-400"></span> Field Telemetry
-                    </h3>
-                    <p class="text-[10px] text-slate-500">T1 → T2 → T3 Site Tests</p>
+            <div class="glass-card rounded-3xl border border-white/10 p-6 md:p-8 shadow-2xl">
+                <div class="flex flex-wrap items-center justify-between mb-8 gap-4 pb-4 border-b border-white/5">
+                    <div>
+                        <h3 class="text-sm font-black tracking-[0.25em] text-slate-200 uppercase flex items-center gap-3">
+                            <span class="w-2.5 h-2.5 rounded-full bg-slate-400 shadow-[0_0_10px_rgba(148,163,184,0.5)]"></span> Field Telemetry
+                        </h3>
+                        <p class="text-[11px] text-slate-500 mt-2 font-semibold tracking-wide">Sequential Site Tests (T1 → T2 → T3)</p>
+                    </div>
                 </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- Spaced out horizontal rows for each test -->
+                <div class="space-y-6">
+                    
                     <!-- TEST 1 -->
-                    <div class="rounded-xl border border-white/10 bg-slate-900/40 p-4 space-y-3">
-                        <div class="flex items-center justify-between pb-2 border-b border-white/5">
-                            <span class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-300">Test 1</span>
-                            <span class="text-[9px] font-bold uppercase text-slate-500 tracking-widest">Pre-Test</span>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2.5">
-                            <div><label class="block text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Flow (m³/hr)</label>
-                                <input id="rep-t1-flow" type="number" value="2998" class="w-full input-premium rounded-lg px-2 py-1.5 text-xs font-mono"></div>
-                            <div><label class="block text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">WBT (°C)</label>
-                                <input id="rep-t1-wbt" type="number" step="0.01" value="25.25" class="w-full input-premium rounded-lg px-2 py-1.5 text-xs font-mono"></div>
-                            <div><label class="block text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">HWT (°C)</label>
-                                <input id="rep-t1-hwt" type="number" step="0.01" value="44.67" class="w-full input-premium rounded-lg px-2 py-1.5 text-xs font-mono"></div>
-                            <div><label class="block text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">CWT (°C)</label>
-                                <input id="rep-t1-cwt" type="number" step="0.01" value="35.08" class="w-full input-premium rounded-lg px-2 py-1.5 text-xs font-mono"></div>
-                            <div class="col-span-2"><label class="block text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-1">Fan Power (kW)</label>
-                                <input id="rep-t1-fanpow" type="number" step="0.01" value="97.04" class="w-full input-premium rounded-lg px-2 py-1.5 text-xs font-mono"></div>
+                    <div class="rounded-2xl border border-white/10 bg-slate-900/40 p-5 md:p-6 transition-all hover:bg-slate-900/60 hover:border-white/20">
+                        <div class="flex flex-col xl:flex-row xl:items-center gap-6">
+                            <div class="shrink-0 xl:w-32 border-l-2 border-slate-500 pl-4">
+                                <h4 class="text-[12px] font-black uppercase tracking-[0.25em] text-slate-300">Test 1</h4>
+                                <p class="text-[10px] font-bold uppercase text-slate-500 tracking-widest mt-1">Pre-Test Baseline</p>
+                            </div>
+                            <div class="flex-1 grid grid-cols-2 sm:grid-cols-5 gap-4 md:gap-5">
+                                <div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 text-center">Flow (m³/hr)</label>
+                                    <input id="rep-t1-flow" type="number" value="2998" class="w-full input-premium rounded-xl px-3 py-2.5 text-sm font-mono text-center bg-slate-950/50 focus:bg-slate-900"></div>
+                                <div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 text-center">WBT (°C)</label>
+                                    <input id="rep-t1-wbt" type="number" step="0.01" value="25.25" class="w-full input-premium rounded-xl px-3 py-2.5 text-sm font-mono text-center bg-slate-950/50 focus:bg-slate-900"></div>
+                                <div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 text-center">HWT (°C)</label>
+                                    <input id="rep-t1-hwt" type="number" step="0.01" value="44.67" class="w-full input-premium rounded-xl px-3 py-2.5 text-sm font-mono text-center bg-slate-950/50 focus:bg-slate-900"></div>
+                                <div><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 text-center">CWT (°C)</label>
+                                    <input id="rep-t1-cwt" type="number" step="0.01" value="35.08" class="w-full input-premium rounded-xl px-3 py-2.5 text-sm font-mono text-center bg-slate-950/50 focus:bg-slate-900"></div>
+                                <div class="col-span-2 sm:col-span-1"><label class="block text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-2 text-center">Fan Pow (kW)</label>
+                                    <input id="rep-t1-fanpow" type="number" step="0.01" value="97.04" class="w-full input-premium rounded-xl px-3 py-2.5 text-sm font-mono text-center bg-slate-950/50 focus:bg-slate-900"></div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- TEST 2 -->
-                    <div class="rounded-xl border border-amber-500/20 bg-amber-950/10 p-4 space-y-3">
-                        <div class="flex items-center justify-between pb-2 border-b border-amber-500/10">
-                            <span class="text-[10px] font-black uppercase tracking-[0.2em] text-amber-400">Test 2</span>
-                            <span class="text-[9px] font-bold uppercase text-amber-500/60 tracking-widest">Post Fan</span>
-                        </div>
-                        <div class="grid grid-cols-2 gap-2.5">
-                            <div><label class="block text-[9px] font-bold text-amber-500/60 uppercase tracking-widest mb-1">Flow (m³/hr)</label>
-                                <input id="rep-t2-flow" type="number" value="3067.21" class="w-full input-premium rounded-lg px-2 py-1.5 text-xs font-mono border border-amber-500/20 focus:border-amber-500/50"></div>
-                            <div><label class="block text-[9px] font-bold text-amber-500/60 uppercase tracking-widest mb-1">WBT (°C)</label>
-                                <input id="rep-t2-wbt" type="number" step="0.01" value="24.22" class="w-full input-premium rounded-lg px-2 py-1.5 text-xs font-mono border border-amber-500/20 focus:border-amber-500/50"></div>
-                            <div><label class="block text-[9px] font-bold text-amber-500/60 uppercase tracking-widest mb-1">HWT (°C)</label>
-                                <input id="rep-t2-hwt" type="number" step="0.01" value="43.21" class="w-full input-premium rounded-lg px-2 py-1.5 text-xs font-mono border border-amber-500/20 focus:border-amber-500/50"></div>
-                            <div><label class="block text-[9px] font-bold text-amber-500/60 uppercase tracking-widest mb-1">CWT (°C)</label>
-                                <input id="rep-t2-cwt" type="number" step="0.01" value="32.89" class="w-full input-premium rounded-lg px-2 py-1.5 text-xs font-mono border border-amber-500/20 focus:border-amber-500/50"></div>
-                            <div class="col-span-2"><label class="block text-[9px] font-bold text-amber-500/60 uppercase tracking-widest mb-1">Fan Power (kW)</label>
-                                <input id="rep-t2-fanpow" type="number" step="0.01" value="116.24" class="w-full input-premium rounded-lg px-2 py-1.5 text-xs font-mono border border-amber-500/20 focus:border-amber-500/50"></div>
+                    <div class="rounded-2xl border border-amber-500/20 bg-amber-950/10 p-5 md:p-6 transition-all hover:bg-amber-950/20 hover:border-amber-500/40">
+                        <div class="flex flex-col xl:flex-row xl:items-center gap-6">
+                            <div class="shrink-0 xl:w-32 border-l-2 border-amber-500/60 pl-4">
+                                <h4 class="text-[12px] font-black uppercase tracking-[0.25em] text-amber-400">Test 2</h4>
+                                <p class="text-[10px] font-bold uppercase text-amber-500/60 tracking-widest mt-1">Post Fan Pitch</p>
+                            </div>
+                            <div class="flex-1 grid grid-cols-2 sm:grid-cols-5 gap-4 md:gap-5">
+                                <div><label class="block text-[10px] font-bold text-amber-500/60 uppercase tracking-widest mb-2 text-center">Flow (m³/hr)</label>
+                                    <input id="rep-t2-flow" type="number" value="3067.21" class="w-full input-premium rounded-xl px-3 py-2.5 text-sm font-mono text-center border-amber-500/20 focus:border-amber-500/50 bg-slate-950/50"></div>
+                                <div><label class="block text-[10px] font-bold text-amber-500/60 uppercase tracking-widest mb-2 text-center">WBT (°C)</label>
+                                    <input id="rep-t2-wbt" type="number" step="0.01" value="24.22" class="w-full input-premium rounded-xl px-3 py-2.5 text-sm font-mono text-center border-amber-500/20 focus:border-amber-500/50 bg-slate-950/50"></div>
+                                <div><label class="block text-[10px] font-bold text-amber-500/60 uppercase tracking-widest mb-2 text-center">HWT (°C)</label>
+                                    <input id="rep-t2-hwt" type="number" step="0.01" value="43.21" class="w-full input-premium rounded-xl px-3 py-2.5 text-sm font-mono text-center border-amber-500/20 focus:border-amber-500/50 bg-slate-950/50"></div>
+                                <div><label class="block text-[10px] font-bold text-amber-500/60 uppercase tracking-widest mb-2 text-center">CWT (°C)</label>
+                                    <input id="rep-t2-cwt" type="number" step="0.01" value="32.89" class="w-full input-premium rounded-xl px-3 py-2.5 text-sm font-mono text-center border-amber-500/20 focus:border-amber-500/50 bg-slate-950/50"></div>
+                                <div class="col-span-2 sm:col-span-1"><label class="block text-[10px] font-bold text-amber-500/60 uppercase tracking-widest mb-2 text-center">Fan Pow (kW)</label>
+                                    <input id="rep-t2-fanpow" type="number" step="0.01" value="116.24" class="w-full input-premium rounded-xl px-3 py-2.5 text-sm font-mono text-center border-amber-500/20 focus:border-amber-500/50 bg-slate-950/50"></div>
+                            </div>
                         </div>
                     </div>
 
                     <!-- TEST 3 -->
-                    <div class="rounded-xl border border-cyan-500/30 bg-cyan-950/20 p-4 space-y-3 relative overflow-hidden">
-                        <div class="absolute -right-4 -top-4 w-16 h-16 bg-cyan-500/10 rounded-full blur-xl"></div>
-                        <div class="flex items-center justify-between pb-2 border-b border-cyan-500/20 relative">
-                            <span class="text-[10px] font-black uppercase tracking-[0.2em] text-cyan-400">Test 3 ★</span>
-                            <span class="text-[9px] font-bold uppercase text-cyan-500/60 tracking-widest">Final</span>
-                        </div>
-                        
-                        <!-- Compact Auto-Fill -->
-                        <div class="border border-cyan-500/30 rounded-lg p-2 bg-cyan-950/30 flex items-center justify-between gap-2 relative">
-                            <label class="flex-1 cursor-pointer">
-                                <input id="rep-filter-upload" type="file" accept=".xlsx,.xls" class="sr-only">
-                                <div class="w-full border border-dashed border-cyan-500/40 rounded px-2 py-1 text-center hover:border-cyan-500/80 transition-all">
-                                    <p class="text-[9px] text-cyan-300 font-semibold" id="rep-filter-upload-label">Select .xlsx</p>
+                    <div class="rounded-2xl border border-cyan-500/40 bg-cyan-950/20 p-5 md:p-6 relative overflow-hidden transition-all hover:bg-cyan-950/30 hover:border-cyan-400/60 shadow-[0_0_30px_rgba(6,182,212,0.05)]">
+                        <div class="absolute -right-20 -top-20 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                        <div class="flex flex-col xl:flex-row xl:items-center gap-6 relative">
+                            <div class="shrink-0 xl:w-32 border-l-2 border-cyan-400 pl-4">
+                                <h4 class="text-[12px] font-black uppercase tracking-[0.25em] text-cyan-400 flex items-center gap-2">Test 3 <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path></svg></h4>
+                                <p class="text-[10px] font-bold uppercase text-cyan-500/70 tracking-widest mt-1">Final Fill Restor.</p>
+                                
+                                <!-- Compact Excel Auto-Fill -->
+                                <div class="mt-5 border border-cyan-500/30 rounded-xl p-1.5 bg-cyan-950/40 flex items-center gap-1 backdrop-blur-md">
+                                    <label class="flex-1 cursor-pointer">
+                                        <input id="rep-filter-upload" type="file" accept=".xlsx,.xls" class="sr-only">
+                                        <div class="w-full text-center hover:bg-cyan-500/20 rounded py-1.5 transition-all">
+                                            <p class="text-[9px] text-cyan-300 font-black uppercase tracking-widest" id="rep-filter-upload-label">Excel</p>
+                                        </div>
+                                    </label>
+                                    <button id="rep-parse-excel-btn" type="button" disabled
+                                        class="px-3 py-1.5 text-[9px] font-black uppercase tracking-widest rounded-lg bg-cyan-500/20 hover:bg-cyan-500/40 disabled:opacity-30 disabled:cursor-not-allowed text-cyan-300 transition-all border border-cyan-500/30">
+                                        Fill
+                                    </button>
                                 </div>
-                            </label>
-                            <button id="rep-parse-excel-btn" type="button" disabled
-                                class="px-2 py-1 text-[8px] font-black uppercase tracking-widest rounded border border-cyan-500/40 text-cyan-300 bg-cyan-500/20 hover:bg-cyan-500/30 disabled:opacity-40 disabled:cursor-not-allowed transition-all">
-                                Fill
-                            </button>
+                            </div>
+                            
+                            <div class="flex-1 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-5">
+                                <div><label class="block text-[10px] font-bold text-cyan-500/70 uppercase tracking-widest mb-2 text-center">Flow (m³/hr)</label>
+                                    <input id="rep-flow" type="number" step="1" value="3680" class="w-full input-premium rounded-xl px-2 py-2.5 text-sm font-mono text-center border-cyan-500/40 focus:border-cyan-400 bg-slate-950/60"></div>
+                                <div><label class="block text-[10px] font-bold text-cyan-500/70 uppercase tracking-widest mb-2 text-center">WBT (°C)</label>
+                                    <input id="rep-test-wbt" type="number" step="0.1" value="21.7" class="w-full input-premium rounded-xl px-2 py-2.5 text-sm font-mono text-center border-cyan-500/40 focus:border-cyan-400 bg-slate-950/60"></div>
+                                <div><label class="block text-[10px] font-bold text-cyan-500/70 uppercase tracking-widest mb-2 text-center">HWT (°C)</label>
+                                    <input id="rep-hwt" type="number" step="0.1" value="42.13" class="w-full input-premium rounded-xl px-2 py-2.5 text-sm font-mono text-center border-cyan-500/40 focus:border-cyan-400 bg-slate-950/60"></div>
+                                <div><label class="block text-[10px] font-bold text-cyan-500/70 uppercase tracking-widest mb-2 text-center">CWT (°C)</label>
+                                    <input id="rep-cwt" type="number" step="0.1" value="32.4" class="w-full input-premium rounded-xl px-2 py-2.5 text-sm font-mono text-center border-cyan-500/40 focus:border-cyan-400 bg-slate-950/60"></div>
+                                <div><label class="block text-[10px] font-bold text-cyan-500/70 uppercase tracking-widest mb-2 text-center">Fan Pow (kW)</label>
+                                    <input id="rep-test-fanpow" type="number" step="1" value="117" class="w-full input-premium rounded-xl px-2 py-2.5 text-sm font-mono text-center border-cyan-500/40 focus:border-cyan-400 bg-slate-950/60"></div>
+                                <div><label class="block text-[10px] font-bold text-cyan-500/70 uppercase tracking-widest mb-2 text-center">Fan Area (m²)</label>
+                                    <input id="rep-fan-area" type="number" step="0.01" value="92.25" class="w-full input-premium rounded-xl px-2 py-2.5 text-sm font-mono text-center border-cyan-500/40 focus:border-cyan-400 bg-slate-950/60"></div>
+                            </div>
                         </div>
-                        <div id="rep-parsed-preview" class="hidden grid grid-cols-2 gap-1 mt-1 text-[8px]"></div>
-                        <p id="rep-parse-status" class="text-[8px] hidden"></p>
-
-                        <div class="grid grid-cols-2 gap-2.5 relative">
-                            <div><label class="block text-[9px] font-bold text-cyan-500/60 uppercase tracking-widest mb-1">Flow (m³/hr)</label>
-                                <input id="rep-flow" type="number" step="1" value="3680" class="w-full input-premium rounded-lg px-2 py-1.5 text-xs font-mono border border-cyan-500/30 focus:border-cyan-500/60"></div>
-                            <div><label class="block text-[9px] font-bold text-cyan-500/60 uppercase tracking-widest mb-1">WBT (°C)</label>
-                                <input id="rep-test-wbt" type="number" step="0.1" value="21.7" class="w-full input-premium rounded-lg px-2 py-1.5 text-xs font-mono border border-cyan-500/30 focus:border-cyan-500/60"></div>
-                            <div><label class="block text-[9px] font-bold text-cyan-500/60 uppercase tracking-widest mb-1">HWT (°C)</label>
-                                <input id="rep-hwt" type="number" step="0.1" value="42.13" class="w-full input-premium rounded-lg px-2 py-1.5 text-xs font-mono border border-cyan-500/30 focus:border-cyan-500/60"></div>
-                            <div><label class="block text-[9px] font-bold text-cyan-500/60 uppercase tracking-widest mb-1">CWT (°C)</label>
-                                <input id="rep-cwt" type="number" step="0.1" value="32.4" class="w-full input-premium rounded-lg px-2 py-1.5 text-xs font-mono border border-cyan-500/30 focus:border-cyan-500/60"></div>
-                            <div><label class="block text-[9px] font-bold text-cyan-500/60 uppercase tracking-widest mb-1">Fan Power</label>
-                                <input id="rep-test-fanpow" type="number" step="1" value="117" class="w-full input-premium rounded-lg px-2 py-1.5 text-xs font-mono border border-cyan-500/30 focus:border-cyan-500/60"></div>
-                            <div><label class="block text-[9px] font-bold text-cyan-500/60 uppercase tracking-widest mb-1">Fan Area (m²)</label>
-                                <input id="rep-fan-area" type="number" step="0.01" value="92.25" class="w-full input-premium rounded-lg px-2 py-1.5 text-xs font-mono border border-cyan-500/30 focus:border-cyan-500/60"></div>
-                        </div>
+                        <div id="rep-parsed-preview" class="hidden grid grid-cols-2 gap-2 mt-4 text-[10px] text-center border-t border-cyan-500/20 pt-3"></div>
+                        <p id="rep-parse-status" class="text-[10px] text-center mt-2 font-mono hidden text-cyan-400"></p>
                     </div>
                 </div>
             </div>
 
             <!-- DOCUMENT VERIFICATION (Bottom Half) -->
-            <div class="glass-card rounded-2xl border border-violet-500/20 p-5 space-y-4">
-                <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-violet-500/10">
+            <div class="glass-card rounded-3xl border border-violet-500/20 p-6 md:p-8 space-y-6 shadow-2xl">
+                <div class="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-violet-500/10">
                     <div>
-                        <h3 class="text-xs font-black tracking-widest text-violet-300 uppercase flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-violet-400"></span> Real-Time Document Verification
+                        <h3 class="text-sm font-black tracking-[0.25em] text-violet-300 uppercase flex items-center gap-3">
+                            <span class="w-2.5 h-2.5 rounded-full bg-violet-400 shadow-[0_0_10px_rgba(167,139,250,0.5)]"></span> Live Verification
                         </h3>
-                        <p class="text-[10px] text-slate-400 mt-1">Check generated calculations and plots before final PDF compilation.</p>
+                        <p class="text-[11px] text-slate-400 mt-2 font-semibold tracking-wide">Validate cross plots and performance margins.</p>
                     </div>
                     <button id="previewAllTestsBtn" type="button"
-                        class="flex items-center gap-2 px-4 py-2.5 text-[10px] font-black uppercase tracking-widest rounded-xl border border-violet-500/40 text-violet-300 bg-violet-500/10 hover:bg-violet-500/20 transition-all">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                        class="flex items-center gap-2.5 px-6 py-3.5 text-[11px] font-black uppercase tracking-[0.2em] rounded-xl border border-violet-500/40 text-violet-300 bg-violet-500/10 hover:bg-violet-500/20 transition-all shadow-[0_0_20px_rgba(139,92,246,0.15)]">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
                         Run Verification
                     </button>
                 </div>
 
-                <p id="previewError" class="hidden text-[11px] text-rose-400 font-semibold"></p>
+                <p id="previewError" class="hidden text-[11px] text-rose-400 font-semibold text-center"></p>
 
                 <!-- ── Full preview document (hidden until Run Preview completes) ── -->
-                <div id="previewResultsPanel" class="hidden space-y-5 px-1 sm:px-4 py-4 w-full">
+                <div id="previewResultsPanel" class="hidden space-y-8 py-4 w-full">
                     <!-- ① Document header -->
-                    <div class="rounded-2xl border border-violet-500/15 bg-slate-900/50 p-5">
-                        <div class="flex flex-wrap items-start justify-between gap-4 mb-4">
+                    <div class="rounded-3xl border border-violet-500/20 bg-slate-900/60 p-6 md:p-8">
+                        <div class="flex flex-wrap items-start justify-between gap-6 mb-6">
                             <div>
-                                <p class="text-[10px] font-black uppercase tracking-wide text-violet-400/60 mb-1">CTI ATC-105 (2000 Ed.) · Standard Cooling Tower Performance Test</p>
-                                <p id="pv-doc-title" class="text-base font-black text-slate-100">CT PERFORMANCE EVALUATION REPORT</p>
-                                <p class="text-[10px] text-slate-400 mt-1">Report Date: <span id="pv-doc-repdate" class="text-slate-300">—</span> &nbsp;·&nbsp; Test Date: <span id="pv-doc-testdate" class="text-slate-300">—</span></p>
+                                <p class="text-[10px] font-black uppercase tracking-widest text-violet-400/80 mb-2">CTI ATC-105 (2000 Ed.) · Standard Cooling Tower Performance Test</p>
+                                <p id="pv-doc-title" class="text-xl md:text-2xl font-black text-slate-100 tracking-wide">CT PERFORMANCE EVALUATION REPORT</p>
+                                <p class="text-xs text-slate-400 mt-2 font-mono">Report Date: <span id="pv-doc-repdate" class="text-slate-200">—</span> &nbsp;·&nbsp; Test Date: <span id="pv-doc-testdate" class="text-slate-200">—</span></p>
                             </div>
-                            <span id="pv-overall-verdict" class="px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border border-emerald-500/40 text-emerald-400 bg-emerald-500/10">—</span>
+                            <span id="pv-overall-verdict" class="px-4 py-2 rounded-xl text-[11px] font-black uppercase tracking-widest border border-emerald-500/40 text-emerald-400 bg-emerald-500/10">—</span>
                         </div>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-3 pt-4 border-t border-white/5">
-                            <div><p class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Client</p><p id="pv-doc-client" class="text-xs font-bold text-slate-200 leading-tight">—</p></div>
-                            <div><p class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Asset / Equipment</p><p id="pv-doc-asset" class="text-xs font-bold text-slate-200 leading-tight">—</p></div>
-                            <div><p class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Tests Conducted</p><p class="text-xs font-bold text-emerald-400">3 of 3 Complete</p></div>
-                            <div><p class="text-[10px] font-black uppercase tracking-widest text-slate-500 mb-1">Standard</p><p class="text-xs font-bold text-slate-300">CTI ATC-105 (2000)</p></div>
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-6 pt-6 border-t border-white/5">
+                            <div><p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-1.5">Client</p><p id="pv-doc-client" class="text-sm font-bold text-slate-200 leading-tight">—</p></div>
+                            <div><p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-1.5">Asset / Equipment</p><p id="pv-doc-asset" class="text-sm font-bold text-slate-200 leading-tight">—</p></div>
+                            <div><p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-1.5">Tests Conducted</p><p class="text-sm font-bold text-emerald-400">3 of 3 Complete</p></div>
+                            <div><p class="text-[10px] font-black uppercase tracking-[0.2em] text-slate-500 mb-1.5">Standard</p><p class="text-sm font-bold text-slate-300">CTI ATC-105 (2000)</p></div>
                         </div>
                     </div>
 
                     <!-- ② How to read legend -->
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-                        <div class="rounded-xl border border-white/5 bg-slate-900/30 p-3">
-                            <p class="text-xs font-black uppercase tracking-widest text-violet-400 mb-2">Shortfall (°C)</p>
-                            <p class="text-xs text-slate-400 leading-relaxed">= Test CWT − Predicted CWT from Cross Plot 2. <span class="text-rose-400 font-bold">Positive = underperforming.</span> <span class="text-emerald-400 font-bold">Negative = exceeds spec.</span></p>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                        <div class="rounded-2xl border border-white/5 bg-slate-900/40 p-5">
+                            <p class="text-[11px] font-black uppercase tracking-widest text-violet-400 mb-2">Shortfall (°C)</p>
+                            <p class="text-xs text-slate-400 leading-relaxed font-medium">= Test CWT − Predicted CWT from Cross Plot 2. <br><span class="text-rose-400 font-bold mt-1 inline-block">Positive = underperforming.</span> <span class="text-emerald-400 font-bold">Negative = exceeds spec.</span></p>
                         </div>
-                        <div class="rounded-xl border border-white/5 bg-slate-900/30 p-3">
-                            <p class="text-xs font-black uppercase tracking-widest text-cyan-400 mb-2">Capability (%)</p>
-                            <p class="text-xs text-slate-400 leading-relaxed">= (Adj. Flow ÷ Pred. Flow at Test CWT) × 100. <span class="text-emerald-400 font-bold">≥ 100% = spec met.</span> <span class="text-rose-400 font-bold">&lt; 100% = failing.</span> Per ATC-105 App. C.</p>
+                        <div class="rounded-2xl border border-white/5 bg-slate-900/40 p-5">
+                            <p class="text-[11px] font-black uppercase tracking-widest text-cyan-400 mb-2">Capability (%)</p>
+                            <p class="text-xs text-slate-400 leading-relaxed font-medium">= (Adj. Flow ÷ Pred. Flow at Test CWT) × 100. <br><span class="text-emerald-400 font-bold mt-1 inline-block">≥ 100% = spec met.</span> <span class="text-rose-400 font-bold">&lt; 100% = failing.</span> Per ATC-105 App. C.</p>
                         </div>
-                        <div class="rounded-xl border border-white/5 bg-slate-900/30 p-3">
-                            <p class="text-xs font-black uppercase tracking-widest text-emerald-400 mb-2">Cross Plots</p>
-                            <p class="text-xs text-slate-400 leading-relaxed">CP1: CWT vs Range at 3 flows → interpolate at test range → 3 curve points. CP2: Flow vs CWT — read adj. flow → pred. CWT → capability.</p>
+                        <div class="rounded-2xl border border-white/5 bg-slate-900/40 p-5">
+                            <p class="text-[11px] font-black uppercase tracking-widest text-emerald-400 mb-2">Cross Plots</p>
+                            <p class="text-xs text-slate-400 leading-relaxed font-medium">CP1: CWT vs Range at 3 flows → interpolate at test range → 3 curve points. CP2: Flow vs CWT — read adj. flow → pred. CWT → capability.</p>
                         </div>
                     </div>
 
                     <!-- ③ Executive Summary -->
-                    <div class="rounded-2xl border border-white/5 bg-slate-900/40 p-5 space-y-4">
-                        <p class="text-xs font-black uppercase tracking-widest text-slate-400">Executive Summary</p>
-                        <div class="grid grid-cols-3 gap-3">
-                            <div class="rounded-xl bg-slate-900/60 border border-white/5 p-3 text-center">
-                                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Test 1 · Pre-Baseline</p>
-                                <p id="pv-cap1" class="text-2xl font-black font-mono text-slate-200">—</p>
-                                <p id="pv-verdict1" class="text-[11px] font-black uppercase mt-1 text-slate-400">—</p>
+                    <div class="rounded-3xl border border-white/5 bg-slate-900/40 p-6 md:p-8 space-y-6">
+                        <p class="text-sm font-black uppercase tracking-widest text-slate-300 border-b border-white/5 pb-4">Executive Summary</p>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+                            <div class="rounded-2xl bg-slate-900/60 border border-white/5 p-5 text-center">
+                                <p class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">Test 1 · Pre-Baseline</p>
+                                <p id="pv-cap1" class="text-3xl font-black font-mono text-slate-200">—</p>
+                                <p id="pv-verdict1" class="text-xs font-black uppercase mt-2 tracking-widest text-slate-400">—</p>
                             </div>
-                            <div class="rounded-xl bg-slate-900/60 border border-white/5 p-3 text-center">
-                                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Test 2 · Post Fan Pitch</p>
-                                <p id="pv-cap2" class="text-2xl font-black font-mono text-slate-200">—</p>
-                                <p id="pv-verdict2" class="text-[11px] font-black uppercase mt-1 text-slate-400">—</p>
+                            <div class="rounded-2xl bg-slate-900/60 border border-white/5 p-5 text-center">
+                                <p class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-2">Test 2 · Post Fan Pitch</p>
+                                <p id="pv-cap2" class="text-3xl font-black font-mono text-slate-200">—</p>
+                                <p id="pv-verdict2" class="text-xs font-black uppercase mt-2 tracking-widest text-slate-400">—</p>
                             </div>
-                            <div class="rounded-xl bg-slate-900/60 border border-white/5 p-3 text-center">
-                                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Test 3 · Post Fill Dist.</p>
-                                <p id="pv-cap3" class="text-2xl font-black font-mono text-slate-200">—</p>
-                                <p id="pv-verdict3" class="text-[11px] font-black uppercase mt-1 text-slate-400">—</p>
+                            <div class="rounded-2xl bg-slate-900/60 border border-white/5 p-5 text-center relative overflow-hidden">
+                                <div class="absolute inset-0 bg-cyan-500/5"></div>
+                                <p class="text-[11px] font-black uppercase tracking-[0.2em] text-cyan-400 mb-2 relative">Test 3 · Final</p>
+                                <p id="pv-cap3" class="text-3xl font-black font-mono text-white relative">—</p>
+                                <p id="pv-verdict3" class="text-xs font-black uppercase mt-2 tracking-widest text-cyan-400 relative">—</p>
                             </div>
                         </div>
-                        <div style="height:165px;position:relative;"><canvas id="pv-cap-chart"></canvas></div>
+                        <div style="height:220px;position:relative;" class="mt-6"><canvas id="pv-cap-chart"></canvas></div>
                     </div>
 
                     <!-- ④ Design Conditions -->
-                    <div class="rounded-2xl border border-white/5 bg-slate-900/40 p-5 space-y-3">
-                        <div class="flex items-center gap-2">
-                            <p class="text-xs font-black uppercase tracking-widest text-slate-400">Design Reference Conditions</p>
-                            <span class="text-[11px] text-slate-500">— nameplate / contract basis, fixed for all 3 tests</span>
+                    <div class="rounded-3xl border border-white/5 bg-slate-900/40 p-6 md:p-8 space-y-4">
+                        <div class="flex flex-wrap items-center gap-4 border-b border-white/5 pb-4">
+                            <p class="text-sm font-black uppercase tracking-widest text-slate-300">Design Reference Conditions</p>
+                            <span class="text-xs text-slate-500 font-semibold tracking-wide bg-slate-900/80 px-3 py-1 rounded-full">— fixed baseline for all tests</span>
                         </div>
-                        <div id="pv-design-grid" class="grid grid-cols-3 md:grid-cols-6 gap-2"></div>
-                        <p id="pv-design-note" class="text-xs text-slate-500 italic"></p>
+                        <div id="pv-design-grid" class="grid grid-cols-2 md:grid-cols-6 gap-4 pt-2"></div>
+                        <p id="pv-design-note" class="text-xs text-slate-500 italic mt-4"></p>
                     </div>
 
                     <!-- ⑤ TEST 1 -->
-                    <div class="rounded-2xl border border-white/10 bg-slate-900/50 overflow-hidden">
-                        <div class="flex items-center justify-between px-5 py-4 border-b border-white/5">
-                            <div class="flex items-center gap-3">
-                                <span class="px-2 py-0.5 bg-slate-700/60 text-slate-300 rounded text-[9px] font-black">TEST 1</span>
-                                <span class="text-[11px] font-bold text-slate-300">Pre-Cleaning Baseline</span>
+                    <div class="rounded-3xl border border-white/10 bg-slate-900/50 overflow-hidden shadow-xl">
+                        <div class="flex items-center justify-between px-6 md:px-8 py-5 border-b border-white/5 bg-slate-800/30">
+                            <div class="flex items-center gap-4">
+                                <span class="px-3 py-1 bg-slate-700/80 text-white rounded text-[11px] font-black tracking-widest shadow-inner">TEST 1</span>
+                                <span class="text-[13px] font-bold text-slate-300 uppercase tracking-widest">Pre-Cleaning Baseline</span>
                             </div>
-                            <span id="pv1-verdict-badge" class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border border-rose-500/30 bg-rose-500/10 text-rose-400">—</span>
+                            <span id="pv1-verdict-badge" class="px-4 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-widest border border-rose-500/30 bg-rose-500/10 text-rose-400">—</span>
                         </div>
-                        <div class="p-5 space-y-5">
+                        <div class="p-6 md:p-8 space-y-8">
                             <div>
-                                <p class="text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Measured Site Conditions <span class="text-slate-700 font-normal normal-case tracking-normal">— raw instrument readings</span></p>
-                                <div class="grid grid-cols-5 gap-2">
-                                    <div class="rounded-lg bg-slate-900/60 border border-white/5 p-2 text-center"><p class="text-[10px] text-slate-400 font-bold uppercase mb-1">WBT °C</p><p id="pv1-in-wbt" class="text-sm font-black font-mono text-slate-200">—</p></div>
-                                    <div class="rounded-lg bg-slate-900/60 border border-white/5 p-2 text-center"><p class="text-[10px] text-slate-400 font-bold uppercase mb-1">HWT °C</p><p id="pv1-in-hwt" class="text-sm font-black font-mono text-slate-200">—</p></div>
-                                    <div class="rounded-lg bg-slate-900/60 border border-white/5 p-2 text-center"><p class="text-[10px] text-slate-400 font-bold uppercase mb-1">CWT °C</p><p id="pv1-in-cwt" class="text-sm font-black font-mono text-slate-200">—</p></div>
-                                    <div class="rounded-lg bg-slate-900/60 border border-white/5 p-2 text-center"><p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Flow m³/hr</p><p id="pv1-in-flow" class="text-sm font-black font-mono text-slate-200">—</p></div>
-                                    <div class="rounded-lg bg-slate-900/60 border border-white/5 p-2 text-center"><p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Fan kW</p><p id="pv1-in-fanpow" class="text-sm font-black font-mono text-slate-200">—</p></div>
+                                <p class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4 flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> Measured Site Conditions</p>
+                                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                                    <div class="rounded-xl bg-slate-900/80 border border-white/5 p-3 text-center"><p class="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1.5">WBT °C</p><p id="pv1-in-wbt" class="text-base font-black font-mono text-slate-200">—</p></div>
+                                    <div class="rounded-xl bg-slate-900/80 border border-white/5 p-3 text-center"><p class="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1.5">HWT °C</p><p id="pv1-in-hwt" class="text-base font-black font-mono text-slate-200">—</p></div>
+                                    <div class="rounded-xl bg-slate-900/80 border border-white/5 p-3 text-center"><p class="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1.5">CWT °C</p><p id="pv1-in-cwt" class="text-base font-black font-mono text-slate-200">—</p></div>
+                                    <div class="rounded-xl bg-slate-900/80 border border-white/5 p-3 text-center"><p class="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1.5">Flow m³/hr</p><p id="pv1-in-flow" class="text-base font-black font-mono text-slate-200">—</p></div>
+                                    <div class="rounded-xl bg-slate-900/80 border border-white/5 p-3 text-center col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1.5">Fan kW</p><p id="pv1-in-fanpow" class="text-base font-black font-mono text-slate-200">—</p></div>
                                 </div>
                             </div>
                             <div>
-                                <p class="text-xs font-black uppercase tracking-widest text-slate-400 mb-2">ATC-105 Calculation Steps</p>
-                                <div id="pv1-calc-table" class="rounded-xl border border-white/5 overflow-hidden"></div>
+                                <p class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4 flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> ATC-105 Calculation Matrix</p>
+                                <div id="pv1-calc-table" class="rounded-2xl border border-white/5 overflow-hidden"></div>
                             </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Cross Plot 1 — CWT vs Range @ WBT <span id="pv1-cp1-wbt" class="font-mono font-normal text-slate-400"></span></p>
-                                    <p class="text-[11px] text-slate-500 mb-2 leading-relaxed">3 performance curves at 90/100/110% design flow.</p>
-                                    <div style="height:245px;position:relative;"><canvas id="pv1-cp1"></canvas></div>
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-4">
+                                <div class="bg-slate-900/40 rounded-2xl p-5 border border-white/5">
+                                    <p class="text-[11px] font-black uppercase tracking-widest text-slate-300 mb-1">Cross Plot 1 — CWT vs Range @ <span id="pv1-cp1-wbt" class="font-mono text-slate-400"></span></p>
+                                    <p class="text-[11px] text-slate-500 mb-4">Deriving performance curve points at 90/100/110% flow.</p>
+                                    <div style="height:280px;position:relative;"><canvas id="pv1-cp1"></canvas></div>
                                 </div>
-                                <div>
-                                    <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Cross Plot 2 — Tower Performance Curve</p>
-                                    <p class="text-[11px] text-slate-500 mb-2 leading-relaxed"><span class="text-amber-400 font-bold">Orange</span> = Pred. CWT. <span class="text-rose-400 font-bold">Red</span> = Pred. Flow.</p>
-                                    <div style="height:245px;position:relative;"><canvas id="pv1-cp2"></canvas></div>
+                                <div class="bg-slate-900/40 rounded-2xl p-5 border border-white/5">
+                                    <p class="text-[11px] font-black uppercase tracking-widest text-slate-300 mb-1">Cross Plot 2 — Performance Evaluation</p>
+                                    <p class="text-[11px] text-slate-500 mb-4">Determining final Predicted CWT and Capability %.</p>
+                                    <div style="height:280px;position:relative;"><canvas id="pv1-cp2"></canvas></div>
                                 </div>
                             </div>
-                            <div>
-                                <p class="text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Normalised Results</p>
-                                <div class="grid grid-cols-5 gap-2">
-                                    <div class="rounded-lg bg-slate-900/60 border border-white/5 p-2 text-center"><p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Range °C</p><p id="pv1-range" class="text-sm font-black font-mono text-slate-200">—</p></div>
-                                    <div class="rounded-lg bg-slate-900/60 border border-white/5 p-2 text-center"><p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Adj. Flow</p><p id="pv1-flow" class="text-sm font-black font-mono text-slate-200">—</p></div>
-                                    <div class="rounded-lg bg-slate-900/60 border border-white/5 p-2 text-center"><p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Pred. CWT</p><p id="pv1-cwt" class="text-sm font-black font-mono text-cyan-300">—</p></div>
-                                    <div class="rounded-lg bg-slate-900/60 border border-white/5 p-2 text-center"><p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Shortfall</p><p id="pv1-shortfall" class="text-sm font-black font-mono text-slate-200">—</p></div>
-                                    <div class="rounded-lg bg-slate-900/60 border border-white/5 p-2 text-center"><p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Capability</p><p id="pv1-cap" class="text-sm font-black font-mono text-slate-200">—</p></div>
+                            <div class="pt-4 border-t border-white/5">
+                                <p class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4">Normalised Results</p>
+                                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                                    <div class="rounded-xl bg-slate-800/80 border border-white/10 p-4 text-center"><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Range °C</p><p id="pv1-range" class="text-xl font-black font-mono text-slate-100">—</p></div>
+                                    <div class="rounded-xl bg-slate-800/80 border border-white/10 p-4 text-center"><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Adj. Flow</p><p id="pv1-flow" class="text-xl font-black font-mono text-slate-100">—</p></div>
+                                    <div class="rounded-xl bg-cyan-900/30 border border-cyan-500/30 p-4 text-center"><p class="text-[10px] text-cyan-400 font-black uppercase tracking-widest mb-2">Pred. CWT</p><p id="pv1-cwt" class="text-xl font-black font-mono text-cyan-300">—</p></div>
+                                    <div class="rounded-xl bg-slate-800/80 border border-white/10 p-4 text-center"><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Shortfall</p><p id="pv1-shortfall" class="text-xl font-black font-mono text-slate-100">—</p></div>
+                                    <div class="rounded-xl bg-slate-800/80 border border-white/10 p-4 text-center col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Capability</p><p id="pv1-cap" class="text-xl font-black font-mono text-slate-100">—</p></div>
                                 </div>
-                                <p class="text-[11px] text-slate-500 font-mono mt-2">Baseline — no improvement delta</p>
                             </div>
                         </div>
                     </div>
 
                     <!-- ⑥ TEST 2 -->
-                    <div class="rounded-2xl border border-white/10 bg-slate-900/50 overflow-hidden">
-                        <div class="flex items-center justify-between px-5 py-4 border-b border-white/5">
-                            <div class="flex items-center gap-3">
-                                <span class="px-2 py-0.5 bg-slate-700/60 text-slate-300 rounded text-[9px] font-black">TEST 2</span>
-                                <span class="text-[11px] font-bold text-slate-300">Post Fan Blade Pitch Adjustment</span>
+                    <div class="rounded-3xl border border-white/10 bg-slate-900/50 overflow-hidden shadow-xl">
+                        <div class="flex items-center justify-between px-6 md:px-8 py-5 border-b border-white/5 bg-slate-800/30">
+                            <div class="flex items-center gap-4">
+                                <span class="px-3 py-1 bg-slate-700/80 text-white rounded text-[11px] font-black tracking-widest shadow-inner">TEST 2</span>
+                                <span class="text-[13px] font-bold text-slate-300 uppercase tracking-widest">Post Fan Pitch Adjustment</span>
                             </div>
-                            <div class="flex items-center gap-3">
-                                <span class="text-[11px] text-slate-400">vs Test 1:</span>
-                                <span id="pv2-imp" class="text-[11px] font-black font-mono text-slate-400">—</span>
-                                <span id="pv2-verdict-badge" class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border border-slate-500/30 bg-slate-800/60 text-slate-400">—</span>
+                            <div class="flex items-center gap-4 bg-slate-900/80 px-4 py-1.5 rounded-full border border-white/5">
+                                <span class="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Delta:</span>
+                                <span id="pv2-imp" class="text-[12px] font-black font-mono text-emerald-400">—</span>
                             </div>
                         </div>
-                        <div class="p-5 space-y-5">
+                        <div class="p-6 md:p-8 space-y-8">
                             <div>
-                                <p class="text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Measured Site Conditions</p>
-                                <div class="grid grid-cols-5 gap-2">
-                                    <div class="rounded-lg bg-slate-900/60 border border-white/5 p-2 text-center"><p class="text-[10px] text-slate-400 font-bold uppercase mb-1">WBT °C</p><p id="pv2-in-wbt" class="text-sm font-black font-mono text-slate-200">—</p></div>
-                                    <div class="rounded-lg bg-slate-900/60 border border-white/5 p-2 text-center"><p class="text-[10px] text-slate-400 font-bold uppercase mb-1">HWT °C</p><p id="pv2-in-hwt" class="text-sm font-black font-mono text-slate-200">—</p></div>
-                                    <div class="rounded-lg bg-slate-900/60 border border-white/5 p-2 text-center"><p class="text-[10px] text-slate-400 font-bold uppercase mb-1">CWT °C</p><p id="pv2-in-cwt" class="text-sm font-black font-mono text-slate-200">—</p></div>
-                                    <div class="rounded-lg bg-slate-900/60 border border-white/5 p-2 text-center"><p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Flow m³/hr</p><p id="pv2-in-flow" class="text-sm font-black font-mono text-slate-200">—</p></div>
-                                    <div class="rounded-lg bg-slate-900/60 border border-white/5 p-2 text-center"><p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Fan kW</p><p id="pv2-in-fanpow" class="text-sm font-black font-mono text-slate-200">—</p></div>
+                                <p class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4 flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> Measured Site Conditions</p>
+                                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                                    <div class="rounded-xl bg-slate-900/80 border border-white/5 p-3 text-center"><p class="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1.5">WBT °C</p><p id="pv2-in-wbt" class="text-base font-black font-mono text-slate-200">—</p></div>
+                                    <div class="rounded-xl bg-slate-900/80 border border-white/5 p-3 text-center"><p class="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1.5">HWT °C</p><p id="pv2-in-hwt" class="text-base font-black font-mono text-slate-200">—</p></div>
+                                    <div class="rounded-xl bg-slate-900/80 border border-white/5 p-3 text-center"><p class="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1.5">CWT °C</p><p id="pv2-in-cwt" class="text-base font-black font-mono text-slate-200">—</p></div>
+                                    <div class="rounded-xl bg-slate-900/80 border border-white/5 p-3 text-center"><p class="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1.5">Flow m³/hr</p><p id="pv2-in-flow" class="text-base font-black font-mono text-slate-200">—</p></div>
+                                    <div class="rounded-xl bg-slate-900/80 border border-white/5 p-3 text-center col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1.5">Fan kW</p><p id="pv2-in-fanpow" class="text-base font-black font-mono text-slate-200">—</p></div>
                                 </div>
                             </div>
                             <div>
-                                <p class="text-xs font-black uppercase tracking-widest text-slate-400 mb-2">ATC-105 Calculation Steps</p>
-                                <div id="pv2-calc-table" class="rounded-xl border border-white/5 overflow-hidden"></div>
+                                <p class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4 flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-slate-500"></span> ATC-105 Calculation Matrix</p>
+                                <div id="pv2-calc-table" class="rounded-2xl border border-white/5 overflow-hidden"></div>
                             </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Cross Plot 1 — CWT vs Range @ WBT <span id="pv2-cp1-wbt" class="font-mono font-normal text-slate-400"></span></p>
-                                    <p class="text-[11px] text-slate-500 mb-2">3 performance curves — amber intersections at test range % → 3 CP2 input points.</p>
-                                    <div style="height:245px;position:relative;"><canvas id="pv2-cp1"></canvas></div>
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-4">
+                                <div class="bg-slate-900/40 rounded-2xl p-5 border border-white/5">
+                                    <p class="text-[11px] font-black uppercase tracking-widest text-slate-300 mb-1">Cross Plot 1 — CWT vs Range @ <span id="pv2-cp1-wbt" class="font-mono text-slate-400"></span></p>
+                                    <div style="height:280px;position:relative;" class="mt-4"><canvas id="pv2-cp1"></canvas></div>
                                 </div>
-                                <div>
-                                    <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Cross Plot 2 — Tower Performance Curve</p>
-                                    <p class="text-[11px] text-slate-500 mb-2">Adj. Flow → Pred. CWT (Shortfall). Test CWT → Pred. Flow (Capability).</p>
-                                    <div style="height:245px;position:relative;"><canvas id="pv2-cp2"></canvas></div>
+                                <div class="bg-slate-900/40 rounded-2xl p-5 border border-white/5">
+                                    <p class="text-[11px] font-black uppercase tracking-widest text-slate-300 mb-1">Cross Plot 2 — Performance Evaluation</p>
+                                    <div style="height:280px;position:relative;" class="mt-4"><canvas id="pv2-cp2"></canvas></div>
                                 </div>
                             </div>
-                            <div>
-                                <p class="text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Normalised Results</p>
-                                <div class="grid grid-cols-5 gap-2">
-                                    <div class="rounded-lg bg-slate-900/60 border border-white/5 p-2 text-center"><p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Range °C</p><p id="pv2-range" class="text-sm font-black font-mono text-slate-200">—</p></div>
-                                    <div class="rounded-lg bg-slate-900/60 border border-white/5 p-2 text-center"><p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Adj. Flow</p><p id="pv2-flow" class="text-sm font-black font-mono text-slate-200">—</p></div>
-                                    <div class="rounded-lg bg-slate-900/60 border border-white/5 p-2 text-center"><p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Pred. CWT</p><p id="pv2-cwt" class="text-sm font-black font-mono text-cyan-300">—</p></div>
-                                    <div class="rounded-lg bg-slate-900/60 border border-white/5 p-2 text-center"><p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Shortfall</p><p id="pv2-shortfall" class="text-sm font-black font-mono text-slate-200">—</p></div>
-                                    <div class="rounded-lg bg-slate-900/60 border border-white/5 p-2 text-center"><p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Capability</p><p id="pv2-cap" class="text-sm font-black font-mono text-slate-200">—</p></div>
+                            <div class="pt-4 border-t border-white/5">
+                                <p class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4">Normalised Results</p>
+                                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                                    <div class="rounded-xl bg-slate-800/80 border border-white/10 p-4 text-center"><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Range °C</p><p id="pv2-range" class="text-xl font-black font-mono text-slate-100">—</p></div>
+                                    <div class="rounded-xl bg-slate-800/80 border border-white/10 p-4 text-center"><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Adj. Flow</p><p id="pv2-flow" class="text-xl font-black font-mono text-slate-100">—</p></div>
+                                    <div class="rounded-xl bg-cyan-900/30 border border-cyan-500/30 p-4 text-center"><p class="text-[10px] text-cyan-400 font-black uppercase tracking-widest mb-2">Pred. CWT</p><p id="pv2-cwt" class="text-xl font-black font-mono text-cyan-300">—</p></div>
+                                    <div class="rounded-xl bg-slate-800/80 border border-white/10 p-4 text-center"><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Shortfall</p><p id="pv2-shortfall" class="text-xl font-black font-mono text-slate-100">—</p></div>
+                                    <div class="rounded-xl bg-slate-800/80 border border-white/10 p-4 text-center col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Capability</p><p id="pv2-cap" class="text-xl font-black font-mono text-slate-100">—</p></div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- ⑦ TEST 3 — Final Assessment (cyan highlight) -->
-                    <div class="rounded-2xl border border-cyan-500/20 bg-slate-900/50 overflow-hidden">
-                        <div class="flex items-center justify-between px-5 py-4 border-b border-cyan-500/10">
-                            <div class="flex items-center gap-3">
-                                <span class="px-2 py-0.5 bg-cyan-500/20 text-cyan-400 rounded text-[9px] font-black">TEST 3 ★ FINAL</span>
-                                <span class="text-[11px] font-bold text-slate-300">Post Fill Distribution Restoration</span>
+                    <!-- ⑦ TEST 3 — Final Assessment -->
+                    <div class="rounded-3xl border border-cyan-500/30 bg-slate-900/60 overflow-hidden shadow-[0_0_40px_rgba(6,182,212,0.1)]">
+                        <div class="flex items-center justify-between px-6 md:px-8 py-5 border-b border-cyan-500/20 bg-cyan-950/30">
+                            <div class="flex items-center gap-4">
+                                <span class="px-3 py-1 bg-cyan-500/20 text-cyan-400 rounded text-[11px] font-black tracking-widest border border-cyan-500/30">TEST 3 ★ FINAL</span>
+                                <span class="text-[13px] font-bold text-slate-200 uppercase tracking-widest">Post Fill Distribution Restoration</span>
                             </div>
-                            <div class="flex items-center gap-3">
-                                <span class="text-[11px] text-slate-400">vs Test 2:</span>
-                                <span id="pv3-imp" class="text-[11px] font-black font-mono text-slate-400">—</span>
-                                <span id="pv3-verdict-badge" class="px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border border-emerald-500/30 bg-emerald-500/10 text-emerald-400">—</span>
+                            <div class="flex items-center gap-4 bg-cyan-950/80 px-4 py-1.5 rounded-full border border-cyan-500/20">
+                                <span class="text-[11px] font-bold text-cyan-400/80 uppercase tracking-widest">Delta:</span>
+                                <span id="pv3-imp" class="text-[12px] font-black font-mono text-cyan-300">—</span>
                             </div>
                         </div>
-                        <div class="p-5 space-y-5">
+                        <div class="p-6 md:p-8 space-y-8">
                             <div>
-                                <p class="text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Measured Site Conditions</p>
-                                <div class="grid grid-cols-5 gap-2">
-                                    <div class="rounded-lg bg-slate-900/60 border border-white/5 p-2 text-center"><p class="text-[10px] text-slate-400 font-bold uppercase mb-1">WBT °C</p><p id="pv3-in-wbt" class="text-sm font-black font-mono text-slate-200">—</p></div>
-                                    <div class="rounded-lg bg-slate-900/60 border border-white/5 p-2 text-center"><p class="text-[10px] text-slate-400 font-bold uppercase mb-1">HWT °C</p><p id="pv3-in-hwt" class="text-sm font-black font-mono text-slate-200">—</p></div>
-                                    <div class="rounded-lg bg-slate-900/60 border border-white/5 p-2 text-center"><p class="text-[10px] text-slate-400 font-bold uppercase mb-1">CWT °C</p><p id="pv3-in-cwt" class="text-sm font-black font-mono text-slate-200">—</p></div>
-                                    <div class="rounded-lg bg-slate-900/60 border border-white/5 p-2 text-center"><p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Flow m³/hr</p><p id="pv3-in-flow" class="text-sm font-black font-mono text-slate-200">—</p></div>
-                                    <div class="rounded-lg bg-slate-900/60 border border-white/5 p-2 text-center"><p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Fan kW</p><p id="pv3-in-fanpow" class="text-sm font-black font-mono text-slate-200">—</p></div>
+                                <p class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4 flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-cyan-500"></span> Measured Site Conditions</p>
+                                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                                    <div class="rounded-xl bg-slate-900/80 border border-white/5 p-3 text-center"><p class="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1.5">WBT °C</p><p id="pv3-in-wbt" class="text-base font-black font-mono text-slate-200">—</p></div>
+                                    <div class="rounded-xl bg-slate-900/80 border border-white/5 p-3 text-center"><p class="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1.5">HWT °C</p><p id="pv3-in-hwt" class="text-base font-black font-mono text-slate-200">—</p></div>
+                                    <div class="rounded-xl bg-slate-900/80 border border-white/5 p-3 text-center"><p class="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1.5">CWT °C</p><p id="pv3-in-cwt" class="text-base font-black font-mono text-slate-200">—</p></div>
+                                    <div class="rounded-xl bg-slate-900/80 border border-white/5 p-3 text-center"><p class="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1.5">Flow m³/hr</p><p id="pv3-in-flow" class="text-base font-black font-mono text-slate-200">—</p></div>
+                                    <div class="rounded-xl bg-slate-900/80 border border-white/5 p-3 text-center col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1.5">Fan kW</p><p id="pv3-in-fanpow" class="text-base font-black font-mono text-slate-200">—</p></div>
                                 </div>
                             </div>
                             <div>
-                                <p class="text-xs font-black uppercase tracking-widest text-slate-400 mb-2">ATC-105 Calculation Steps</p>
-                                <div id="pv3-calc-table" class="rounded-xl border border-white/5 overflow-hidden"></div>
+                                <p class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4 flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full bg-cyan-500"></span> ATC-105 Calculation Matrix</p>
+                                <div id="pv3-calc-table" class="rounded-2xl border border-white/5 overflow-hidden"></div>
                             </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                <div>
-                                    <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Cross Plot 1 — CWT vs Range @ WBT <span id="pv3-cp1-wbt" class="font-mono font-normal text-slate-400"></span></p>
-                                    <p class="text-[11px] text-slate-500 mb-2">3 performance curves — amber intersections at test range % → 3 CP2 input points.</p>
-                                    <div style="height:245px;position:relative;"><canvas id="pv3-cp1"></canvas></div>
+                            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-4">
+                                <div class="bg-slate-900/40 rounded-2xl p-5 border border-white/5">
+                                    <p class="text-[11px] font-black uppercase tracking-widest text-slate-300 mb-1">Cross Plot 1 — CWT vs Range @ <span id="pv3-cp1-wbt" class="font-mono text-slate-400"></span></p>
+                                    <div style="height:280px;position:relative;" class="mt-4"><canvas id="pv3-cp1"></canvas></div>
                                 </div>
-                                <div>
-                                    <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Cross Plot 2 — Tower Performance Curve</p>
-                                    <p class="text-[11px] text-slate-500 mb-2">Adj. Flow → Pred. CWT (Shortfall). Test CWT → Pred. Flow (Capability).</p>
-                                    <div style="height:245px;position:relative;"><canvas id="pv3-cp2"></canvas></div>
+                                <div class="bg-slate-900/40 rounded-2xl p-5 border border-white/5">
+                                    <p class="text-[11px] font-black uppercase tracking-widest text-slate-300 mb-1">Cross Plot 2 — Performance Evaluation</p>
+                                    <div style="height:280px;position:relative;" class="mt-4"><canvas id="pv3-cp2"></canvas></div>
                                 </div>
                             </div>
-                            <div>
-                                <p class="text-xs font-black uppercase tracking-widest text-slate-400 mb-2">Normalised Results</p>
-                                <div class="grid grid-cols-5 gap-2">
-                                    <div class="rounded-lg bg-slate-900/60 border border-white/5 p-2 text-center"><p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Range °C</p><p id="pv3-range" class="text-sm font-black font-mono text-slate-200">—</p></div>
-                                    <div class="rounded-lg bg-slate-900/60 border border-white/5 p-2 text-center"><p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Adj. Flow</p><p id="pv3-flow" class="text-sm font-black font-mono text-slate-200">—</p></div>
-                                    <div class="rounded-lg bg-slate-900/60 border border-white/5 p-2 text-center"><p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Pred. CWT</p><p id="pv3-cwt" class="text-sm font-black font-mono text-cyan-300">—</p></div>
-                                    <div class="rounded-lg bg-slate-900/60 border border-white/5 p-2 text-center"><p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Shortfall</p><p id="pv3-shortfall" class="text-sm font-black font-mono text-slate-200">—</p></div>
-                                    <div class="rounded-lg bg-slate-900/60 border border-white/5 p-2 text-center"><p class="text-[10px] text-slate-400 font-bold uppercase mb-1">Capability</p><p id="pv3-cap" class="text-sm font-black font-mono text-slate-200">—</p></div>
+                            <div class="pt-4 border-t border-cyan-500/20">
+                                <p class="text-[11px] font-black uppercase tracking-[0.2em] text-cyan-400 mb-4">Normalised Results</p>
+                                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                                    <div class="rounded-xl bg-slate-800/80 border border-white/10 p-4 text-center"><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Range °C</p><p id="pv3-range" class="text-xl font-black font-mono text-slate-100">—</p></div>
+                                    <div class="rounded-xl bg-slate-800/80 border border-white/10 p-4 text-center"><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Adj. Flow</p><p id="pv3-flow" class="text-xl font-black font-mono text-slate-100">—</p></div>
+                                    <div class="rounded-xl bg-cyan-500/20 border border-cyan-500/50 p-4 text-center"><p class="text-[10px] text-cyan-300 font-black uppercase tracking-widest mb-2">Pred. CWT</p><p id="pv3-cwt" class="text-xl font-black font-mono text-white shadow-cyan-500/50 drop-shadow-lg">—</p></div>
+                                    <div class="rounded-xl bg-slate-800/80 border border-white/10 p-4 text-center"><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Shortfall</p><p id="pv3-shortfall" class="text-xl font-black font-mono text-slate-100">—</p></div>
+                                    <div class="rounded-xl bg-slate-800/80 border border-white/10 p-4 text-center col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Capability</p><p id="pv3-cap" class="text-xl font-black font-mono text-slate-100">—</p></div>
                                 </div>
                             </div>
                         </div>
                     </div>
 
                     <!-- ⑧ Improvement Progression -->
-                    <div class="rounded-2xl border border-white/5 bg-slate-900/40 p-5 space-y-4">
-                        <p class="text-xs font-black uppercase tracking-widest text-slate-400">Improvement Progression <span class="text-slate-500 font-normal normal-case tracking-normal text-[11px]">— lower shortfall = better performance</span></p>
-                        <div class="grid grid-cols-3 gap-4">
-                            <div class="text-center">
-                                <p class="text-[11px] text-slate-400 mb-1 font-semibold">Test 2 vs Test 1</p>
-                                <p id="pv-imp21" class="text-xl font-black font-mono text-emerald-400">—</p>
-                                <p class="text-[11px] text-slate-500 mt-1">Fan Blade Pitch</p>
+                    <div class="rounded-3xl border border-white/5 bg-slate-900/40 p-6 md:p-8 space-y-6">
+                        <p class="text-sm font-black uppercase tracking-[0.2em] text-slate-300 border-b border-white/5 pb-4">Improvement Progression</p>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                            <div class="text-center bg-slate-900/60 rounded-2xl p-5 border border-white/5">
+                                <p class="text-xs text-slate-400 mb-2 font-bold tracking-widest uppercase">Test 2 vs Test 1</p>
+                                <p id="pv-imp21" class="text-3xl font-black font-mono text-emerald-400">—</p>
+                                <p class="text-[11px] text-slate-500 mt-2 font-semibold">Fan Blade Pitch Delta</p>
                             </div>
-                            <div class="text-center">
-                                <p class="text-[11px] text-slate-400 mb-1 font-semibold">Test 3 vs Test 2</p>
-                                <p id="pv-imp32" class="text-xl font-black font-mono text-emerald-400">—</p>
-                                <p class="text-[11px] text-slate-500 mt-1">Fill Distribution</p>
+                            <div class="text-center bg-slate-900/60 rounded-2xl p-5 border border-white/5">
+                                <p class="text-xs text-slate-400 mb-2 font-bold tracking-widest uppercase">Test 3 vs Test 2</p>
+                                <p id="pv-imp32" class="text-3xl font-black font-mono text-emerald-400">—</p>
+                                <p class="text-[11px] text-slate-500 mt-2 font-semibold">Fill Distribution Delta</p>
                             </div>
-                            <div class="text-center border-l border-white/5">
-                                <p class="text-[11px] text-slate-400 mb-1 font-semibold">Total — Test 3 vs Test 1</p>
-                                <p id="pv-cumulative" class="text-2xl font-black font-mono text-emerald-400">—</p>
-                                <p class="text-[11px] text-slate-500 mt-1">Cumulative Shortfall Reduction</p>
+                            <div class="text-center bg-cyan-900/20 rounded-2xl p-5 border border-cyan-500/20 relative overflow-hidden">
+                                <div class="absolute inset-0 bg-cyan-500/5"></div>
+                                <p class="text-xs text-cyan-400/80 mb-2 font-bold tracking-widest uppercase relative">Total Evaluation</p>
+                                <p id="pv-cumulative" class="text-4xl font-black font-mono text-cyan-400 relative">—</p>
+                                <p class="text-[11px] text-cyan-500/70 mt-2 font-semibold relative">Cumulative Shortfall Reduction</p>
                             </div>
                         </div>
-                        <div style="height:180px;position:relative;"><canvas id="pv-trend-chart"></canvas></div>
+                        <div style="height:240px;position:relative;" class="mt-6"><canvas id="pv-trend-chart"></canvas></div>
                     </div>
 
                     <!-- ⑨ Multi-Test Comparison Table -->
-                    <div class="rounded-2xl border border-white/5 bg-slate-900/40 p-5 space-y-3">
-                        <div class="flex items-center gap-2">
-                            <p class="text-xs font-black uppercase tracking-widest text-slate-400">Multi-Test Comparison Table</p>
-                            <span class="text-[11px] text-slate-500">— appears verbatim in the PDF</span>
+                    <div class="rounded-3xl border border-white/5 bg-slate-900/40 p-6 md:p-8 space-y-6">
+                        <div class="flex flex-wrap items-center gap-4 border-b border-white/5 pb-4">
+                            <p class="text-sm font-black uppercase tracking-widest text-slate-300">Multi-Test Comparison Table</p>
+                            <span class="text-xs text-slate-500 font-semibold tracking-wide bg-slate-900/80 px-3 py-1 rounded-full">— Data export summary</span>
                         </div>
-                        <div class="overflow-x-auto rounded-xl border border-white/5">
-                            <table id="pv-comparison-table" class="w-full border-collapse"></table>
+                        <div class="overflow-x-auto rounded-2xl border border-white/5 shadow-inner">
+                            <table id="pv-comparison-table" class="w-full border-collapse text-left"></table>
                         </div>
-                        <p class="text-xs text-slate-500 italic">Shortfall = Test CWT − Pred. CWT (negative = tower exceeds spec). Capability = (Adj. Flow / Pred. Flow at Test CWT) × 100%.</p>
+                        <p class="text-xs text-slate-500 font-medium italic mt-4 text-center">Shortfall = Test CWT − Pred. CWT (negative = tower exceeds spec). Capability = (Adj. Flow / Pred. Flow at Test CWT) × 100%.</p>
                     </div>
-
-                    <!-- ⑩ Footer note -->
-                    <p class="text-center text-xs text-slate-500 italic">Preview complete — all values and charts match the PDF exactly.</p>
 
                 </div>
                 
-                <div id="previewReadyHint" class="hidden items-center gap-2 text-[10px] font-semibold text-violet-400/80">
-                    <svg class="w-3 h-3 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <div id="previewReadyHint" class="hidden items-center justify-center gap-3 text-xs font-bold uppercase tracking-widest text-violet-400/80 pt-4">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     Verification ready ·
-                    <button class="underline underline-offset-2 hover:text-violet-300 transition-colors" onclick="openPreviewModal()">Open Full Screen</button>
+                    <button class="underline underline-offset-4 hover:text-violet-300 transition-colors" onclick="openPreviewModal()">Expand to Full Screen</button>
                 </div>
             </div>
 
@@ -544,54 +525,97 @@
      REPORT SETUP & NARRATIVE MODAL
      ═══════════════════════════════════════════════════════════════════════ -->
 <div id="repDocSetupModal" class="hidden fixed inset-0 z-[400] flex items-center justify-center p-4 sm:p-6"
-     style="background:rgba(5,7,12,0.82);backdrop-filter:blur(6px);">
-    <div class="relative w-full max-w-4xl bg-[#0d1117] border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+     style="background:rgba(5,7,12,0.85);backdrop-filter:blur(10px);">
+    <div class="relative w-full max-w-5xl bg-slate-900/95 border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] ring-1 ring-cyan-500/20">
         
-        <div class="flex items-center justify-between px-6 py-4 border-b border-white/8 bg-slate-900/50 shrink-0">
-            <h2 class="text-xs font-black uppercase tracking-[0.18em] text-cyan-400 flex items-center gap-2">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                Document Settings &amp; Executive Narrative
+        <div class="flex items-center justify-between px-8 py-6 border-b border-white/10 bg-slate-950/80 shrink-0">
+            <h2 class="text-sm font-black uppercase tracking-[0.2em] text-cyan-400 flex items-center gap-3">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                Document Settings &amp; Narrative
             </h2>
             <button onclick="document.getElementById('repDocSetupModal').classList.add('hidden')"
-                    class="w-8 h-8 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center transition-colors text-slate-400 hover:text-white">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+                    class="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center transition-colors text-slate-400 hover:text-white">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
             </button>
         </div>
 
-        <div class="p-6 overflow-y-auto space-y-6">
-            <!-- Narrative -->
-            <div class="space-y-4">
-                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 border-b border-white/5 pb-2">Executive Narrative</h3>
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Preamble &amp; Objective</label>
-                    <textarea id="rep-preamble" class="w-full input-premium rounded-xl px-4 py-3 text-sm h-28 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20 transition-all">Due to poor performance of the cooling tower, factors influencing the poor performance were identified to be progressively resolved. To carry out this procedure it was decided to carry out the changes on one cell and based on the result carry out the same on balance cell. This procedure had to be conducted both before change of gear box and fan and post change of gear box and fan to ascertain the effect on cold water temperature.</textarea>
+        <div class="p-8 overflow-y-auto space-y-8 custom-scrollbar">
+            
+            <!-- Project Metadata -->
+            <div class="space-y-5">
+                <h3 class="text-xs font-black uppercase tracking-[0.2em] text-slate-300 border-b border-white/10 pb-3 flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-cyan-500"></span> Project Metadata
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Client Organization</label>
+                        <input id="rep-client" type="text" value="DHARIWAL INFRASTRUCTURE LTD CHANDRAPUR"
+                            class="w-full input-premium rounded-xl px-4 py-3.5 text-sm font-semibold uppercase tracking-wide bg-slate-950/60 focus:bg-slate-900 focus:border-cyan-500/50">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Asset / Equipment ID</label>
+                        <input id="rep-asset" type="text" value="CT - 02 , CELL 02"
+                            class="w-full input-premium rounded-xl px-4 py-3.5 text-sm font-semibold uppercase tracking-wide bg-slate-950/60 focus:bg-slate-900 focus:border-cyan-500/50">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Report Title</label>
+                        <input id="rep-title" type="text" value="CT PERFORMANCE EVALUATION REPORT"
+                            class="w-full input-premium rounded-xl px-4 py-3.5 text-sm font-semibold uppercase tracking-wide bg-slate-950/60 focus:bg-slate-900 focus:border-cyan-500/50">
+                    </div>
+                    <div class="grid grid-cols-2 gap-6 md:col-span-2">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Test Date</label>
+                            <input id="rep-test-date" type="text" value="27 March 2026"
+                                class="w-full input-premium rounded-xl px-4 py-3.5 text-sm font-semibold bg-slate-950/60 focus:bg-slate-900 focus:border-cyan-500/50">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Report Date</label>
+                            <input id="rep-report-date" type="text" value="15 April 2026"
+                                class="w-full input-premium rounded-xl px-4 py-3.5 text-sm font-semibold bg-slate-950/60 focus:bg-slate-900 focus:border-cyan-500/50">
+                        </div>
+                    </div>
                 </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Conclusions &amp; Remarks <span class="text-slate-500 normal-case font-normal">(one per line → numbered in PDF)</span></label>
-                    <textarea id="rep-conclusions" class="w-full input-premium rounded-xl px-4 py-3 text-sm h-28 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20 transition-all">Testing of the cell was carried out after incorporating the distribution system changes on 27th of March 2026.
+            </div>
+
+            <!-- Narrative -->
+            <div class="space-y-5 pt-4">
+                <h3 class="text-xs font-black uppercase tracking-[0.2em] text-slate-300 border-b border-white/10 pb-3 flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-violet-500"></span> Executive Narrative
+                </h3>
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Preamble &amp; Objective</label>
+                        <textarea id="rep-preamble" class="w-full input-premium rounded-2xl px-5 py-4 text-sm leading-relaxed h-32 focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 transition-all bg-slate-950/60 focus:bg-slate-900">Due to poor performance of the cooling tower, factors influencing the poor performance were identified to be progressively resolved. To carry out this procedure it was decided to carry out the changes on one cell and based on the result carry out the same on balance cell. This procedure had to be conducted both before change of gear box and fan and post change of gear box and fan to ascertain the effect on cold water temperature.</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Conclusions &amp; Remarks <span class="text-slate-500 normal-case font-medium ml-2">— One per line (bulleted in PDF)</span></label>
+                        <textarea id="rep-conclusions" class="w-full input-premium rounded-2xl px-5 py-4 text-sm leading-relaxed h-32 focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 transition-all bg-slate-950/60 focus:bg-slate-900">Testing of the cell was carried out after incorporating the distribution system changes on 27th of March 2026.
 The additional head available caused flow to increase substantially. Even under these conditions the cell showed an improvement of approx. 0.5 °C above the post fan modification test.
 Single cell isolated testing involves UNCERTAINTY in measurement due to turbulent water flow.</textarea>
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Special Data Notes <span class="text-slate-500 normal-case font-normal">(one per line → numbered in PDF)</span></label>
-                    <textarea id="rep-data-notes" class="w-full input-premium rounded-xl px-4 py-3 text-sm h-20 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20 transition-all">Improvement of 1.5 appears high in "TEST 2" so we consider that as 0.7 Deg C
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Special Data Notes <span class="text-slate-500 normal-case font-medium ml-2">— One per line</span></label>
+                        <textarea id="rep-data-notes" class="w-full input-premium rounded-2xl px-5 py-4 text-sm leading-relaxed h-24 focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 transition-all bg-slate-950/60 focus:bg-slate-900">Improvement of 1.5 appears high in "TEST 2" so we consider that as 0.7 Deg C
 Single cell isolated testing involves UNCERTAINTY in measurement due to turbulent water flow</textarea>
+                    </div>
                 </div>
             </div>
 
             <!-- Personnel -->
-            <div class="space-y-4">
-                <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-500 border-b border-white/5 pb-2">Personnel Present</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="space-y-5 pt-4">
+                <h3 class="text-xs font-black uppercase tracking-[0.2em] text-slate-300 border-b border-white/10 pb-3 flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Personnel Present
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">Client Members <span class="text-slate-500 normal-case font-normal">(one per line)</span></label>
-                        <textarea id="rep-members-client" class="w-full input-premium rounded-xl px-4 py-3 text-sm font-mono h-32 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20 transition-all">Mr Shrikant Shrivastava ( Remote)
+                        <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Client Members <span class="text-slate-500 normal-case font-medium ml-2">— One per line</span></label>
+                        <textarea id="rep-members-client" class="w-full input-premium rounded-2xl px-5 py-4 text-sm font-mono leading-relaxed h-40 focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition-all bg-slate-950/60 focus:bg-slate-900">Mr Shrikant Shrivastava ( Remote)
 Mr GAURAV HANTODKAR
 Mr PAWAN GAWANDE</textarea>
                     </div>
                     <div>
-                        <label class="block text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1.5">SSCTC Members <span class="text-slate-500 normal-case font-normal">(one per line)</span></label>
-                        <textarea id="rep-members-ssctc" class="w-full input-premium rounded-xl px-4 py-3 text-sm font-mono h-32 focus:border-cyan-500/50 focus:ring-1 focus:ring-cyan-500/20 transition-all">Mr SURESH SARMA
+                        <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">SSCTC Members <span class="text-slate-500 normal-case font-medium ml-2">— One per line</span></label>
+                        <textarea id="rep-members-ssctc" class="w-full input-premium rounded-2xl px-5 py-4 text-sm font-mono leading-relaxed h-40 focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition-all bg-slate-950/60 focus:bg-slate-900">Mr SURESH SARMA
 Mr SANJAY GORAD
 Mr MRADUL VISHWAKARMA
 Mr PARAG VISHWAKARMA
@@ -601,10 +625,10 @@ Mr RAHUL MANKE</textarea>
             </div>
         </div>
         
-        <div class="px-6 py-4 border-t border-white/8 bg-slate-900/50 shrink-0 flex justify-end">
+        <div class="px-8 py-5 border-t border-white/10 bg-slate-950/80 shrink-0 flex justify-end">
             <button onclick="document.getElementById('repDocSetupModal').classList.add('hidden')"
-                    class="px-6 py-2 bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 rounded-lg text-xs font-bold uppercase tracking-widest transition-all border border-cyan-500/30">
-                Save &amp; Close
+                    class="px-8 py-3 bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 rounded-xl text-xs font-black uppercase tracking-[0.2em] transition-all border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.15)]">
+                Save Settings &amp; Close
             </button>
         </div>
     </div>
