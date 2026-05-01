@@ -98,7 +98,7 @@ def log_request(ip, user_agent, method, path, query, status, process_time):
             
             # Use Indian Standard Time (IST) which is UTC + 5:30
             IST = timezone(timedelta(hours=5, minutes=30))
-            current_time = datetime.now(IST).strftime('%I:%M:%S %p, %d %b %Y')
+            current_time = datetime.now(IST).strftime('%I:%M:%S %p')
             
             c.execute('''
                 INSERT INTO access_logs (timestamp, ip_address, location, user_agent, method, path, query_params, status_code, process_time_ms)
