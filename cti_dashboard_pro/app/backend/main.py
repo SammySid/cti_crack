@@ -111,8 +111,17 @@ async def analytics_middleware(request: Request, call_next):
     response = await call_next(request)
     process_time = (time.time() - start_time) * 1000
     
-    # Ignore static files and the analytics page itself to keep logs clean
-    if not request.url.path.startswith(("/css", "/js")) and "/analytics" not in request.url.path:
+    # Ignore static files and high-frequency calculation API calls to prevent log spam
+    noisy_routes = (
+        "/css", 
+        "/js", 
+        "/api/calculate/curves", 
+        "/api/calculate/kavl", 
+        "/api/calculate/psychro", 
+        "/api/calculate/predict"
+    )
+    
+    if not request.url.path.startswith(noisy_routes) and "/analytics" not in request.url.path:
         ip = request.client.host if request.client else "unknown"
         forwarded = request.headers.get("x-forwarded-for")
         if forwarded:
