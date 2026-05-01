@@ -126,18 +126,22 @@ async def analytics_middleware(request: Request, call_next):
         "/api/calculate/predict"
     )
     
+    # Exclude admin IP address from analytics
+    IGNORED_IPS = ["103.187.229.87"]
+    
     if not request.url.path.startswith(noisy_routes) and "/analytics" not in request.url.path:
         ip = request.client.host if request.client else "unknown"
         forwarded = request.headers.get("x-forwarded-for")
         if forwarded:
             ip = forwarded.split(",")[0].strip()
             
-        user_agent = request.headers.get("user-agent", "unknown")
-        
-        log_request(
-            ip, user_agent, request.method, request.url.path, 
-            str(request.query_params), response.status_code, process_time
-        )
+        if ip not in IGNORED_IPS:
+            user_agent = request.headers.get("user-agent", "unknown")
+            
+            log_request(
+                ip, user_agent, request.method, request.url.path, 
+                str(request.query_params), response.status_code, process_time
+            )
         
     return response
 
