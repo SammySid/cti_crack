@@ -112,7 +112,7 @@ async def analytics_middleware(request: Request, call_next):
     process_time = (time.time() - start_time) * 1000
     
     # Ignore static files and the analytics page itself to keep logs clean
-    if not request.url.path.startswith(("/css", "/js")) and "/api/admin/analytics" not in request.url.path:
+    if not request.url.path.startswith(("/css", "/js")) and "/analytics" not in request.url.path:
         ip = request.client.host if request.client else "unknown"
         forwarded = request.headers.get("x-forwarded-for")
         if forwarded:
@@ -127,7 +127,7 @@ async def analytics_middleware(request: Request, call_next):
         
     return response
 
-@app.get("/api/admin/analytics")
+@app.get("/analytics")
 def get_analytics(limit: int = 500):
     """Admin endpoint to view a powerful HTML analytics dashboard."""
     try:
