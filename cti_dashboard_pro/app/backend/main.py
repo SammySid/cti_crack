@@ -8,7 +8,7 @@ import threading
 import sqlite3
 import urllib.request
 import json
-from datetime import datetime
+from datetime import datetime, timezone, timedelta
 from pathlib import Path
 from typing import List, Optional
 
@@ -95,10 +95,15 @@ def log_request(ip, user_agent, method, path, query, status, process_time):
             location = get_ip_details(ip)
             conn = sqlite3.connect(str(DB_PATH))
             c = conn.cursor()
+            
+            # Use Indian Standard Time (IST) which is UTC + 5:30
+            IST = timezone(timedelta(hours=5, minutes=30))
+            current_time = datetime.now(IST).strftime('%I:%M:%S %p, %d %b %Y')
+            
             c.execute('''
                 INSERT INTO access_logs (timestamp, ip_address, location, user_agent, method, path, query_params, status_code, process_time_ms)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
-            ''', (datetime.utcnow().strftime('%Y-%m-%d %H:%M:%S UTC'), ip, location, user_agent, method, path, query, status, process_time))
+            ''', (current_time, ip, location, user_agent, method, path, query, status, process_time))
             conn.commit()
             conn.close()
         except Exception as e:
@@ -204,7 +209,7 @@ def get_analytics(limit: int = 500):
 
             <table>
                 <tr>
-                    <th>Time (UTC)</th>
+                    <th>Time (IST)</th>
                     <th>IP Address</th>
                     <th>Location & ISP</th>
                     <th>Method</th>
