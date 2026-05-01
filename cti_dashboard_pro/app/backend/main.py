@@ -920,6 +920,10 @@ def api_download_pdf(token: str):
     )
 
 # Serve UI
+@app.get("/favicon.ico", include_in_schema=False)
+async def favicon():
+    return FileResponse(str(WEB_ROOT / "favicon.svg"))
+
 app.mount("/css", StaticFiles(directory=str(WEB_ROOT / "css")), name="css")
 app.mount("/js", StaticFiles(directory=str(WEB_ROOT / "js")), name="js")
 
