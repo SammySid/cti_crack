@@ -79,6 +79,72 @@ input[type="number"] { -moz-appearance: textfield; }
 .tele-field.tele-cyan:focus-within .tele-label { color: #22d3ee; }
 .tele-field.tele-cyan .tele-input { color: #f0fdff; }
 
+/* ── TEST ENABLE/DISABLE TOGGLE ─────────────────────────────────────────── */
+
+/* The invisible checkbox */
+.test-toggle-input { display: none; }
+
+/* The pill track */
+.test-toggle-track {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    width: 36px;
+    height: 20px;
+    border-radius: 99px;
+    cursor: pointer;
+    transition: background 0.22s ease, box-shadow 0.22s ease;
+    background: rgba(16,185,129,0.30);
+    border: 1px solid rgba(16,185,129,0.45);
+    box-shadow: 0 0 8px rgba(16,185,129,0.25);
+    flex-shrink: 0;
+}
+.test-toggle-input:not(:checked) + .test-toggle-track {
+    background: rgba(71,85,105,0.30);
+    border-color: rgba(71,85,105,0.40);
+    box-shadow: none;
+}
+
+/* The sliding knob */
+.test-toggle-track::after {
+    content: '';
+    position: absolute;
+    left: 2px;
+    top: 50%;
+    transform: translateY(-50%) translateX(16px);
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #10b981;
+    box-shadow: 0 0 6px rgba(16,185,129,0.6);
+    transition: transform 0.22s cubic-bezier(0.4,0,0.2,1), background 0.22s ease, box-shadow 0.22s ease;
+}
+.test-toggle-input:not(:checked) + .test-toggle-track::after {
+    transform: translateY(-50%) translateX(0px);
+    background: #475569;
+    box-shadow: none;
+}
+
+/* The "ACTIVE / SKIP" label next to the track */
+.test-toggle-label {
+    font-size: 9px;
+    font-weight: 900;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    transition: color 0.2s ease;
+    user-select: none;
+    cursor: pointer;
+}
+
+/* ── Disabled card state — dims the whole card body ─────────────────────── */
+.test-card-disabled .tele-field {
+    opacity: 0.38;
+    pointer-events: none;
+}
+.test-card-disabled .tele-input {
+    pointer-events: none;
+}
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {

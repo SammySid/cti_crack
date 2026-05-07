@@ -1,5 +1,5 @@
 import { INPUT_IDS, isCurveAffectingInput } from './constants.js';
-import { generateReport, updateAtcPreview, syncDesignFromThermal, bindFilterUpload, previewAllTests, launchReportFromThermal } from './report.js';
+import { generateReport, updateAtcPreview, syncDesignFromThermal, bindFilterUpload, bindTestToggles, previewAllTests, launchReportFromThermal } from './report.js';
 
 export function bindEvents(ui) {
     const debouncedUpdateAll = ui.debounce(ui.updateAll, 300);
@@ -129,6 +129,7 @@ export function bindEvents(ui) {
 
     document.getElementById('rep-sync-from-thermal')?.addEventListener('click', () => syncDesignFromThermal(ui));
     bindFilterUpload(ui);
+    bindTestToggles();
 
     // ── Filter tool ──────────────────────────────────────────────────────────
     document.getElementById('runFilterAction')?.addEventListener('click', () => ui.runFilterTool());

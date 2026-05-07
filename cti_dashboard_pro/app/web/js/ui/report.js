@@ -4,6 +4,57 @@
 // Report Builder fields, shows a confirmation banner, then switches tabs.
 // No duplicate UI needed — the Report Builder is the single source of truth.
 
+// ── Test Enable / Disable Toggles ─────────────────────────────────────────
+// Returns true if the given test (1, 2 or 3) is toggled on.
+function _isTestEnabled(n) {
+    const el = document.getElementById(`rep-t${n}-enabled`);
+    return el ? el.checked : true; // default true if element missing
+}
+
+// Returns how many tests are currently enabled.
+function _enabledCount() {
+    return [1, 2, 3].filter(_isTestEnabled).length;
+}
+
+// Update the "N of 3 Active" badge in the telemetry header.
+function _updateActiveBadge() {
+    const n   = _enabledCount();
+    const el  = document.getElementById('rep-active-count-badge');
+    if (!el) return;
+    el.textContent = `${n} of 3 Active`;
+    el.className   = [
+        'ml-auto px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider border',
+        n === 3 ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' :
+        n === 0 ? 'bg-rose-500/10    border-rose-500/20    text-rose-400'    :
+                  'bg-amber-500/10  border-amber-500/20   text-amber-400',
+    ].join(' ');
+}
+
+// Wire reactivity for one toggle: dim the card body + update badge + label.
+function _bindTestToggle(n) {
+    const cb   = document.getElementById(`rep-t${n}-enabled`);
+    const body = document.getElementById(`rep-t${n}-body`);
+    const lbl  = document.getElementById(`rep-t${n}-toggle-label`);
+    if (!cb) return;
+
+    const applyState = () => {
+        const on = cb.checked;
+        if (body)  body.classList.toggle('test-card-disabled', !on);
+        if (lbl) {
+            lbl.textContent = on ? 'Active' : 'Skip';
+            lbl.className   = `test-toggle-label ${on ? 'text-emerald-400' : 'text-slate-500'}`;
+        }
+        _updateActiveBadge();
+    };
+    cb.addEventListener('change', applyState);
+    applyState(); // sync on init
+}
+
+// Initialise all 3 toggles — call once from bindEvents.
+export function bindTestToggles() {
+    [1, 2, 3].forEach(_bindTestToggle);
+}
+
 function _getOffsetsFromUi(ui) {
     const i = ui?.inputs ?? {};
     return {
@@ -496,29 +547,30 @@ function _buildPvCalcTable(d, t, r) {
 }
 
 // ── Multi-test comparison table (injected as innerHTML) ────────────────────────
-function _buildComparisonTable(t1, t2, t3, r1, r2, r3) {
+function _buildComparisonTable(t1, t2, t3, r1, r2, r3, en1=true, en2=true, en3=true) {
     const f2 = v => v != null ? Number(v).toFixed(2) : '—';
     const f1 = v => v != null ? Number(v).toFixed(1) : '—';
-    const imp21 = r1.shortfall != null && r2.shortfall != null ? (r1.shortfall - r2.shortfall).toFixed(2) : '—';
-    const imp32 = r2.shortfall != null && r3.shortfall != null ? (r2.shortfall - r3.shortfall).toFixed(2) : '—';
-    const imp31 = r1.shortfall != null && r3.shortfall != null ? (r1.shortfall - r3.shortfall).toFixed(2) : '—';
+    const _na = (en, val) => en ? val : '<span class="text-slate-600">N/A</span>';
+    const imp21 = (r1 && r2 && en1 && en2) ? (r1.shortfall - r2.shortfall).toFixed(2) : '—';
+    const imp32 = (r2 && r3 && en2 && en3) ? (r2.shortfall - r3.shortfall).toFixed(2) : '—';
+    const imp31 = (r1 && r3 && en1 && en3) ? (r1.shortfall - r3.shortfall).toFixed(2) : '—';
 
     const capCls = v => { const n = parseFloat(v); return n >= 100 ? 'text-emerald-400' : n >= 95 ? 'text-amber-400' : 'text-rose-400'; };
     const sfCls  = v => { const n = parseFloat(v); return n > 0 ? 'text-rose-400' : n < 0 ? 'text-emerald-400' : 'text-slate-400'; };
     const impCls = v => { const n = parseFloat(v); return n > 0 ? 'text-emerald-400' : n < 0 ? 'text-rose-400' : 'text-slate-400'; };
 
     const rows = [
-        ['Water Flow',                   'm³/hr', f1(t1.flow),       f1(t2.flow),       f1(t3.flow),       ''],
-        ['WBT — Wet Bulb Temp.',         '°C',    f2(t1.wbt),        f2(t2.wbt),        f2(t3.wbt),        ''],
-        ['HWT — Hot Water Temp.',        '°C',    f2(t1.hwt),        f2(t2.hwt),        f2(t3.hwt),        ''],
-        ['CWT — Cold Water Temp.',       '°C',    f2(t1.cwt),        f2(t2.cwt),        f2(t3.cwt),        ''],
-        ['Fan Power at Motor Inlet',     'kW',    f2(t1.fan_power),  f2(t2.fan_power),  f2(t3.fan_power),  ''],
-        ['Range (HWT−CWT)',              '°C',    f2(r1.test_range), f2(r2.test_range), f2(r3.test_range), ''],
-        ['Approach (CWT−WBT)',           '°C',    f2(t1.cwt-t1.wbt),f2(t2.cwt-t2.wbt),f2(t3.cwt-t3.wbt),''],
-        ['Adjusted Water Flow',          'm³/hr', f1(r1.adj_flow),   f1(r2.adj_flow),   f1(r3.adj_flow),   ''],
-        ['Predicted CWT (CP2)',          '°C',    f2(r1.pred_cwt),   f2(r2.pred_cwt),   f2(r3.pred_cwt),   ''],
-        ['CWT Shortfall (Deviation)',    '°C',    `${r1.shortfall > 0 ? '+' : ''}${f2(r1.shortfall)}`, `${r2.shortfall > 0 ? '+' : ''}${f2(r2.shortfall)}`, `${r3.shortfall > 0 ? '+' : ''}${f2(r3.shortfall)}`, 'sf'],
-        ['Capability',                   '%',     f1(r1.capability), f1(r2.capability), f1(r3.capability), 'cap'],
+        ['Water Flow',                   'm³/hr', _na(en1,f1(t1.flow)),       _na(en2,f1(t2.flow)),       _na(en3,f1(t3.flow)),       ''],
+        ['WBT — Wet Bulb Temp.',         '°C',    _na(en1,f2(t1.wbt)),        _na(en2,f2(t2.wbt)),        _na(en3,f2(t3.wbt)),        ''],
+        ['HWT — Hot Water Temp.',        '°C',    _na(en1,f2(t1.hwt)),        _na(en2,f2(t2.hwt)),        _na(en3,f2(t3.hwt)),        ''],
+        ['CWT — Cold Water Temp.',       '°C',    _na(en1,f2(t1.cwt)),        _na(en2,f2(t2.cwt)),        _na(en3,f2(t3.cwt)),        ''],
+        ['Fan Power at Motor Inlet',     'kW',    _na(en1,f2(t1.fan_power)),  _na(en2,f2(t2.fan_power)),  _na(en3,f2(t3.fan_power)),  ''],
+        ['Range (HWT−CWT)',              '°C',    _na(en1,f2(r1?.test_range)),_na(en2,f2(r2?.test_range)),_na(en3,f2(r3?.test_range)),''],
+        ['Approach (CWT−WBT)',           '°C',    _na(en1,f2(t1.cwt-t1.wbt)),_na(en2,f2(t2.cwt-t2.wbt)),_na(en3,f2(t3.cwt-t3.wbt)),''],
+        ['Adjusted Water Flow',          'm³/hr', _na(en1,f1(r1?.adj_flow)),  _na(en2,f1(r2?.adj_flow)),  _na(en3,f1(r3?.adj_flow)),  ''],
+        ['Predicted CWT (CP2)',          '°C',    _na(en1,f2(r1?.pred_cwt)),  _na(en2,f2(r2?.pred_cwt)),  _na(en3,f2(r3?.pred_cwt)),  ''],
+        ['CWT Shortfall (Deviation)',    '°C',    _na(en1,r1 ? `${r1.shortfall>0?'+':''}${f2(r1.shortfall)}`:'—'), _na(en2,r2?`${r2.shortfall>0?'+':''}${f2(r2.shortfall)}`:'—'), _na(en3,r3?`${r3.shortfall>0?'+':''}${f2(r3.shortfall)}`:'—'), 'sf'],
+        ['Capability',                   '%',     _na(en1,f1(r1?.capability)),_na(en2,f1(r2?.capability)),_na(en3,f1(r3?.capability)),'cap'],
         ['Improvement vs Previous Test', '°C',    '—',               imp21 !== '—' ? `+${imp21}` : '—', imp32 !== '—' ? `+${imp32}` : '—', 'imp'],
         ['Cumulative Improvement vs T1', '°C',    '—',               imp21 !== '—' ? `+${imp21}` : '—', imp31 !== '—' ? `+${imp31}` : '—', 'imp'],
     ];
@@ -589,9 +641,14 @@ export async function previewAllTests(ui) {
         const t2 = { flow: _n('rep-t2-flow',3067.21),  wbt: _n('rep-t2-wbt',24.22),  hwt: _n('rep-t2-hwt',43.21), cwt: _n('rep-t2-cwt',32.89), fan_power: _n('rep-t2-fanpow',116.24) };
         const t3 = { flow: _n('rep-flow',3680),         wbt: _n('rep-test-wbt',21.7), hwt: _n('rep-hwt',42.13),   cwt: _n('rep-cwt',32.4),     fan_power: _n('rep-test-fanpow',117) };
 
+        // ── Only calculate enabled tests ──────────────────────────────────────
+        const en1 = _isTestEnabled(1), en2 = _isTestEnabled(2), en3 = _isTestEnabled(3);
+        if (!en1 && !en2 && !en3) throw new Error('Please enable at least one test (T1 / T2 / T3) before running verification.');
+
         const offsets = _getOffsetsFromUi(ui);
+        const _maybeCalc = (enabled, t) => enabled ? _calcAtc(design, t, offsets) : Promise.resolve(null);
         const [r1, r2, r3] = await Promise.all([
-            _calcAtc(design, t1, offsets), _calcAtc(design, t2, offsets), _calcAtc(design, t3, offsets),
+            _maybeCalc(en1, t1), _maybeCalc(en2, t2), _maybeCalc(en3, t3),
         ]);
 
         // ── Document header ────────────────────────────────────────────────────
@@ -603,18 +660,24 @@ export async function previewAllTests(ui) {
 
         const overallEl = document.getElementById('pv-overall-verdict');
         if (overallEl) {
-            overallEl.textContent = r3.capability >= 100 ? 'OVERALL: PASS' : r3.capability >= 95 ? 'OVERALL: MARGINAL' : 'OVERALL: FAIL';
-            overallEl.className   = `px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border ${_capBadgeCls(r3.capability)}`;
+            // Use the last enabled test's capability for the overall verdict
+            const lastR = en3 ? r3 : en2 ? r2 : r1;
+            overallEl.textContent = lastR.capability >= 100 ? 'OVERALL: PASS' : lastR.capability >= 95 ? 'OVERALL: MARGINAL' : 'OVERALL: FAIL';
+            overallEl.className   = `px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border ${_capBadgeCls(lastR.capability)}`;
         }
 
+        // ── Tests-conducted counter (dynamic) ──────────────────────────────────
+        const activeCount = [en1, en2, en3].filter(Boolean).length;
+        _text('pv-tests-conducted', `${activeCount} of 3 Complete`);
+
         // ── Executive summary ──────────────────────────────────────────────────
-        [[r1,'pv-cap1','pv-verdict1'],[r2,'pv-cap2','pv-verdict2'],[r3,'pv-cap3','pv-verdict3']].forEach(([r, capId, verdId]) => {
+        [[r1,en1,'pv-cap1','pv-verdict1'],[r2,en2,'pv-cap2','pv-verdict2'],[r3,en3,'pv-cap3','pv-verdict3']].forEach(([r, en, capId, verdId]) => {
             const capEl  = document.getElementById(capId);
-            if (capEl)  { capEl.textContent  = `${r.capability?.toFixed(1) ?? '—'} %`;  capEl.className  = `text-2xl font-black font-mono ${_capTextCls(r.capability)}`; }
+            if (capEl)  { capEl.textContent  = en ? `${r.capability?.toFixed(1) ?? '—'} %` : 'N/A'; capEl.className = `text-2xl font-black font-mono ${en ? _capTextCls(r.capability) : 'text-slate-600'}`; }
             const verdEl = document.getElementById(verdId);
-            if (verdEl) { verdEl.textContent = _capVerdict(r.capability); verdEl.className = `text-[11px] font-black uppercase mt-1 ${_capTextCls(r.capability)}`; }
+            if (verdEl) { verdEl.textContent = en ? _capVerdict(r.capability) : 'Skipped'; verdEl.className = `text-[11px] font-black uppercase mt-1 ${en ? _capTextCls(r.capability) : 'text-slate-600'}`; }
         });
-        _pvRenderCapChart([r1.capability, r2.capability, r3.capability]);
+        _pvRenderCapChart([en1 ? r1?.capability : null, en2 ? r2?.capability : null, en3 ? r3?.capability : null]);
 
         // ── Design conditions ──────────────────────────────────────────────────
         const designGrid = document.getElementById('pv-design-grid');
@@ -625,7 +688,13 @@ export async function previewAllTests(ui) {
         const f2 = v => v != null ? Number(v).toFixed(2) : '—';
         const f1 = v => v != null ? Number(v).toFixed(1) : '—';
 
-        [['1', t1, r1], ['2', t2, r2], ['3', t3, r3]].forEach(([p, t, r]) => {
+        [['1',t1,r1,en1],['2',t2,r2,en2],['3',t3,r3,en3]].forEach(([p, t, r, en]) => {
+            // Find the wrapping section (pv1/pv2/pv3 result cards in the preview panel)
+            const sectionEl = document.getElementById(`pv${p}-calc-table`)?.closest?.('.rounded-3xl');
+            if (sectionEl) sectionEl.style.display = en ? '' : 'none';
+
+            if (!en || !r) return; // skip rendering for disabled tests
+
             // Measured inputs
             _text(`pv${p}-in-wbt`,    `${f2(t.wbt)} °C`);
             _text(`pv${p}-in-hwt`,    `${f2(t.hwt)} °C`);
@@ -659,13 +728,14 @@ export async function previewAllTests(ui) {
             if (badge) { badge.textContent = _capVerdict(r.capability); badge.className = `px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border ${_capBadgeCls(r.capability)}`; }
         });
 
-        // ── Improvement deltas ─────────────────────────────────────────────────
-        const imp21 = r1.shortfall != null && r2.shortfall != null ? r1.shortfall - r2.shortfall : null;
-        const imp32 = r2.shortfall != null && r3.shortfall != null ? r2.shortfall - r3.shortfall : null;
-        const imp31 = r1.shortfall != null && r3.shortfall != null ? r1.shortfall - r3.shortfall : null;
+        // ── Improvement deltas (only between enabled tests) ────────────────────
+        const imp21 = (en1 && en2 && r1 && r2) ? r1.shortfall - r2.shortfall : null;
+        const imp32 = (en2 && en3 && r2 && r3) ? r2.shortfall - r3.shortfall : null;
+        const imp31 = (en1 && en3 && r1 && r3) ? r1.shortfall - r3.shortfall : null;
 
         const _setImp = (id, val, large = false) => {
-            const el = document.getElementById(id); if (!el || val == null) return;
+            const el = document.getElementById(id); if (!el) return;
+            if (val == null) { el.textContent = '—'; el.className = `${large ? 'text-2xl' : 'text-xl'} font-black font-mono text-slate-600`; return; }
             const sign = val >= 0 ? '+' : '';
             el.textContent = `${sign}${val.toFixed(2)} °C`;
             el.className   = `${large ? 'text-2xl' : 'text-xl'} font-black font-mono ${val >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
@@ -675,7 +745,8 @@ export async function previewAllTests(ui) {
         _setImp('pv-cumulative',imp31, true);
 
         const _setTestImp = (id, val) => {
-            const el = document.getElementById(id); if (!el || val == null) return;
+            const el = document.getElementById(id); if (!el) return;
+            if (val == null) { el.textContent = '—'; el.className = 'text-[11px] font-black font-mono text-slate-600'; return; }
             el.textContent = `${val >= 0 ? '+' : ''}${val.toFixed(2)} °C`;
             el.className   = `text-[11px] font-black font-mono ${val >= 0 ? 'text-emerald-400' : 'text-rose-400'}`;
         };
@@ -683,37 +754,41 @@ export async function previewAllTests(ui) {
         _setTestImp('pv3-imp', imp32);
 
         // ── Trend chart ────────────────────────────────────────────────────────
-        _pvRenderTrendChart([r1.shortfall, r2.shortfall, r3.shortfall], [r1.capability, r2.capability, r3.capability]);
+        _pvRenderTrendChart(
+            [en1?r1?.shortfall:null, en2?r2?.shortfall:null, en3?r3?.shortfall:null],
+            [en1?r1?.capability:null, en2?r2?.capability:null, en3?r3?.capability:null]
+        );
 
         // ── Comparison table ───────────────────────────────────────────────────
         const compWrapper = document.getElementById('pv-comparison-table');
-        if (compWrapper) compWrapper.innerHTML = _buildComparisonTable(t1, t2, t3, r1, r2, r3);
+        if (compWrapper) compWrapper.innerHTML = _buildComparisonTable(t1, t2, t3, r1, r2, r3, en1, en2, en3);
 
-        // ── Show preview panel ────────────────────────────────────────────────
-        // ── Update modal header ────────────────────────────────────────
+        // ── Update modal header ────────────────────────────────────────────────
         const modalSubtitle = [_v('rep-client',''), _v('rep-asset',''), _v('rep-test-date','')].filter(Boolean).join(' · ');
         _text('pv-modal-subtitle', modalSubtitle || 'ATC-105 Report Preview');
         const mvEl = document.getElementById('pv-modal-verdict');
         if (mvEl) {
-            mvEl.textContent = r3.capability >= 100 ? 'OVERALL: PASS' : r3.capability >= 95 ? 'OVERALL: MARGINAL' : 'OVERALL: FAIL';
-            mvEl.className   = `shrink-0 ml-1 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border ${_capBadgeCls(r3.capability)}`;
+            const lastR = en3 ? r3 : en2 ? r2 : r1;
+            mvEl.textContent = lastR.capability >= 100 ? 'OVERALL: PASS' : lastR.capability >= 95 ? 'OVERALL: MARGINAL' : 'OVERALL: FAIL';
+            mvEl.className   = `shrink-0 ml-1 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border ${_capBadgeCls(lastR.capability)}`;
         }
 
-        // ── Show "Re-open overlay" hint inside the step card ─────────
+        // ── Show "Re-open overlay" hint inside the step card ──────────────────
         const hintEl = document.getElementById('previewReadyHint');
         if (hintEl) { hintEl.classList.remove('hidden'); hintEl.classList.add('flex'); }
 
-        // ── Open the preview modal ────────────────────────────────────
+        // ── Open the preview modal ─────────────────────────────────────────────
         if (typeof openPreviewModal === 'function') openPreviewModal();
 
-        // ── Update live Test-3 mini-preview card in Step 3 ───────────────────
+        // ── Update live Test-3 mini-preview card (use last enabled test) ───────
         const pvCard = document.getElementById('atcPreview');
-        if (pvCard) {
-            _text('atc-prev-range',      r3.test_range  != null ? `${r3.test_range.toFixed(2)} °C` : '—');
-            _text('atc-prev-adjflow',    r3.adj_flow    != null ? r3.adj_flow.toFixed(1)            : '—');
-            _text('atc-prev-predcwt',    r3.pred_cwt    != null ? r3.pred_cwt.toFixed(2)            : '—');
-            _text('atc-prev-shortfall',  r3.shortfall   != null ? r3.shortfall.toFixed(2)           : '—');
-            _text('atc-prev-capability', r3.capability  != null ? `${r3.capability.toFixed(1)} %`   : '—');
+        const liveR  = en3 ? r3 : en2 ? r2 : r1;
+        if (pvCard && liveR) {
+            _text('atc-prev-range',      liveR.test_range  != null ? `${liveR.test_range.toFixed(2)} °C` : '—');
+            _text('atc-prev-adjflow',    liveR.adj_flow    != null ? liveR.adj_flow.toFixed(1)            : '—');
+            _text('atc-prev-predcwt',    liveR.pred_cwt    != null ? liveR.pred_cwt.toFixed(2)            : '—');
+            _text('atc-prev-shortfall',  liveR.shortfall   != null ? liveR.shortfall.toFixed(2)           : '—');
+            _text('atc-prev-capability', liveR.capability  != null ? `${liveR.capability.toFixed(1)} %`   : '—');
             pvCard.classList.remove('hidden');
         }
 
@@ -775,30 +850,33 @@ export async function generateReport(ui) {
             fan_power: _n('rep-test-fanpow', 117),
         };
 
-        // ── Run all 3 ATC-105 calculations in parallel (offsets from Thermal Analysis) ──
+        // ── Respect test toggles ──────────────────────────────────────────────
+        const gr_en1 = _isTestEnabled(1), gr_en2 = _isTestEnabled(2), gr_en3 = _isTestEnabled(3);
+        if (!gr_en1 && !gr_en2 && !gr_en3) throw new Error('Please enable at least one test (T1 / T2 / T3) before generating the report.');
+
+        // ── Run only enabled ATC-105 calculations in parallel ─────────────────
         const offsets = _getOffsetsFromUi(ui);
+        const _maybeCalcR = (en, t) => en ? _calcAtc(design, t, offsets) : Promise.resolve(null);
         const [atc_pre, atc_post, atc_dist] = await Promise.all([
-            _calcAtc(design, t1, offsets),
-            _calcAtc(design, t2, offsets),
-            _calcAtc(design, t3, offsets),
+            _maybeCalcR(gr_en1, t1),
+            _maybeCalcR(gr_en2, t2),
+            _maybeCalcR(gr_en3, t3),
         ]);
 
-        // Annotate fan powers (not in API response; needed for Step 4 table)
-        atc_pre.fan_power_design  = design.fan_power;
-        atc_pre.fan_power_test    = t1.fan_power;
-        atc_post.fan_power_design = design.fan_power;
-        atc_post.fan_power_test   = t2.fan_power;
-        atc_dist.fan_power_design = design.fan_power;
-        atc_dist.fan_power_test   = t3.fan_power;
+        // Annotate fan powers (not in API response; needed for table)
+        if (atc_pre)  { atc_pre.fan_power_design  = design.fan_power; atc_pre.fan_power_test  = t1.fan_power; }
+        if (atc_post) { atc_post.fan_power_design = design.fan_power; atc_post.fan_power_test = t2.fan_power; }
+        if (atc_dist) { atc_dist.fan_power_design = design.fan_power; atc_dist.fan_power_test = t3.fan_power; }
 
-        // Update live preview with Test 3 (current / distribution)
+        // Update live preview card with last enabled test
+        const liveAtc = gr_en3 ? atc_dist : gr_en2 ? atc_post : atc_pre;
         const pv = document.getElementById('atcPreview');
-        if (pv) {
-            document.getElementById('atc-prev-range').innerText      = `${atc_dist.test_range?.toFixed(2) ?? '—'} °C`;
-            document.getElementById('atc-prev-adjflow').innerText    = atc_dist.adj_flow?.toFixed(1)  ?? '—';
-            document.getElementById('atc-prev-predcwt').innerText    = atc_dist.pred_cwt?.toFixed(2)  ?? '—';
-            document.getElementById('atc-prev-shortfall').innerText  = atc_dist.shortfall?.toFixed(2) ?? '—';
-            document.getElementById('atc-prev-capability').innerText = atc_dist.capability != null ? `${atc_dist.capability.toFixed(1)} %` : '—';
+        if (pv && liveAtc) {
+            document.getElementById('atc-prev-range').innerText      = `${liveAtc.test_range?.toFixed(2) ?? '—'} °C`;
+            document.getElementById('atc-prev-adjflow').innerText    = liveAtc.adj_flow?.toFixed(1)  ?? '—';
+            document.getElementById('atc-prev-predcwt').innerText    = liveAtc.pred_cwt?.toFixed(2)  ?? '—';
+            document.getElementById('atc-prev-shortfall').innerText  = liveAtc.shortfall?.toFixed(2) ?? '—';
+            document.getElementById('atc-prev-capability').innerText = liveAtc.capability != null ? `${liveAtc.capability.toFixed(1)} %` : '—';
             pv.classList.remove('hidden');
         }
 
