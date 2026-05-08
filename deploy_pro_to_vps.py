@@ -20,6 +20,7 @@ Requirements:
 """
 
 import os
+import sys
 import subprocess
 import paramiko
 
@@ -47,7 +48,7 @@ def run_local(cmd: list[str], cwd: str = REPO_ROOT) -> str:
     return result.stdout.strip()
 
 
-def git_push() -> bool:
+def git_push(commit_message: str) -> bool:
     """
     Stage, commit (if anything changed), and push to GitHub.
     Returns True if a push was made, False if already up to date.
@@ -58,7 +59,7 @@ def git_push() -> bool:
     if status:
         print(f"    {len(status.splitlines())} changed file(s) — committing...")
         run_local(["git", "add", "-A"])
-        run_local(["git", "commit", "-m", "chore: auto-deploy commit from deploy_pro_to_vps.py"])
+        run_local(["git", "commit", "-m", commit_message])
         print("    ✅ Committed.")
     else:
         print("    Working tree clean — nothing to commit.")
@@ -106,7 +107,7 @@ def trigger_vps_sync():
 
 # ── Main ──────────────────────────────────────────────────────────────────────
 
-def deploy():
+def deploy(commit_message: str):
     print("\n" + "=" * 60)
     print("  CTI Dashboard PRO — Deploy to VPS")
     print("  Mode: GitHub auto-sync (push → trigger)")
@@ -114,7 +115,7 @@ def deploy():
 
     # Step 1: Push to GitHub
     try:
-        git_push()
+        git_push(commit_message)
     except RuntimeError as e:
         print(f"\n⚠️  Git error (continuing anyway): {e}")
 
@@ -133,4 +134,5 @@ def deploy():
 
 
 if __name__ == "__main__":
-    deploy()
+    msg = sys.argv[1] if len(sys.argv) > 1 else "chore: auto-deploy commit from deploy_pro_to_vps.py"
+    deploy(msg)
