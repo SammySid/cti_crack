@@ -301,16 +301,16 @@
                     <!-- ② How to read legend -->
                     <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                         <div class="rounded-2xl border border-white/5 bg-slate-900/40 p-5">
-                            <p class="text-[11px] font-black uppercase tracking-widest text-violet-400 mb-2">Shortfall (°C)</p>
-                            <p class="text-xs text-slate-400 leading-relaxed font-medium">= Test CWT − Predicted CWT from Cross Plot 2. <br><span class="text-rose-400 font-bold mt-1 inline-block">Positive = underperforming.</span> <span class="text-emerald-400 font-bold">Negative = exceeds spec.</span></p>
+                            <p class="text-[11px] font-black uppercase tracking-widest text-violet-400 mb-2">Shortfall — App. C (°C)</p>
+                            <p class="text-xs text-slate-400 leading-relaxed font-medium">= Test CWT − Predicted CWT from Cross Plot 2 (at test WBT). <br><span class="text-rose-400 font-bold mt-1 inline-block">Positive = underperforming.</span> <span class="text-emerald-400 font-bold">Negative = exceeds spec.</span></p>
+                        </div>
+                        <div class="rounded-2xl border border-amber-500/10 bg-amber-950/10 p-5">
+                            <p class="text-[11px] font-black uppercase tracking-widest text-amber-400 mb-2">CW Deviation — App. M (°C)</p>
+                            <p class="text-xs text-slate-400 leading-relaxed font-medium">= CWT at Design Conditions − Design CWT. Normalises test KaV/L to design WBT &amp; flow — direct contract deviation. <span class="text-rose-400 font-bold">Positive = below spec.</span></p>
                         </div>
                         <div class="rounded-2xl border border-white/5 bg-slate-900/40 p-5">
                             <p class="text-[11px] font-black uppercase tracking-widest text-cyan-400 mb-2">Capability (%)</p>
                             <p class="text-xs text-slate-400 leading-relaxed font-medium">= (Adj. Flow ÷ Pred. Flow at Test CWT) × 100. <br><span class="text-emerald-400 font-bold mt-1 inline-block">≥ 100% = spec met.</span> <span class="text-rose-400 font-bold">&lt; 100% = failing.</span> Per ATC-105 App. C.</p>
-                        </div>
-                        <div class="rounded-2xl border border-white/5 bg-slate-900/40 p-5">
-                            <p class="text-[11px] font-black uppercase tracking-widest text-emerald-400 mb-2">Cross Plots</p>
-                            <p class="text-xs text-slate-400 leading-relaxed font-medium">CP1: CWT vs Range at 3 flows → interpolate at test range → 3 curve points. CP2: Flow vs CWT — read adj. flow → pred. CWT → capability.</p>
                         </div>
                     </div>
 
@@ -386,11 +386,12 @@
                             </div>
                             <div class="pt-4 border-t border-white/5">
                                 <p class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4">Normalised Results</p>
-                                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                                <div class="grid grid-cols-2 sm:grid-cols-6 gap-3">
                                     <div class="rounded-xl bg-slate-800/80 border border-white/10 p-4 text-center"><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Range °C</p><p id="pv1-range" class="text-xl font-black font-mono text-slate-100">—</p></div>
                                     <div class="rounded-xl bg-slate-800/80 border border-white/10 p-4 text-center"><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Adj. Flow</p><p id="pv1-flow" class="text-xl font-black font-mono text-slate-100">—</p></div>
                                     <div class="rounded-xl bg-cyan-900/30 border border-cyan-500/30 p-4 text-center"><p class="text-[10px] text-cyan-400 font-black uppercase tracking-widest mb-2">Pred. CWT</p><p id="pv1-cwt" class="text-xl font-black font-mono text-cyan-300">—</p></div>
-                                    <div class="rounded-xl bg-slate-800/80 border border-white/10 p-4 text-center"><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Shortfall</p><p id="pv1-shortfall" class="text-xl font-black font-mono text-slate-100">—</p></div>
+                                    <div class="rounded-xl bg-slate-800/80 border border-white/10 p-4 text-center"><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Shortfall App.C</p><p id="pv1-shortfall" class="text-xl font-black font-mono text-slate-100">—</p></div>
+                                    <div class="rounded-xl bg-amber-950/30 border border-amber-500/20 p-4 text-center"><p class="text-[10px] text-amber-400 font-black uppercase tracking-widest mb-2">CW Dev. App.M</p><p id="pv1-appM-cwd" class="text-xl font-black font-mono text-amber-300">—</p></div>
                                     <div class="rounded-xl bg-slate-800/80 border border-white/10 p-4 text-center col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Capability</p><p id="pv1-cap" class="text-xl font-black font-mono text-slate-100">—</p></div>
                                 </div>
                             </div>
@@ -436,11 +437,12 @@
                             </div>
                             <div class="pt-4 border-t border-white/5">
                                 <p class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4">Normalised Results</p>
-                                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                                <div class="grid grid-cols-2 sm:grid-cols-6 gap-3">
                                     <div class="rounded-xl bg-slate-800/80 border border-white/10 p-4 text-center"><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Range °C</p><p id="pv2-range" class="text-xl font-black font-mono text-slate-100">—</p></div>
                                     <div class="rounded-xl bg-slate-800/80 border border-white/10 p-4 text-center"><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Adj. Flow</p><p id="pv2-flow" class="text-xl font-black font-mono text-slate-100">—</p></div>
                                     <div class="rounded-xl bg-cyan-900/30 border border-cyan-500/30 p-4 text-center"><p class="text-[10px] text-cyan-400 font-black uppercase tracking-widest mb-2">Pred. CWT</p><p id="pv2-cwt" class="text-xl font-black font-mono text-cyan-300">—</p></div>
-                                    <div class="rounded-xl bg-slate-800/80 border border-white/10 p-4 text-center"><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Shortfall</p><p id="pv2-shortfall" class="text-xl font-black font-mono text-slate-100">—</p></div>
+                                    <div class="rounded-xl bg-slate-800/80 border border-white/10 p-4 text-center"><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Shortfall App.C</p><p id="pv2-shortfall" class="text-xl font-black font-mono text-slate-100">—</p></div>
+                                    <div class="rounded-xl bg-amber-950/30 border border-amber-500/20 p-4 text-center"><p class="text-[10px] text-amber-400 font-black uppercase tracking-widest mb-2">CW Dev. App.M</p><p id="pv2-appM-cwd" class="text-xl font-black font-mono text-amber-300">—</p></div>
                                     <div class="rounded-xl bg-slate-800/80 border border-white/10 p-4 text-center col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Capability</p><p id="pv2-cap" class="text-xl font-black font-mono text-slate-100">—</p></div>
                                 </div>
                             </div>
@@ -486,11 +488,12 @@
                             </div>
                             <div class="pt-4 border-t border-cyan-500/20">
                                 <p class="text-[11px] font-black uppercase tracking-[0.2em] text-cyan-400 mb-4">Normalised Results</p>
-                                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                                <div class="grid grid-cols-2 sm:grid-cols-6 gap-3">
                                     <div class="rounded-xl bg-slate-800/80 border border-white/10 p-4 text-center"><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Range °C</p><p id="pv3-range" class="text-xl font-black font-mono text-slate-100">—</p></div>
                                     <div class="rounded-xl bg-slate-800/80 border border-white/10 p-4 text-center"><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Adj. Flow</p><p id="pv3-flow" class="text-xl font-black font-mono text-slate-100">—</p></div>
                                     <div class="rounded-xl bg-cyan-500/20 border border-cyan-500/50 p-4 text-center"><p class="text-[10px] text-cyan-300 font-black uppercase tracking-widest mb-2">Pred. CWT</p><p id="pv3-cwt" class="text-xl font-black font-mono text-white shadow-cyan-500/50 drop-shadow-lg">—</p></div>
-                                    <div class="rounded-xl bg-slate-800/80 border border-white/10 p-4 text-center"><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Shortfall</p><p id="pv3-shortfall" class="text-xl font-black font-mono text-slate-100">—</p></div>
+                                    <div class="rounded-xl bg-slate-800/80 border border-white/10 p-4 text-center"><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Shortfall App.C</p><p id="pv3-shortfall" class="text-xl font-black font-mono text-slate-100">—</p></div>
+                                    <div class="rounded-xl bg-amber-950/30 border border-amber-500/20 p-4 text-center"><p class="text-[10px] text-amber-400 font-black uppercase tracking-widest mb-2">CW Dev. App.M</p><p id="pv3-appM-cwd" class="text-xl font-black font-mono text-amber-300">—</p></div>
                                     <div class="rounded-xl bg-slate-800/80 border border-white/10 p-4 text-center col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Capability</p><p id="pv3-cap" class="text-xl font-black font-mono text-slate-100">—</p></div>
                                 </div>
                             </div>

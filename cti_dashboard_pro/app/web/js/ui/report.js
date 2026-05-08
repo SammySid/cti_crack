@@ -567,21 +567,27 @@ function _buildComparisonTable(t1, t2, t3, r1, r2, r3, en1=true, en2=true, en3=t
         ['Fan Power at Motor Inlet',     'kW',    _na(en1,f2(t1.fan_power)),  _na(en2,f2(t2.fan_power)),  _na(en3,f2(t3.fan_power)),  ''],
         ['Range (HWT−CWT)',              '°C',    _na(en1,f2(r1?.test_range)),_na(en2,f2(r2?.test_range)),_na(en3,f2(r3?.test_range)),''],
         ['Approach (CWT−WBT)',           '°C',    _na(en1,f2(t1.cwt-t1.wbt)),_na(en2,f2(t2.cwt-t2.wbt)),_na(en3,f2(t3.cwt-t3.wbt)),''],
-        ['Adjusted Water Flow',          'm³/hr', _na(en1,f1(r1?.adj_flow)),  _na(en2,f1(r2?.adj_flow)),  _na(en3,f1(r3?.adj_flow)),  ''],
-        ['Predicted CWT (CP2)',          '°C',    _na(en1,f2(r1?.pred_cwt)),  _na(en2,f2(r2?.pred_cwt)),  _na(en3,f2(r3?.pred_cwt)),  ''],
-        ['CWT Shortfall (Deviation)',    '°C',    _na(en1,r1 ? `${r1.shortfall>0?'+':''}${f2(r1.shortfall)}`:'—'), _na(en2,r2?`${r2.shortfall>0?'+':''}${f2(r2.shortfall)}`:'—'), _na(en3,r3?`${r3.shortfall>0?'+':''}${f2(r3.shortfall)}`:'—'), 'sf'],
+        ['Adjusted Water Flow',          'm\u00b3/hr', _na(en1,f1(r1?.adj_flow)),  _na(en2,f1(r2?.adj_flow)),  _na(en3,f1(r3?.adj_flow)),  ''],
+        ['Predicted CWT (CP2)',          '\u00b0C',    _na(en1,f2(r1?.pred_cwt)),  _na(en2,f2(r2?.pred_cwt)),  _na(en3,f2(r3?.pred_cwt)),  ''],
+        ['CWT Shortfall \u2014 App. C',       '\u00b0C',    _na(en1,r1 ? `${r1.shortfall>0?'+':''}${f2(r1.shortfall)}`:'—'), _na(en2,r2?`${r2.shortfall>0?'+':''}${f2(r2.shortfall)}`:'—'), _na(en3,r3?`${r3.shortfall>0?'+':''}${f2(r3.shortfall)}`:'—'), 'sf'],
+        ['CW Deviation \u2014 App. M (pg64)',  '\u00b0C',    _na(en1,r1?.appM_cwd!=null?`${r1.appM_cwd>0?'+':''}${f2(r1.appM_cwd)}`:'—'), _na(en2,r2?.appM_cwd!=null?`${r2.appM_cwd>0?'+':''}${f2(r2.appM_cwd)}`:'—'), _na(en3,r3?.appM_cwd!=null?`${r3.appM_cwd>0?'+':''}${f2(r3.appM_cwd)}`:'—'), 'appM'],
         ['Capability',                   '%',     _na(en1,f1(r1?.capability)),_na(en2,f1(r2?.capability)),_na(en3,f1(r3?.capability)),'cap'],
-        ['Improvement vs Previous Test', '°C',    '—',               imp21 !== '—' ? `+${imp21}` : '—', imp32 !== '—' ? `+${imp32}` : '—', 'imp'],
-        ['Cumulative Improvement vs T1', '°C',    '—',               imp21 !== '—' ? `+${imp21}` : '—', imp31 !== '—' ? `+${imp31}` : '—', 'imp'],
+        ['Improvement vs Previous Test', '\u00b0C',    '\u2014',               imp21 !== '\u2014' ? `+${imp21}` : '\u2014', imp32 !== '\u2014' ? `+${imp32}` : '\u2014', 'imp'],
+        ['Cumulative Improvement vs T1', '\u00b0C',    '\u2014',               imp21 !== '\u2014' ? `+${imp21}` : '\u2014', imp31 !== '\u2014' ? `+${imp31}` : '\u2014', 'imp'],
     ];
 
     const rowHtml = rows.map(([param, unit, v1, v2, v3, type]) => {
-        const bg   = type === 'sf' ? 'bg-yellow-500/5' : type === 'imp' ? 'bg-emerald-500/5' : '';
-        const c1   = type === 'cap' ? capCls(v1) : type === 'sf' ? sfCls(v1)  : type === 'imp' ? impCls(v1) : 'text-slate-300';
-        const c2   = type === 'cap' ? capCls(v2) : type === 'sf' ? sfCls(v2)  : type === 'imp' ? impCls(v2) : 'text-slate-300';
-        const c3   = type === 'cap' ? capCls(v3) : type === 'sf' ? sfCls(v3)  : type === 'imp' ? impCls(v3) : 'text-slate-300';
+        const bg   = type === 'sf'   ? 'bg-yellow-500/5'  :
+                     type === 'appM' ? 'bg-amber-500/5'   :
+                     type === 'imp'  ? 'bg-emerald-500/5' : '';
+        const _cls = (v) => type === 'cap'  ? capCls(v) :
+                            type === 'sf'   ? sfCls(v)  :
+                            type === 'appM' ? sfCls(v)  :
+                            type === 'imp'  ? impCls(v) : 'text-slate-300';
+        const c1 = _cls(v1), c2 = _cls(v2), c3 = _cls(v3);
+        const labelCls = type === 'appM' ? 'text-amber-300/80' : 'text-slate-300';
         return `<tr class="hover:bg-white/[0.02] ${bg}">
-            <td class="px-3 py-2 text-xs font-mono text-slate-300">${param}</td>
+            <td class="px-3 py-2 text-xs font-mono ${labelCls}">${param}</td>
             <td class="px-3 py-2 text-xs font-mono text-center text-slate-500">${unit}</td>
             <td class="px-3 py-2 text-xs font-mono text-right ${c1}">${v1}</td>
             <td class="px-3 py-2 text-xs font-mono text-right ${c2}">${v2}</td>
@@ -714,12 +720,25 @@ export async function previewAllTests(ui) {
             if (r.cross_plot_2) _pvRenderCp2(`pv${p}-cp2`, r.cross_plot_2);
 
             // Results strip
-            _text(`pv${p}-range`, `${f2(r.test_range)} °C`);
-            _text(`pv${p}-flow`,  `${f1(r.adj_flow)} m³/hr`);
-            _text(`pv${p}-cwt`,   `${f2(r.pred_cwt)} °C`);
+            _text(`pv${p}-range`, `${f2(r.test_range)} \u00b0C`);
+            _text(`pv${p}-flow`,  `${f1(r.adj_flow)} m\u00b3/hr`);
+            _text(`pv${p}-cwt`,   `${f2(r.pred_cwt)} \u00b0C`);
 
             const sfEl = document.getElementById(`pv${p}-shortfall`);
-            if (sfEl) { sfEl.textContent = `${r.shortfall > 0 ? '+' : ''}${f2(r.shortfall)} °C`; sfEl.className = `text-sm font-black font-mono ${_sfTextCls(r.shortfall)}`; }
+            if (sfEl) { sfEl.textContent = `${r.shortfall > 0 ? '+' : ''}${f2(r.shortfall)} \u00b0C`; sfEl.className = `text-sm font-black font-mono ${_sfTextCls(r.shortfall)}`; }
+
+            // ── Appendix M: Cold Water Temperature Deviation ──────────────────
+            const appMEl = document.getElementById(`pv${p}-appM-cwd`);
+            if (appMEl) {
+                const cwd = r.appM_cwd;
+                if (cwd != null) {
+                    appMEl.textContent = `${cwd > 0 ? '+' : ''}${f2(cwd)} \u00b0C`;
+                    appMEl.className   = `text-sm font-black font-mono ${cwd > 0 ? 'text-rose-400' : 'text-emerald-400'}`;
+                } else {
+                    appMEl.textContent = '\u2014';
+                    appMEl.className   = 'text-sm font-black font-mono text-slate-600';
+                }
+            }
 
             const capEl = document.getElementById(`pv${p}-cap`);
             if (capEl) { capEl.textContent = `${f1(r.capability)} %`; capEl.className = `text-sm font-black font-mono ${_capTextCls(r.capability)}`; }

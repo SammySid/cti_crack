@@ -614,6 +614,79 @@ async def api_calc_atc105(req: Atc105Request):
         shortfall  = round(req.test_cwt - pred_cwt, 3) if pred_cwt is not None else None
         capability = round((adj_flow / pred_flow) * 100, 1) if pred_flow and pred_flow > 0 else None
 
+        # ── APPENDIX M: Cold Water Temperature Deviation (pg 64) ─────────────
+        # This is a design-referenced deviation: it takes the tower's actual
+        # measured Merkel performance (KaV/L from the test) and asks
+        # "at DESIGN conditions (design WBT, design range, design flow),
+        #  what CWT would this tower actually deliver?"
+        # CWD_AppM = CWT_predicted_at_design - Design_CWT
+        # A positive value = underperforming vs contract. Negative = exceeds spec.
+        appM_cwt_design_pred = None
+        appM_cwd             = None
+        try:
+            # Step 1: Compute KaV/L from actual test conditions
+            test_lg = req.lg_ratio  # L/G at test (from design LG ratio – used as measured LG)
+            kavl_result = merkel_kavl(req.test_hwt, req.test_cwt, req.test_wbt, test_lg)
+
+            if kavl_result and kavl_result.get("valid"):
+                kavl_test = kavl_result["kavl"]
+
+                # Step 2: Back-calculate the tower's effective characteristic constant C
+                # from the test data: KaV/L = C × (L/G)^-m → C = KaV/L / (L/G)^-m
+                if test_lg > 0 and req.constant_m > 0 and kavl_test > 0:
+                    c_effective = kavl_test / math.pow(test_lg, -req.constant_m)
+
+                    # Step 3: Solve for CWT at DESIGN conditions using this c_effective
+                    # Design conditions: design_WBT, design_range = design_HWT - design_CWT,
+                    # design_LG = req.lg_ratio (contract L/G)
+                    design_range_val = req.design_hwt - req.design_cwt
+                    design_lg        = req.lg_ratio
+
+                    # Iterative bisection — same pattern as solve_off_design_cwt
+                    supply_kavl_design = c_effective * math.pow(design_lg, -req.constant_m)
+
+                    if supply_kavl_design > 0:
+                        low_ap  = 0.01
+                        high_ap = 80.0
+                        best_cwt_d = float('nan')
+                        best_diff  = float('inf')
+                        tolerance  = 1e-7
+
+                        for _ in range(120):
+                            mid_ap = (low_ap + high_ap) / 2.0
+                            g_cwt  = req.design_wbt + mid_ap
+                            g_hwt  = g_cwt + design_range_val
+
+                            try:
+                                d_kavl = merkel_kavl(g_hwt, g_cwt, req.design_wbt, design_lg)
+                                demand = d_kavl["kavl"] if d_kavl and d_kavl.get("valid") else float('nan')
+                            except Exception:
+                                demand = float('nan')
+
+                            if math.isnan(demand) or demand <= 0:
+                                low_ap = mid_ap
+                                continue
+
+                            diff = abs(demand - supply_kavl_design)
+                            if diff < best_diff:
+                                best_diff  = diff
+                                best_cwt_d = g_cwt
+
+                            if diff < tolerance:
+                                break
+
+                            if demand > supply_kavl_design:
+                                low_ap = mid_ap
+                            else:
+                                high_ap = mid_ap
+
+                        if not math.isnan(best_cwt_d) and best_diff < 0.5:
+                            appM_cwt_design_pred = round(best_cwt_d, 3)
+                            # Positive = underperforming vs design contract guarantee
+                            appM_cwd = round(appM_cwt_design_pred - req.design_cwt, 3)
+        except Exception:
+            pass  # Appendix M is supplementary; don't let it fail the main calc
+
         return {
             "design_range":    round(design_range, 3),
             "test_range":      round(test_range, 3),
@@ -657,6 +730,11 @@ async def api_calc_atc105(req: Atc105Request):
             "pred_flow":   pred_flow,
             "shortfall":   shortfall,
             "capability":  capability,
+            # ── Appendix M: Cold Water Temperature Deviation ──────────────────
+            # appM_cwt_design_pred: CWT this tower would deliver at design conditions
+            # appM_cwd: deviation from design CWT (positive = under-spec, negative = over-spec)
+            "appM_cwt_design_pred": appM_cwt_design_pred,
+            "appM_cwd":             appM_cwd,
             # Pass through request inputs for report template
             "design_wbt":  req.design_wbt,
             "design_cwt":  req.design_cwt,
