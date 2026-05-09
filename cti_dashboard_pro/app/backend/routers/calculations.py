@@ -278,8 +278,24 @@ async def api_calc_atc105(req: Atc105Request):
                 cwt = _lerp(test_range_pct, 100.0, 120.0, r100, r120)
             cross1[fp] = round(cwt, 3)
 
+        cross2_direct = {}
+        for fp in flow_pcts:
+            val = find_cwt(base_inputs, req.test_wbt, test_range_pct, fp)
+            cross2_direct[fp] = round(val, 3) if not math.isnan(val) else cross1.get(fp)
+
+        # Apply offsets to direct cross-plot 2 values if needed
+        if _has_offsets:
+            for fp in flow_pcts:
+                if cross2_direct[fp] is not None:
+                    o80, o100, o120 = _offsets[fp]
+                    if test_range_pct <= 100.0:
+                        raw_off = o80 + (o100 - o80) * (test_range_pct - 80.0) / 20.0
+                    else:
+                        raw_off = o100 + (o120 - o100) * (test_range_pct - 100.0) / 20.0
+                    cross2_direct[fp] = round(cross2_direct[fp] + _wbt_correction + raw_off * _tilt_multiplier, 3)
+
         cp2_flows = [flows_m3h[fp] for fp in flow_pcts]
-        cp2_cwts  = [cross1[fp] for fp in flow_pcts]
+        cp2_cwts  = [cross2_direct[fp] for fp in flow_pcts]
 
         if req.test_lg_ratio is not None:
             effective_test_lg = req.test_lg_ratio
