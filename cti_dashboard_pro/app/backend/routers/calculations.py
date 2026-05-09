@@ -76,6 +76,7 @@ class Atc105Request(BaseModel):
     test_flow: float
     test_fan_power: float = 117.0
     lg_ratio: float
+    test_lg_ratio: float | None = None
     constant_c: float = 1.2
     constant_m: float = 0.6
     density_ratio_override: float | None = None
@@ -205,11 +206,18 @@ async def api_calc_atc105(req: Atc105Request):
                     return _lerp(x, xs[i], xs[i + 1], ys[i], ys[i + 1])
             return ys[-1]
 
-        def _water_density(T):
-            num = (999.83952 + 16.945176 * T - 7.9870401e-3 * T ** 2
-                   - 46.170461e-6 * T ** 3 + 105.56302e-9 * T ** 4
-                   - 280.54253e-12 * T ** 5)
-            return num / (1 + 16.879850e-3 * T)
+        def _exit_air_density(wbt, hwt, cwt, lg):
+            p_in = psychrometrics(wbt, wbt)
+            h_in = p_in["H"]
+            h_out = h_in + lg * 4.186 * (hwt - cwt)
+            low, high = 5.0, 95.0
+            for _ in range(50):
+                mid = (low + high) / 2
+                if psychrometrics(mid, mid)["H"] > h_out:
+                    high = mid
+                else:
+                    low = mid
+            return psychrometrics((low + high) / 2, (low + high) / 2)["Dens"]
 
         design_range = req.design_hwt - req.design_cwt
         test_range   = req.test_hwt  - req.test_cwt
@@ -273,13 +281,23 @@ async def api_calc_atc105(req: Atc105Request):
         cp2_flows = [flows_m3h[fp] for fp in flow_pcts]
         cp2_cwts  = [cross1[fp] for fp in flow_pcts]
 
-        avg_test_T   = (req.test_hwt   + req.test_cwt)   / 2.0
-        avg_design_T = (req.design_hwt + req.design_cwt) / 2.0
-        density_test   = _water_density(avg_test_T)
-        density_design = _water_density(avg_design_T)
+        if req.test_lg_ratio is not None:
+            effective_test_lg = req.test_lg_ratio
+        else:
+            effective_test_lg = req.lg_ratio * (req.test_flow / req.design_flow)
+
+        density_test = _exit_air_density(req.test_wbt, req.test_hwt, req.test_cwt, effective_test_lg)
+        density_design = _exit_air_density(req.design_wbt, req.design_hwt, req.design_cwt, req.lg_ratio)
         density_ratio  = density_test / density_design
 
         effective_density_ratio = req.density_ratio_override if req.density_ratio_override else density_ratio
+
+        if req.test_lg_ratio is not None:
+            final_test_lg = req.test_lg_ratio
+        else:
+            g_ratio = (effective_density_ratio) ** (2/3) * (req.test_fan_power / req.design_fan_power) ** (1/3)
+            l_ratio = req.test_flow / req.design_flow
+            final_test_lg = req.lg_ratio * (l_ratio / g_ratio) if g_ratio > 0 else req.lg_ratio
 
         adj_flow = (req.test_flow
                     * (req.design_fan_power / req.test_fan_power) ** (1 / 3)
@@ -298,7 +316,7 @@ async def api_calc_atc105(req: Atc105Request):
         appM_cwt_design_pred = None
         appM_cwd             = None
         try:
-            test_lg = req.lg_ratio
+            test_lg = final_test_lg
             kavl_result = merkel_kavl(req.test_hwt, req.test_cwt, req.test_wbt, test_lg)
 
             if kavl_result and kavl_result.get("valid"):
