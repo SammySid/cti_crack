@@ -668,8 +668,15 @@ export async function previewAllTests(ui) {
         if (overallEl) {
             // Use the last enabled test's capability for the overall verdict
             const lastR = en3 ? r3 : en2 ? r2 : r1;
-            overallEl.textContent = lastR.capability >= 100 ? 'OVERALL: PASS' : lastR.capability >= 95 ? 'OVERALL: MARGINAL' : 'OVERALL: FAIL';
-            overallEl.className   = `px-3 py-1.5 rounded-xl text-[10px] font-black uppercase tracking-widest border ${_capBadgeCls(lastR.capability)}`;
+            const isPass = lastR.capability >= 100;
+            const isMarg = lastR.capability >= 95;
+            overallEl.textContent = isPass ? 'OVERALL: PASS ✓' : isMarg ? 'OVERALL: MARGINAL' : 'OVERALL: FAIL ✗';
+            const badgeCls = isPass
+                ? 'border-emerald-500/50 text-emerald-300 bg-emerald-500/10 shadow-[0_0_24px_rgba(16,185,129,0.18)] verd-pass'
+                : isMarg
+                ? 'border-amber-500/40  text-amber-300  bg-amber-500/10'
+                : 'border-rose-500/40   text-rose-300   bg-rose-500/10';
+            overallEl.className = `inline-block px-6 py-3 rounded-2xl text-base font-black uppercase tracking-widest border-2 ${badgeCls}`;
         }
 
         // ── Tests-conducted counter (dynamic) ──────────────────────────────────
@@ -788,7 +795,9 @@ export async function previewAllTests(ui) {
         const mvEl = document.getElementById('pv-modal-verdict');
         if (mvEl) {
             const lastR = en3 ? r3 : en2 ? r2 : r1;
-            mvEl.textContent = lastR.capability >= 100 ? 'OVERALL: PASS' : lastR.capability >= 95 ? 'OVERALL: MARGINAL' : 'OVERALL: FAIL';
+            const isPass = lastR.capability >= 100;
+            const isMarg = lastR.capability >= 95;
+            mvEl.textContent = isPass ? 'PASS ✓' : isMarg ? 'MARGINAL' : 'FAIL ✗';
             mvEl.className   = `shrink-0 ml-1 px-2.5 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest border ${_capBadgeCls(lastR.capability)}`;
         }
 
