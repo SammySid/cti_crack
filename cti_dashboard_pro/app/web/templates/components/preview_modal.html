@@ -39,12 +39,15 @@
             </div>
 
             <!-- ── Scrollable body (preview content teleported here) ─── -->
-            <div id="pvm-body" class="flex-1 overflow-y-auto overscroll-contain" style="scroll-behavior:smooth"></div>
+            <div id="pvm-body" class="flex-1 overflow-y-auto overscroll-contain custom-scrollbar" style="scroll-behavior:smooth">
+                <!-- Content is teleported here. Inner wrapper constrains reading width. -->
+                <div class="max-w-[1280px] mx-auto px-5 sm:px-8 py-6"></div>
+            </div>
 
             <!-- ── Modal footer ────────────────────────────────────────── -->
             <div class="shrink-0 flex flex-wrap items-center justify-between gap-3 px-5 sm:px-7 py-3.5 border-t border-white/[0.08]"
                  style="background:rgba(12,18,34,0.98)">
-                <p class="text-[10px] text-slate-600 italic">All values and charts match the PDF. Check results, then generate.</p>
+                <p class="text-[10px] text-slate-600 italic">Sections: Scorecard → Improvement → Comparison Table → Design Ref → Tests (T1/T2/T3) → Legend</p>
                 <div class="flex items-center gap-2">
                     <button type="button" onclick="closePreviewModal()"
                             class="px-4 py-2 text-[10px] font-black uppercase tracking-widest rounded-xl border border-white/10 text-slate-400 hover:text-slate-200 hover:bg-white/[0.05] transition-all">

@@ -303,10 +303,11 @@
                 return;
             }
 
-            // Teleport preview content into the modal body
+            // Teleport preview content into the constrained inner wrapper
+            const pvmInner = pvmBody.querySelector('div') || pvmBody;
             modal._prevParent = content.parentNode;
             modal._prevNext   = content.nextSibling;
-            pvmBody.appendChild(content);
+            pvmInner.appendChild(content);
             content.classList.remove('hidden');
 
             // Show modal
