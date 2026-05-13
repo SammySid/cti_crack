@@ -1,0 +1,105 @@
+        <!-- ══════════════════════════════════════════════════════════════
+             LEFT SIDEBAR: Baseline Specifications
+             ══════════════════════════════════════════════════════════════ -->
+        <aside class="xl:sticky xl:top-[60px] w-full xl:w-[300px] shrink-0">
+            <div class="glass-card rounded-3xl border border-white/10 overflow-hidden shadow-2xl">
+                <!-- Panel Header -->
+                <div class="px-6 py-5 border-b border-white/5 flex flex-wrap items-center justify-between gap-2 bg-slate-900/40">
+                    <div class="flex items-center gap-2.5">
+                        <div class="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></div>
+                        <h3 class="text-[11px] font-black uppercase tracking-[0.25em] text-slate-300">Baseline Specs</h3>
+                    </div>
+                    <button id="rep-sync-from-thermal" type="button"
+                        class="px-3 py-1.5 text-[9px] font-black uppercase tracking-widest rounded-lg border border-cyan-500/30 text-cyan-400 bg-cyan-500/10 hover:bg-cyan-500/20 transition-all">
+                        ↙ Sync Thermal
+                    </button>
+                </div>
+                
+                <div class="p-6 space-y-6">
+                    <!-- Design Point -->
+                    <div>
+                        <p class="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.25em] mb-4">
+                            <span class="w-1 h-3 bg-blue-500/70 rounded-full"></span>Design Point
+                        </p>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="rounded-xl border border-white/5 bg-slate-950/50 p-3 focus-within:border-blue-500/40 focus-within:bg-slate-900/80 transition-all">
+                                <label class="block text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">L/G Ratio</label>
+                                <input id="rep-design-lg" type="number" step="0.01" value="1.5" class="w-full bg-transparent border-none p-0 text-sm font-mono font-bold text-slate-200 focus:ring-0 appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                            </div>
+                            <div class="rounded-xl border border-white/5 bg-slate-950/50 p-3 focus-within:border-blue-500/40 focus-within:bg-slate-900/80 transition-all">
+                                <label class="block text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Water <span class="text-[8px] normal-case text-slate-600">m³/h</span></label>
+                                <input id="rep-design-flow" type="number" step="10" value="3863.6" class="w-full bg-transparent border-none p-0 text-sm font-mono font-bold text-slate-200 focus:ring-0 appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                            </div>
+                            <div class="rounded-xl border border-white/5 bg-slate-950/50 p-3 focus-within:border-blue-500/40 focus-within:bg-slate-900/80 transition-all">
+                                <label class="block text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">WBT <span class="text-[8px] normal-case text-slate-600">°C</span></label>
+                                <input id="rep-design-wbt" type="number" step="0.1" value="29" class="w-full bg-transparent border-none p-0 text-sm font-mono font-bold text-slate-200 focus:ring-0 appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                            </div>
+                            <div class="rounded-xl border border-white/5 bg-slate-950/50 p-3 focus-within:border-blue-500/40 focus-within:bg-slate-900/80 transition-all">
+                                <label class="block text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">CWT <span class="text-[8px] normal-case text-slate-600">°C</span></label>
+                                <input id="rep-design-cwt" type="number" step="0.1" value="33" class="w-full bg-transparent border-none p-0 text-sm font-mono font-bold text-slate-200 focus:ring-0 appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                            </div>
+                            <div class="col-span-2 rounded-xl border border-white/5 bg-slate-950/50 p-3 focus-within:border-blue-500/40 focus-within:bg-slate-900/80 transition-all">
+                                <label class="block text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">HWT <span class="text-[8px] normal-case text-slate-600">°C</span></label>
+                                <input id="rep-design-hwt" type="number" step="0.1" value="43" class="w-full bg-transparent border-none p-0 text-sm font-mono font-bold text-slate-200 focus:ring-0 appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                            </div>
+                            <div class="col-span-2 rounded-xl border border-white/5 bg-slate-950/50 p-3 focus-within:border-blue-500/40 focus-within:bg-slate-900/80 transition-all">
+                                <label class="block text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Fan Power <span class="text-[8px] normal-case text-slate-600">kW</span></label>
+                                <input id="rep-design-fanpow" type="number" step="1" value="117" class="w-full bg-transparent border-none p-0 text-sm font-mono font-bold text-slate-200 focus:ring-0 appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+                    
+                    <!-- Transfer Constants -->
+                    <div>
+                        <p class="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-[0.25em] mb-4">
+                            <span class="w-1 h-3 bg-violet-500/70 rounded-full"></span>Transfer Constants <span class="text-[8px] font-semibold text-slate-500 normal-case tracking-normal">(Merkel)</span>
+                        </p>
+                        <div class="grid grid-cols-2 gap-3">
+                            <div class="rounded-xl border border-white/5 bg-slate-950/50 p-3 focus-within:border-violet-500/40 focus-within:bg-slate-900/80 transition-all">
+                                <label class="block text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Const C <span class="text-[8px] normal-case text-slate-600">coeff</span></label>
+                                <input id="rep-design-c" type="number" step="0.01" value="1.2" class="w-full bg-transparent border-none p-0 text-sm font-mono font-bold text-slate-200 focus:ring-0 appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                            </div>
+                            <div class="rounded-xl border border-white/5 bg-slate-950/50 p-3 focus-within:border-violet-500/40 focus-within:bg-slate-900/80 transition-all">
+                                <label class="block text-[9px] font-black text-slate-500 uppercase tracking-widest mb-1">Const M <span class="text-[8px] normal-case text-slate-600">exp</span></label>
+                                <input id="rep-design-m" type="number" step="0.01" value="0.6" class="w-full bg-transparent border-none p-0 text-sm font-mono font-bold text-slate-200 focus:ring-0 appearance-none [&::-webkit-inner-spin-button]:appearance-none">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent"></div>
+
+
+
+                    <div id="rep-margins-strip" class="hidden rounded-2xl border border-amber-500/25 bg-amber-500/[0.07] px-5 py-4">
+                        <div class="flex items-center gap-2 mb-3">
+                            <svg class="w-4 h-4 text-amber-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/></svg>
+                            <p class="text-[10px] font-black uppercase tracking-wider text-amber-400">Safety Margins Active</p>
+                        </div>
+                        <div id="rep-margins-pills" class="flex flex-wrap gap-2"></div>
+                    </div>
+                    
+                    <button id="generateReportBtn" class="w-full mt-6 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-400 py-4 rounded-xl font-black text-[11px] uppercase tracking-[0.2em] transition-all border border-emerald-500/30 flex items-center justify-center gap-3 shadow-[0_0_20px_rgba(16,185,129,0.15)]">
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path></svg>
+                        ATC-105 Engine
+                    </button>
+                    <p id="reportStatus" class="text-[10px] text-cyan-400 font-semibold hidden text-center mt-3 tracking-widest">CALCULATING RESULTS…</p>
+
+                </div>
+            </div>
+            
+            <div id="trm-loaded-banner" class="hidden mt-4 flex items-center gap-3 px-5 py-4 rounded-2xl border border-violet-500/30 bg-violet-500/10 shadow-lg"
+                 style="animation:fadeSlideIn 0.3s ease both">
+                <span class="relative flex h-2.5 w-2.5 shrink-0">
+                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-violet-400 opacity-60"></span>
+                    <span class="relative inline-flex rounded-full h-2.5 w-2.5 bg-violet-500"></span>
+                </span>
+                <p class="text-[11px] text-violet-200 font-semibold flex-1 tracking-wide">
+                    Design values loaded from Thermal Analysis.
+                </p>
+                <button type="button" onclick="this.parentElement.classList.add('hidden')" class="text-violet-400/60 hover:text-violet-300 transition-colors shrink-0 text-xl leading-none">&times;</button>
+            </div>
+            
+
+        </aside>

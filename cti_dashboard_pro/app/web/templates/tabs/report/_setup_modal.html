@@ -1,0 +1,112 @@
+<!-- ═══════════════════════════════════════════════════════════════════════
+     REPORT SETUP & NARRATIVE MODAL
+     ═══════════════════════════════════════════════════════════════════════ -->
+<div id="repDocSetupModal" class="hidden fixed inset-0 z-[400] flex items-center justify-center p-4 sm:p-6"
+     style="background:rgba(5,7,12,0.85);backdrop-filter:blur(10px);">
+    <div class="relative w-full max-w-5xl bg-slate-900/95 border border-white/10 rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[95vh] ring-1 ring-cyan-500/20">
+        
+        <div class="flex items-center justify-between px-8 py-6 border-b border-white/10 bg-slate-950/80 shrink-0">
+            <h2 class="text-sm font-black uppercase tracking-[0.2em] text-cyan-400 flex items-center gap-3">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                Document Settings &amp; Narrative
+            </h2>
+            <button onclick="document.getElementById('repDocSetupModal').classList.add('hidden')"
+                    class="w-10 h-10 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 flex items-center justify-center transition-colors text-slate-400 hover:text-white">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+            </button>
+        </div>
+
+        <div class="p-8 overflow-y-auto space-y-8 custom-scrollbar">
+            
+            <!-- Project Metadata -->
+            <div class="space-y-5">
+                <h3 class="text-xs font-black uppercase tracking-[0.2em] text-slate-300 border-b border-white/10 pb-3 flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-cyan-500"></span> Project Metadata
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Client Organization</label>
+                        <input id="rep-client" type="text" value="DHARIWAL INFRASTRUCTURE LTD CHANDRAPUR"
+                            class="w-full input-premium rounded-xl px-4 py-3.5 text-sm font-semibold uppercase tracking-wide bg-slate-950/60 focus:bg-slate-900 focus:border-cyan-500/50">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Asset / Equipment ID</label>
+                        <input id="rep-asset" type="text" value="CT - 02 , CELL 02"
+                            class="w-full input-premium rounded-xl px-4 py-3.5 text-sm font-semibold uppercase tracking-wide bg-slate-950/60 focus:bg-slate-900 focus:border-cyan-500/50">
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Report Title</label>
+                        <input id="rep-title" type="text" value="CT PERFORMANCE EVALUATION REPORT"
+                            class="w-full input-premium rounded-xl px-4 py-3.5 text-sm font-semibold uppercase tracking-wide bg-slate-950/60 focus:bg-slate-900 focus:border-cyan-500/50">
+                    </div>
+                    <div class="grid grid-cols-2 gap-6 md:col-span-2">
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Test Date</label>
+                            <input id="rep-test-date" type="text" value="27 March 2026"
+                                class="w-full input-premium rounded-xl px-4 py-3.5 text-sm font-semibold bg-slate-950/60 focus:bg-slate-900 focus:border-cyan-500/50">
+                        </div>
+                        <div>
+                            <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Report Date</label>
+                            <input id="rep-report-date" type="text" value="15 April 2026"
+                                class="w-full input-premium rounded-xl px-4 py-3.5 text-sm font-semibold bg-slate-950/60 focus:bg-slate-900 focus:border-cyan-500/50">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Narrative -->
+            <div class="space-y-5 pt-4">
+                <h3 class="text-xs font-black uppercase tracking-[0.2em] text-slate-300 border-b border-white/10 pb-3 flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-violet-500"></span> Executive Narrative
+                </h3>
+                <div class="space-y-6">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Preamble &amp; Objective</label>
+                        <textarea id="rep-preamble" class="w-full input-premium rounded-2xl px-5 py-4 text-sm leading-relaxed h-32 focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 transition-all bg-slate-950/60 focus:bg-slate-900">Due to poor performance of the cooling tower, factors influencing the poor performance were identified to be progressively resolved. To carry out this procedure it was decided to carry out the changes on one cell and based on the result carry out the same on balance cell. This procedure had to be conducted both before change of gear box and fan and post change of gear box and fan to ascertain the effect on cold water temperature.</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Conclusions &amp; Remarks <span class="text-slate-500 normal-case font-medium ml-2">— One per line (bulleted in PDF)</span></label>
+                        <textarea id="rep-conclusions" class="w-full input-premium rounded-2xl px-5 py-4 text-sm leading-relaxed h-32 focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 transition-all bg-slate-950/60 focus:bg-slate-900">Testing of the cell was carried out after incorporating the distribution system changes on 27th of March 2026.
+The additional head available caused flow to increase substantially. Even under these conditions the cell showed an improvement of approx. 0.5 °C above the post fan modification test.
+Single cell isolated testing involves UNCERTAINTY in measurement due to turbulent water flow.</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Special Data Notes <span class="text-slate-500 normal-case font-medium ml-2">— One per line</span></label>
+                        <textarea id="rep-data-notes" class="w-full input-premium rounded-2xl px-5 py-4 text-sm leading-relaxed h-24 focus:border-violet-500/50 focus:ring-1 focus:ring-violet-500/20 transition-all bg-slate-950/60 focus:bg-slate-900">Improvement of 1.5 appears high in "TEST 2" so we consider that as 0.7 Deg C
+Single cell isolated testing involves UNCERTAINTY in measurement due to turbulent water flow</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Personnel -->
+            <div class="space-y-5 pt-4">
+                <h3 class="text-xs font-black uppercase tracking-[0.2em] text-slate-300 border-b border-white/10 pb-3 flex items-center gap-2">
+                    <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span> Personnel Present
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Client Members <span class="text-slate-500 normal-case font-medium ml-2">— One per line</span></label>
+                        <textarea id="rep-members-client" class="w-full input-premium rounded-2xl px-5 py-4 text-sm font-mono leading-relaxed h-40 focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition-all bg-slate-950/60 focus:bg-slate-900">Mr Shrikant Shrivastava ( Remote)
+Mr GAURAV HANTODKAR
+Mr PAWAN GAWANDE</textarea>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">SSCTC Members <span class="text-slate-500 normal-case font-medium ml-2">— One per line</span></label>
+                        <textarea id="rep-members-ssctc" class="w-full input-premium rounded-2xl px-5 py-4 text-sm font-mono leading-relaxed h-40 focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/20 transition-all bg-slate-950/60 focus:bg-slate-900">Mr SURESH SARMA
+Mr SANJAY GORAD
+Mr MRADUL VISHWAKARMA
+Mr PARAG VISHWAKARMA
+Mr RAHUL MANKE</textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="px-8 py-5 border-t border-white/10 bg-slate-950/80 shrink-0 flex justify-end">
+            <button onclick="document.getElementById('repDocSetupModal').classList.add('hidden')"
+                    class="px-8 py-3 bg-cyan-500/20 text-cyan-400 hover:bg-cyan-500/30 rounded-xl text-xs font-black uppercase tracking-[0.2em] transition-all border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.15)]">
+                Save Settings &amp; Close
+            </button>
+        </div>
+    </div>
+</div>
