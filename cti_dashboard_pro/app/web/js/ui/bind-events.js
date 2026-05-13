@@ -113,7 +113,9 @@ export function bindEvents(ui) {
     document.getElementById('tabFilter')?.addEventListener('click',   () => ui.switchTab('filter'));
     document.getElementById('tabReport')?.addEventListener('click',   () => ui.switchTab('report'));
 
-    document.getElementById('generateReportBtn')?.addEventListener('click',  () => generateReport(ui));
+    document.querySelectorAll('.generate-pdf-btn').forEach(btn => {
+        btn.addEventListener('click', (e) => generateReport(ui, e.currentTarget));
+    });
     document.getElementById('previewAllTestsBtn')?.addEventListener('click', () => previewAllTests(ui));
 
     // ── ATC-105 Report Builder: live preview ──────────────────────────────────

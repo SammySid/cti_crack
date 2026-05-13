@@ -830,10 +830,10 @@ export async function previewAllTests(ui) {
 
 // ── Main report generator ──────────────────────────────────────────────────
 
-export async function generateReport(ui) {
-    const btn = document.getElementById('generateReportBtn');
+export async function generateReport(ui, sourceBtn = null) {
+    const btn = sourceBtn;
     const statusEl = document.getElementById('reportStatus');
-    const originalHtml = btn.innerHTML;
+    const originalHtml = btn ? btn.innerHTML : '';
 
     const setStatus = (msg, isError = false) => {
         if (statusEl) {
@@ -843,11 +843,13 @@ export async function generateReport(ui) {
         }
     };
 
-    btn.innerHTML = `<svg class="animate-spin w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-        Calculating ATC-105 (3 tests)…`;
-    btn.disabled = true;
+    if (btn) {
+        btn.innerHTML = `<svg class="animate-spin w-5 h-5 inline mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+            Calculating…`;
+        btn.disabled = true;
+    }
     setStatus('Running ATC-105 calculations for all 3 tests…');
 
     try {
@@ -908,10 +910,12 @@ export async function generateReport(ui) {
             pv.classList.remove('hidden');
         }
 
-        btn.innerHTML = `<svg class="animate-spin w-5 h-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-            Generating PDF…`;
+        if (btn) {
+            btn.innerHTML = `<svg class="animate-spin w-5 h-5 inline mr-2" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                Generating PDF…`;
+        }
         setStatus('ATC-105 calculated for all tests. Rendering PDF…');
 
         // ── Derived values ────────────────────────────────────────────────
@@ -1040,7 +1044,9 @@ export async function generateReport(ui) {
         setStatus(`Error: ${err.message}`, true);
         alert(`Failed to generate report:\n${err.message}`);
     } finally {
-        btn.innerHTML = originalHtml;
-        btn.disabled = false;
+        if (btn) {
+            btn.innerHTML = originalHtml;
+            btn.disabled = false;
+        }
     }
 }
