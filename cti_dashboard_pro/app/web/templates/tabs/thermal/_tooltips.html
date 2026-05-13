@@ -1,0 +1,44 @@
+    <!-- ═══════════════════════════════════════════════════════════════════
+         TOOLTIP CONTENT TEMPLATES
+         ═══════════════════════════════════════════════════════════════════ -->
+    <template id="tt-targetCWT">
+        <div class="bg-emerald-500/15 border-b border-emerald-500/20 px-4 py-2.5">
+            <p class="text-[10px] font-black uppercase tracking-widest text-emerald-400">Target CWT at Design WBT</p>
+        </div>
+        <div class="px-4 py-3 space-y-3 text-[11px] leading-relaxed text-slate-300 max-h-[65vh] overflow-y-auto">
+            <div>
+                <p class="font-bold text-white text-[11px] mb-1">What it is</p>
+                <p>The Cold Water Temperature (°C) the tower must reach at exactly your Design Wet Bulb Temperature. It "anchors" the 100% performance curve to your contractual guarantee.</p>
+            </div>
+            <div>
+                <p class="font-bold text-white text-[11px] mb-1">When to use</p>
+                <p>After entering a 100% Flow / 100% Range safety margin, subtract that margin from the Design CWT and enter the result here, then click <span class="font-bold text-emerald-400">Fit Curve</span>.</p>
+                <p class="mt-2 font-mono text-emerald-300 text-[10px] bg-emerald-950/50 border border-emerald-500/20 rounded-lg px-3 py-2">Design CWT 33°C − Margin 1.2°C = Target 31.8°C</p>
+                <p class="mt-2">The engine back-calculates Const C so the 100% curve exactly hits 33°C at Design WBT — not 34.2°C.</p>
+            </div>
+            <div class="bg-amber-950/40 border border-amber-500/20 rounded-lg px-3 py-2.5">
+                <p class="text-amber-400 font-bold text-[10px] uppercase tracking-wider mb-1">⚠ Why this matters</p>
+                <p class="text-amber-200/80">Without this correction, a safety margin pushes the 100% curve upward — making the tower appear to fail at the design point, which is contractually unacceptable.</p>
+            </div>
+        </div>
+    </template>
+
+    <template id="tt-lowWbt">
+        <div class="bg-amber-500/15 border-b border-amber-500/20 px-4 py-2.5">
+            <p class="text-[10px] font-black uppercase tracking-widest text-amber-400">Low WBT Rotation (at 20°C)</p>
+        </div>
+        <div class="px-4 py-3 space-y-3 text-[11px] leading-relaxed text-slate-300 max-h-[65vh] overflow-y-auto">
+            <div>
+                <p class="font-bold text-white text-[11px] mb-1">What it is</p>
+                <p>A linearly-tapering safety tilt on the cold end of the curve. The full offset is applied at 20°C WBT, then reduces smoothly to zero at the Design WBT. The design point is never disturbed.</p>
+            </div>
+            <div>
+                <p class="font-bold text-white text-[11px] mb-1">When to use</p>
+                <p>When you need conservative protection at low ambient temperatures where cooling tower performance is less predictable and measurement uncertainty is highest.</p>
+            </div>
+            <div class="bg-slate-800/60 border border-white/5 rounded-lg px-3 py-2.5">
+                <p class="text-cyan-400 font-bold text-[10px] uppercase tracking-wider mb-1">🔬 Engineering Note</p>
+                <p class="text-slate-400">At low WBTs, the air-water enthalpy driving force peaks — but so does turbulence and flow irregularity. This tilt quantifies engineering caution in that uncertain operating zone.</p>
+            </div>
+        </div>
+    </template>
