@@ -57,13 +57,19 @@ def startup_event():
     else:
         print("[WARNING] Could not find binary data files from", DATA_ROOT)
 
+class CustomStaticFiles(StaticFiles):
+    def file_response(self, full_path: str, stat_result, scope, status_code: int = 200):
+        resp = super().file_response(full_path, stat_result, scope, status_code)
+        resp.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+        return resp
+
 # Serve UI
 @app.get("/favicon.ico", include_in_schema=False)
 async def favicon():
-    return FileResponse(str(WEB_ROOT / "favicon.svg"))
+    return FileResponse(str(WEB_ROOT / "favicon.svg"), headers={"Cache-Control": "public, max-age=31536000, immutable"})
 
-app.mount("/css", StaticFiles(directory=str(WEB_ROOT / "css")), name="css")
-app.mount("/js", StaticFiles(directory=str(WEB_ROOT / "js")), name="js")
+app.mount("/css", CustomStaticFiles(directory=str(WEB_ROOT / "css")), name="css")
+app.mount("/js", CustomStaticFiles(directory=str(WEB_ROOT / "js")), name="js")
 
 templates = Jinja2Templates(directory=str(WEB_ROOT / "templates"))
 
