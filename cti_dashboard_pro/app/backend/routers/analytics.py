@@ -80,6 +80,10 @@ async def analytics_middleware(request: Request, call_next):
     response = await call_next(request)
     process_time = (time.time() - start_time) * 1000
     
+    # Add aggressive caching for static assets to make the UI snappy
+    if request.url.path.startswith(("/css", "/js")) or request.url.path == "/favicon.ico":
+        response.headers["Cache-Control"] = "public, max-age=31536000, immutable"
+    
     # Ignore static files and high-frequency calculation API calls to prevent log spam
     noisy_routes = (
         "/css", 
