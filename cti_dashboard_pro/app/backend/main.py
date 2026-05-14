@@ -15,7 +15,7 @@ sys.path.append(os.path.join(os.path.dirname(os.path.abspath(__file__)), "core")
 
 from core.calculations import init as init_engines
 
-from routers import analytics, calculations, excel, reports
+from routers import calculations, excel, reports
 
 app = FastAPI(
     title="SS Cooling Tower API",
@@ -24,8 +24,7 @@ app = FastAPI(
     openapi_url=None, # Disable /openapi.json schema dump
 )
 
-# Setup Analytics Middleware
-app.middleware("http")(analytics.analytics_middleware)
+
 
 # Setup CORS
 app.add_middleware(
@@ -37,7 +36,7 @@ app.add_middleware(
 )
 
 # Mount Routers
-app.include_router(analytics.router, tags=["analytics"])
+
 app.include_router(calculations.router, prefix="/api", tags=["calculations"])
 app.include_router(excel.router, prefix="/api", tags=["excel"])
 app.include_router(reports.router, prefix="/api", tags=["reports"])
