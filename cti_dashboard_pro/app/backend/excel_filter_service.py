@@ -895,6 +895,8 @@ def generate_filtered_workbook(file_items, start_time_str, end_time_str):
         raise ValueError('Start time must be earlier than or equal to end time.')
 
     filtered_dataframes = []
+    global_min_time = None
+    global_max_time = None
 
     for file_name, file_bytes in file_items:
         try:
@@ -935,6 +937,17 @@ def generate_filtered_workbook(file_items, start_time_str, end_time_str):
 
             if apply_time_filter and time_col:
                 parsed_times = _parse_times(df[time_col])
+                
+                # Track available time range for better error messages
+                valid_times = parsed_times.dropna()
+                if not valid_times.empty:
+                    f_min = valid_times.min()
+                    f_max = valid_times.max()
+                    if global_min_time is None or f_min < global_min_time:
+                        global_min_time = f_min
+                    if global_max_time is None or f_max > global_max_time:
+                        global_max_time = f_max
+
                 mask = (parsed_times >= start_time) & (parsed_times <= end_time)
                 filtered_df = df[mask.fillna(False)].copy()
             else:
@@ -951,7 +964,12 @@ def generate_filtered_workbook(file_items, start_time_str, end_time_str):
 
     if not filtered_dataframes:
         if apply_time_filter:
-            raise ValueError('No rows matched the selected time range in uploaded files.')
+            if global_min_time and global_max_time:
+                min_str = global_min_time.strftime('%I:%M %p').lstrip('0')
+                max_str = global_max_time.strftime('%I:%M %p').lstrip('0')
+                raise ValueError(f"No rows match the filter ({start_time_str} to {end_time_str}). The uploaded data ranges from {min_str} to {max_str}.")
+            else:
+                raise ValueError('No rows matched the selected time range in uploaded files.')
         else:
             raise ValueError('No valid data found in the uploaded/selected files.')
 
