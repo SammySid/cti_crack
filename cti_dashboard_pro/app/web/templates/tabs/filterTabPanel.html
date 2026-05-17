@@ -55,11 +55,20 @@
                         </label>
                     </div>
 
-                    <div>
-                        <label for="filterExcelFiles" class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">Upload Data Files or ZIP Archive</label>
-                        <input id="filterExcelFiles" type="file" accept=".xlsx,.xls,.csv,.zip" multiple
-                            class="w-full text-sm text-slate-300 file:mr-4 file:rounded-lg file:border-0 file:bg-cyan-500/20 file:px-3 file:py-2 file:text-xs file:font-bold file:uppercase file:tracking-widest file:text-cyan-300 hover:file:bg-cyan-500/30" />
-                        <p class="text-[10px] text-slate-500 mt-2">Select multiple files (<code>.xlsx</code>, <code>.xls</code>, <code>.csv</code>) or a single <code>.zip</code> archive.</p>
+                    <div class="grid grid-cols-2 gap-6">
+                        <div>
+                            <label for="filterExcelFiles" class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">📄 Select Files / ZIP</label>
+                            <input id="filterExcelFiles" type="file" accept=".xlsx,.xls,.csv,.zip" multiple
+                                class="w-full text-sm text-slate-300 file:mr-4 file:rounded-lg file:border-0 file:bg-cyan-500/20 file:px-3 file:py-2 file:text-xs file:font-bold file:uppercase file:tracking-widest file:text-cyan-300 hover:file:bg-cyan-500/30 cursor-pointer" />
+                            <p class="text-[10px] text-slate-500 mt-2">Upload individual files or a <code>.zip</code> archive.</p>
+                        </div>
+
+                        <div>
+                            <label for="filterExcelFolder" class="block text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">📁 Select Folder</label>
+                            <input id="filterExcelFolder" type="file" accept=".xlsx,.xls,.csv" webkitdirectory directory multiple
+                                class="w-full text-sm text-slate-300 file:mr-4 file:rounded-lg file:border-0 file:bg-emerald-500/20 file:px-3 file:py-2 file:text-xs file:font-bold file:uppercase file:tracking-widest file:text-emerald-300 hover:file:bg-emerald-500/30 cursor-pointer" />
+                            <p class="text-[10px] text-slate-500 mt-2">Select a folder to bulk scan files inside.</p>
+                        </div>
                     </div>
 
                     <div class="flex items-center justify-between gap-4 pt-2">
