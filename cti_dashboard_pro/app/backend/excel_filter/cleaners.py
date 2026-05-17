@@ -34,7 +34,7 @@ def _merge_sensor_dfs(dfs, date_col, time_col):
         copy_df = df.copy()
         dt_str = copy_df[date_col].astype(str) + ' ' + copy_df[time_col].astype(str)
         merge_key = pd.to_datetime(dt_str, dayfirst=True, errors='coerce').dt.floor('min')
-        copy_df['_merge_key'] = merge_key
+        copy_df['_merge_key'] = merge_key.astype(object)
         
         fallback = copy_df[date_col].map(lambda x: str(x).strip()) + '_' + copy_df[time_col].map(lambda x: str(x)[:5])
         copy_df.loc[copy_df['_merge_key'].isna(), '_merge_key'] = fallback.loc[copy_df['_merge_key'].isna()]
