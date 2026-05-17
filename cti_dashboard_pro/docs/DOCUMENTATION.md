@@ -94,7 +94,7 @@ See Section 4 for the complete calculation flow.
 | `backend/main.py` | FastAPI app: all endpoints + `Atc105Request` Pydantic model |
 | `backend/report_service.py` | `create_cross_plot_1`, `create_cross_plot_2`, `generate_pdf_report` (ReportLab Platypus — two-pass) |
 | `backend/excel_gen.py` | Thermal report `.xlsx` builder |
-| `backend/excel_filter_service.py` | Time-window filter service |
+| `backend/excel_filter/` | Time-window filter modular service |
 | `backend/core/calculations.py` | `find_cwt`, `calculate_demand_kavl`, `calculate_supply_kavl` |
 | `backend/core/merkel_engine.py` | 🔒 Merkel KaV/L — **DO NOT MODIFY** |
 | `backend/core/psychro_engine.py` | 🔒 Psychrometrics — **DO NOT MODIFY** |

@@ -28,7 +28,7 @@ cti_dashboard_pro/
 │   │   ├── main.py                  ← FastAPI server + all API endpoints
 │   │   ├── report_service.py        ← Matplotlib plots + PDF generation
 │   │   ├── excel_gen.py             ← Thermal report .xlsx builder
-│   │   ├── excel_filter_service.py  ← Time-window filter service
+│   │   ├── excel_filter/            ← Time-window filter modular service
 │   │   ├── core/
 │   │   │   ├── calculations.py      ← find_cwt, demand/supply KaVL
 │   │   │   ├── merkel_engine.py     ← 🔒 DO NOT MODIFY — 100% accuracy

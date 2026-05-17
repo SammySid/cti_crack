@@ -204,7 +204,7 @@ export async function runFilterTool(ui) {
     const folderFiles = folderInput?.files ? Array.from(folderInput.files) : [];
     const manualFiles = filesInput?.files  ? Array.from(filesInput.files)  : [];
     const files       = folderFiles.length > 0 ? folderFiles : manualFiles;
-    const SUPPORTED_EXT = ['.xlsx', '.xls', '.csv'];
+    const SUPPORTED_EXT = ['.xlsx', '.xls', '.csv', '.zip'];
     const excelFiles  = files.filter(f => SUPPORTED_EXT.some(ext => f.name.toLowerCase().endsWith(ext)));
 
     if (!processAll && (!startTime || !endTime)) {

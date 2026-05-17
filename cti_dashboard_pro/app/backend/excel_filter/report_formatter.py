@@ -1,109 +1,8 @@
-from io import BytesIO
 import os
 import re
-from datetime import datetime
-
 import pandas as pd
-from dateutil import parser
 from typing import List, Dict, Any
-
-
-def _parse_user_time(time_str):
-    """Parse a user-supplied time string. Returns None if the string is empty (meaning 'no filter')."""
-    value = str(time_str or '').strip().lower().replace('.', ':')
-    if not value:
-        return None  # Signals 'process all rows' – no time filter applied
-
-    if re.match(r'^\d{1,2}(:00)?$', value):
-        hour = int(value.split(':')[0])
-        if 1 <= hour <= 7:
-            value = f'{hour + 12}:00'
-        else:
-            value = f'{hour}:00'
-
-    return parser.parse(value).time()
-
-
-def _find_header_row(preview_df):
-    """Find the row index that acts as column headers.
-    Requires the row to have 3+ non-empty cells (to skip metadata lines)
-    and at least one cell that contains 'time' or 'date' as a substring.
-    """
-    for idx, row in preview_df.head(100).iterrows():
-        non_empty = [v for v in row.values
-                     if str(v).strip().lower() not in ('', 'nan', 'nat', 'none')]
-        if len(non_empty) < 3:        # metadata rows typically have ≤ 2 filled cells
-            continue
-        for cell in row.values:
-            cell_str = str(cell).strip().lower()
-            if 'time' in cell_str or 'date' in cell_str:
-                return idx
-    return None
-
-
-def _get_time_column(df):
-    """Return the first column whose name contains 'time' (exact first, then partial)."""
-    # Exact match
-    for col in df.columns:
-        if str(col).strip().lower() == 'time':
-            return col
-    # Partial match (e.g. 'Scan Sweep Time (Sec)')
-    for col in df.columns:
-        if 'time' in str(col).strip().lower():
-            return col
-    return None
-
-
-def _read_excel_bytes(file_bytes, engine=None, **kwargs):
-    """Read excel or csv bytes into a DataFrame, trying the given engine first."""
-    if engine == 'csv':
-        try:
-            return pd.read_csv(BytesIO(file_bytes), **kwargs)
-        except Exception:
-            return pd.read_csv(BytesIO(file_bytes), encoding='iso-8859-1', **kwargs)
-            
-    if engine:
-        kwargs['engine'] = engine
-    return pd.read_excel(BytesIO(file_bytes), **kwargs)
-
-
-def _read_excel_with_time_header(file_bytes, engine=None):
-    """Read an Excel or CSV file and locate the 'Time' column.
-    Returns (df, time_col) where time_col may be None if not found.
-    Falls back to scanning for a datetime-typed column if name-based search fails.
-    """
-    first_pass = _read_excel_bytes(file_bytes, engine=engine)
-    time_col = _get_time_column(first_pass)
-    if time_col:
-        return first_pass, time_col
-
-    preview = _read_excel_bytes(file_bytes, engine=engine, header=None, nrows=100)
-    header_idx = _find_header_row(preview)
-    if header_idx is None:
-        # Fallback: find any datetime-typed column in the default-read df
-        for col in first_pass.columns:
-            if pd.api.types.is_datetime64_any_dtype(first_pass[col]):
-                return first_pass, col
-        return first_pass, None
-
-    adjusted = _read_excel_bytes(file_bytes, engine=engine, header=header_idx)
-    time_col = _get_time_column(adjusted)
-    if time_col:
-        return adjusted, time_col
-    # Fallback: datetime-typed column in the re-read df
-    for col in adjusted.columns:
-        if pd.api.types.is_datetime64_any_dtype(adjusted[col]):
-            return adjusted, col
-    return adjusted, None
-
-
-def _parse_times(series):
-    parsed = pd.to_datetime(series, format='%H:%M:%S', errors='coerce').dt.time
-    missing = parsed.isna()
-    if missing.any():
-        parsed.loc[missing] = pd.to_datetime(series.loc[missing].astype(str), errors='coerce').dt.time
-    return parsed
-
+from .cleaners import _merge_sensor_dfs
 
 def _style_sheet(writer, sheet_name, df):
     workbook  = writer.book
@@ -202,38 +101,6 @@ def _style_sheet(writer, sheet_name, df):
     worksheet.set_row(avg_row_idx, 18)
 
 
-
-
-def _merge_sensor_dfs(dfs, date_col, time_col):
-    if not dfs:
-        return pd.DataFrame()
-
-    working: List[Any] = []
-    for df in dfs:
-        copy_df = df.copy()
-        dt_str = copy_df[date_col].astype(str) + ' ' + copy_df[time_col].astype(str)
-        merge_key = pd.to_datetime(dt_str, dayfirst=True, errors='coerce').dt.floor('min')
-        copy_df['_merge_key'] = merge_key
-        
-        # When falling back for unparseable dates, combine date and time string so dates don't mix
-        fallback = copy_df[date_col].map(lambda x: str(x).strip()) + '_' + copy_df[time_col].map(lambda x: str(x)[:5])
-        copy_df.loc[copy_df['_merge_key'].isna(), '_merge_key'] = fallback.loc[copy_df['_merge_key'].isna()]
-        working.append(copy_df)
-
-    merged = working[0]
-    for df in working[1:]:
-        merged = pd.merge(merged, df, on='_merge_key', how='outer', suffixes=('', '_y'))
-        merged[date_col] = merged[date_col].combine_first(merged[date_col + '_y'])
-        merged[time_col] = merged[time_col].combine_first(merged[time_col + '_y'])
-        merged.drop(columns=[date_col + '_y', time_col + '_y'], inplace=True)
-
-    merged.sort_values(by='_merge_key', inplace=True)
-    merged.drop(columns=['_merge_key'], inplace=True)
-    merged.reset_index(drop=True, inplace=True)
-    return merged
-
-
-# ─────────────────────────────────────────────────────────────────────────────
 # Helper: smart sensor label for generic (non-CWT/HWT) files
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -258,7 +125,6 @@ def _extract_generic_sensor_id(file_name):
     return clean[:18] if len(clean) > 18 else clean
 
 
-# ─────────────────────────────────────────────────────────────────────────────
 # Inline-sensor report  (DAQ-style: one file, sensors spread across COLUMNS)
 # ─────────────────────────────────────────────────────────────────────────────
 
@@ -408,7 +274,6 @@ def _create_inline_sensor_report(
                 worksheet.write_number(tot_avg_row, sec_start, float(total), avg_fmt)
             else:
                 worksheet.write_string(tot_avg_row, sec_start, '-', avg_fmt)
-
 
 
 def _create_report_layout(writer, master_df, sheet_name='Report Layout'):
@@ -872,169 +737,3 @@ def _create_report_layout(writer, master_df, sheet_name='Report Layout'):
         write_total_avg(wbt_avgs, wbt_cols, cidx, 'wbt')
 
 
-def _detect_excel_engine(file_name):
-    """Return the pandas read_excel engine to use based on the file extension."""
-    ext = os.path.splitext(file_name)[1].lower()
-    if ext == '.xls':
-        return 'xlrd'
-    if ext == '.csv':
-        return 'csv'
-    # .xlsx / .xlsm / .xlsb – let pandas pick (openpyxl is the default)
-    return None
-
-
-def generate_filtered_workbook(file_items, start_time_str, end_time_str):
-    if not file_items:
-        raise ValueError('Please upload at least one Excel file.')
-
-    start_time = _parse_user_time(start_time_str)
-    end_time = _parse_user_time(end_time_str)
-    apply_time_filter = (start_time is not None) and (end_time is not None)
-
-    if apply_time_filter and start_time > end_time:
-        raise ValueError('Start time must be earlier than or equal to end time.')
-
-    filtered_dataframes = []
-    global_min_time = None
-    global_max_time = None
-
-    for file_name, file_bytes in file_items:
-        try:
-            engine = _detect_excel_engine(file_name)
-            df, time_col = _read_excel_with_time_header(file_bytes, engine=engine)
-            if df is None:
-                continue
-
-            # ── OL / overrange value cleanup ─────────────────────────────────
-            # DAQ loggers write a huge sentinel (≈9.9e37) when a channel is
-            # overloaded / disconnected.  Replace with NaN so averages are clean.
-            OL_THRESHOLD = 1e15
-            num_cols = df.select_dtypes(include='number').columns
-            df[num_cols] = df[num_cols].where(df[num_cols].abs() < OL_THRESHOLD, other=float('nan'))
-            # Also catch oversized Python ints stored as object dtype
-            for _col in df.select_dtypes(include='object').columns:
-                try:
-                    _ns = pd.to_numeric(df[_col], errors='coerce')
-                    _mask = _ns.abs() >= OL_THRESHOLD
-                    if _mask.any():
-                        df[_col] = df[_col].astype(object)
-                        df.loc[_mask, _col] = float('nan')
-                except Exception:
-                    pass
-
-            # ── Datetime column splitting ────────────────────────────────────
-            # If the time column contains full datetime values (date + time combined)
-            # and there is no separate 'Date' column, derive 'Date' and 'Time' columns
-            # so the report layout can work correctly.
-            has_date_col = any('date' in str(c).lower() for c in df.columns)
-            if time_col and not has_date_col:
-                dt_series = pd.to_datetime(df[time_col], errors='coerce')
-                if dt_series.notna().any():
-                    insert_pos = df.columns.get_loc(time_col) + 1
-                    df.insert(insert_pos,     'Date', dt_series.dt.strftime('%d-%m-%Y'))
-                    df.insert(insert_pos + 1, 'Time', dt_series.dt.strftime('%H:%M:%S'))
-                    time_col = 'Time'   # use the extracted time-only column for filtering
-
-            if apply_time_filter and time_col:
-                parsed_times = _parse_times(df[time_col])
-                
-                # Track available time range for better error messages
-                valid_times = parsed_times.dropna()
-                if not valid_times.empty:
-                    f_min = valid_times.min()
-                    f_max = valid_times.max()
-                    if global_min_time is None or f_min < global_min_time:
-                        global_min_time = f_min
-                    if global_max_time is None or f_max > global_max_time:
-                        global_max_time = f_max
-
-                mask = (parsed_times >= start_time) & (parsed_times <= end_time)
-                filtered_df = df[mask.fillna(False)].copy()
-            else:
-                # No time filter – take all rows
-                filtered_df = df.copy()
-
-            if len(filtered_df) == 0:
-                continue
-
-            filtered_df.insert(0, 'Source File', file_name)
-            filtered_dataframes.append(filtered_df)
-        except Exception:
-            continue
-
-    if not filtered_dataframes:
-        if apply_time_filter:
-            if global_min_time and global_max_time:
-                min_str = global_min_time.strftime('%I:%M %p').lstrip('0')
-                max_str = global_max_time.strftime('%I:%M %p').lstrip('0')
-                raise ValueError(f"No rows match the filter ({start_time_str} to {end_time_str}). The uploaded data ranges from {min_str} to {max_str}.")
-            else:
-                raise ValueError('No rows matched the selected time range in uploaded files.')
-        else:
-            raise ValueError('No valid data found in the uploaded/selected files.')
-
-    master_df = pd.concat(filtered_dataframes, ignore_index=True)
-    master_df.dropna(axis=1, how='all', inplace=True)
-
-    buffer = BytesIO()
-    with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
-        master_df.to_excel(writer, sheet_name='Filtered Data', index=False)
-        _style_sheet(writer, 'Filtered Data', master_df)
-        
-        date_col = next((c for c in master_df.columns if 'date' in str(c).lower()), None)
-        if date_col:
-            dt_series = pd.to_datetime(master_df[date_col], dayfirst=True, errors='coerce')
-            unique_dt_list = dt_series.dropna().dt.normalize().unique()
-            # Sort the dates chronologically
-            unique_dt_list = sorted(unique_dt_list)
-            
-            if len(unique_dt_list) == 1:
-                # If there's exactly one date, use it as the sheet name instead of 'Consolidated'
-                d_str = unique_dt_list[0].strftime('%d-%m-%Y')
-                _create_report_layout(writer, master_df, d_str)
-            elif len(unique_dt_list) > 1:
-                # If multiple dates, split into multiple sheets
-                for dt_val in unique_dt_list:
-                    # Format as DD-MM-YYYY for display/matching
-                    d_str = dt_val.strftime('%d-%m-%Y')
-                    mask = dt_series.dt.strftime('%d-%m-%Y') == d_str
-                    date_df = master_df[mask].copy()
-                    _create_report_layout(writer, date_df, f'{d_str}')
-            else:
-                # Fallback if no valid dates could be parsed despite having a date column
-                _create_report_layout(writer, master_df, 'Consolidated')
-        else:
-            _create_report_layout(writer, master_df, 'Consolidated')
-
-    if apply_time_filter:
-        safe_start = start_time.strftime('%H%M')
-        safe_end = end_time.strftime('%H%M')
-        file_name = f'Master_Filtered_{safe_start}_to_{safe_end}_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx'
-    else:
-        file_name = f'Master_All_{datetime.now().strftime("%Y%m%d_%H%M%S")}.xlsx'
-    return file_name, buffer.getvalue()
-
-
-def generate_filtered_workbook_from_directory(input_dir, start_time_str, end_time_str):
-    if not input_dir:
-        raise ValueError('Source folder path is required.')
-    if not os.path.isdir(input_dir):
-        raise ValueError('Source folder path does not exist.')
-
-    SUPPORTED_EXTENSIONS = ('.xlsx', '.xls', '.csv')
-
-    file_items = []
-    for name in os.listdir(input_dir):
-        if name.startswith('~'):
-            continue
-        if not name.lower().endswith(SUPPORTED_EXTENSIONS):
-            continue
-        file_path = os.path.join(input_dir, name)
-        if os.path.isfile(file_path):
-            with open(file_path, 'rb') as f:
-                file_items.append((name, f.read()))
-
-    if not file_items:
-        raise ValueError('No valid .xlsx, .xls, or .csv files found in the source folder.')
-
-    return generate_filtered_workbook(file_items, start_time_str, end_time_str)

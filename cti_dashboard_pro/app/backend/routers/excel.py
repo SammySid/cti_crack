@@ -8,7 +8,7 @@ from fastapi.responses import Response
 from pydantic import BaseModel
 
 from excel_gen import generate_excel_from_payload, sanitize_filename
-from excel_filter_service import generate_filtered_workbook, generate_filtered_workbook_from_directory
+from excel_filter import generate_filtered_workbook, generate_filtered_workbook_from_directory
 
 router = APIRouter()
 
@@ -141,10 +141,10 @@ async def filter_excel(
     endTime: Optional[str] = Form(default=""),
     files: List[UploadFile] = File(...)
 ):
-    SUPPORTED_EXT = ('.xlsx', '.xls', '.csv')
+    SUPPORTED_EXT = ('.xlsx', '.xls', '.csv', '.zip')
     valid_files = [f for f in files if f.filename.lower().endswith(SUPPORTED_EXT)]
     if not valid_files:
-        raise HTTPException(status_code=400, detail="Please upload valid .xlsx, .xls, or .csv files.")
+        raise HTTPException(status_code=400, detail="Please upload valid .xlsx, .xls, .csv, or .zip files.")
 
     file_items = []
     for f in valid_files:
