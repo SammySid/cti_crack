@@ -159,7 +159,7 @@ def _style_sheet(writer, sheet_name, df):
         worksheet.write(0, col_idx, col_name, header_fmt)
         max_len = max(
             len(str(col_name)),
-            df[col_name].astype(str).str.len().max() if not df.empty else 0
+            df[col_name].map(lambda x: len(str(x))).max() if not df.empty else 0
         )
         worksheet.set_column(col_idx, col_idx, min(max(max_len + 2, 12), 35), data_fmt)
 
@@ -212,7 +212,7 @@ def _merge_sensor_dfs(dfs, date_col, time_col):
         copy_df['_merge_key'] = merge_key
         
         # When falling back for unparseable dates, combine date and time string so dates don't mix
-        fallback = copy_df[date_col].astype(str).str.strip() + '_' + copy_df[time_col].astype(str).str[:5]
+        fallback = copy_df[date_col].map(lambda x: str(x).strip()) + '_' + copy_df[time_col].map(lambda x: str(x)[:5])
         copy_df.loc[copy_df['_merge_key'].isna(), '_merge_key'] = fallback.loc[copy_df['_merge_key'].isna()]
         working.append(copy_df)
 
@@ -341,7 +341,7 @@ def _create_inline_sensor_report(
 
     # ── Data rows ─────────────────────────────────────────────────────────────
     data = master_df[[date_col, time_col] + sensor_col_order].copy()
-    data[time_col] = data[time_col].astype(str).str.split('.').str[0]
+    data[time_col] = data[time_col].map(lambda x: str(x).split('.')[0] if pd.notna(x) else x)
     if pd.api.types.is_datetime64_any_dtype(data[date_col]):
         data[date_col] = data[date_col].dt.strftime('%d-%m-%Y')
 
@@ -486,7 +486,7 @@ def _create_report_layout(writer, master_df, sheet_name='Report Layout'):
 
         subset = group[[date_col, time_col, val_col]].copy()
         subset.rename(columns={val_col: sensor_no}, inplace=True)
-        subset[time_col] = subset[time_col].astype(str).str.split('.').str[0]
+        subset[time_col] = subset[time_col].map(lambda x: str(x).split('.')[0] if pd.notna(x) else x)
         if pd.api.types.is_datetime64_any_dtype(subset[date_col]):
             subset[date_col] = subset[date_col].dt.strftime('%d-%m-%Y')
 
@@ -568,7 +568,7 @@ def _create_report_layout(writer, master_df, sheet_name='Report Layout'):
                 seen_sec.add(sno)
                 s = group[[date_col, time_col, secondary_val_col]].copy()
                 s.rename(columns={secondary_val_col: sno}, inplace=True)
-                s[time_col] = s[time_col].astype(str).str.split('.').str[0]
+                s[time_col] = s[time_col].map(lambda x: str(x).split('.')[0] if pd.notna(x) else x)
                 if pd.api.types.is_datetime64_any_dtype(s[date_col]):
                     s[date_col] = s[date_col].dt.strftime('%d-%m-%Y')
                 sec_dfs.append(s)
