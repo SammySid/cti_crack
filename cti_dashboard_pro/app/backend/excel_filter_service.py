@@ -54,26 +54,30 @@ def _get_time_column(df):
     return None
 
 
-def _read_excel_bytes(file_bytes, engine=None):
-    """Read excel bytes into a DataFrame, trying the given engine first."""
-    kwargs = {}
+def _read_excel_bytes(file_bytes, engine=None, **kwargs):
+    """Read excel or csv bytes into a DataFrame, trying the given engine first."""
+    if engine == 'csv':
+        try:
+            return pd.read_csv(BytesIO(file_bytes), **kwargs)
+        except Exception:
+            return pd.read_csv(BytesIO(file_bytes), encoding='iso-8859-1', **kwargs)
+            
     if engine:
         kwargs['engine'] = engine
     return pd.read_excel(BytesIO(file_bytes), **kwargs)
 
 
 def _read_excel_with_time_header(file_bytes, engine=None):
-    """Read an Excel file (any engine) and locate the 'Time' column.
+    """Read an Excel or CSV file and locate the 'Time' column.
     Returns (df, time_col) where time_col may be None if not found.
     Falls back to scanning for a datetime-typed column if name-based search fails.
     """
-    kw = {'engine': engine} if engine else {}
     first_pass = _read_excel_bytes(file_bytes, engine=engine)
     time_col = _get_time_column(first_pass)
     if time_col:
         return first_pass, time_col
 
-    preview = pd.read_excel(BytesIO(file_bytes), header=None, nrows=30, **kw)
+    preview = _read_excel_bytes(file_bytes, engine=engine, header=None, nrows=30)
     header_idx = _find_header_row(preview)
     if header_idx is None:
         # Fallback: find any datetime-typed column in the default-read df
@@ -82,7 +86,7 @@ def _read_excel_with_time_header(file_bytes, engine=None):
                 return first_pass, col
         return first_pass, None
 
-    adjusted = pd.read_excel(BytesIO(file_bytes), header=header_idx, **kw)
+    adjusted = _read_excel_bytes(file_bytes, engine=engine, header=header_idx)
     time_col = _get_time_column(adjusted)
     if time_col:
         return adjusted, time_col
@@ -873,6 +877,8 @@ def _detect_excel_engine(file_name):
     ext = os.path.splitext(file_name)[1].lower()
     if ext == '.xls':
         return 'xlrd'
+    if ext == '.csv':
+        return 'csv'
     # .xlsx / .xlsm / .xlsb – let pandas pick (openpyxl is the default)
     return None
 
@@ -997,7 +1003,7 @@ def generate_filtered_workbook_from_directory(input_dir, start_time_str, end_tim
     if not os.path.isdir(input_dir):
         raise ValueError('Source folder path does not exist.')
 
-    SUPPORTED_EXTENSIONS = ('.xlsx', '.xls')
+    SUPPORTED_EXTENSIONS = ('.xlsx', '.xls', '.csv')
 
     file_items = []
     for name in os.listdir(input_dir):
@@ -1011,6 +1017,6 @@ def generate_filtered_workbook_from_directory(input_dir, start_time_str, end_tim
                 file_items.append((name, f.read()))
 
     if not file_items:
-        raise ValueError('No valid .xlsx or .xls files found in the source folder.')
+        raise ValueError('No valid .xlsx, .xls, or .csv files found in the source folder.')
 
     return generate_filtered_workbook(file_items, start_time_str, end_time_str)

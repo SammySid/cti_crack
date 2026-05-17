@@ -141,10 +141,10 @@ async def filter_excel(
     endTime: Optional[str] = Form(default=""),
     files: List[UploadFile] = File(...)
 ):
-    SUPPORTED_EXT = ('.xlsx', '.xls')
+    SUPPORTED_EXT = ('.xlsx', '.xls', '.csv')
     valid_files = [f for f in files if f.filename.lower().endswith(SUPPORTED_EXT)]
     if not valid_files:
-        raise HTTPException(status_code=400, detail="Please upload valid .xlsx or .xls files.")
+        raise HTTPException(status_code=400, detail="Please upload valid .xlsx, .xls, or .csv files.")
 
     file_items = []
     for f in valid_files:
