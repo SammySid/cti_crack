@@ -3,6 +3,30 @@ from typing import List, Any
 import pandas as pd
 from dateutil import parser
 
+def normalize_column_names(columns):
+    """
+    Holistically standardizes column names to prevent Pandas concat mismatch issues.
+    Fixes trailing spaces, case-sensitivity (Time vs TIME), and normalizes sensor names.
+    """
+    new_cols = []
+    for c in columns:
+        c_str = str(c).strip()
+        c_lower = c_str.lower()
+        
+        # Force strict exact matching for core columns
+        if 'time' in c_lower and 'stamp' not in c_lower and 'comment' not in c_lower:
+            new_cols.append('Time')
+        elif 'date' == c_lower:
+            new_cols.append('Date')
+        else:
+            # Fix channels (e.g., 'ch 1', 'CH1 ', 'ch1' -> 'CH1')
+            c_str = re.sub(r'(?i)^ch\s*(\d+)$', r'CH\1', c_str)
+            # Collapse multiple spaces into one
+            c_str = re.sub(r'\s+', ' ', c_str)
+            new_cols.append(c_str)
+            
+    return new_cols
+
 def _parse_user_time(time_str):
     """Parse a user-supplied time string. Returns None if the string is empty (meaning 'no filter')."""
     value = str(time_str or '').strip().lower().replace('.', ':')

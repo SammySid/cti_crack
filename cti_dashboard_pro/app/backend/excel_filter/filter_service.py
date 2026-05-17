@@ -4,7 +4,7 @@ from datetime import datetime
 import pandas as pd
 
 from .readers import _detect_excel_engine, _read_excel_with_time_header, extract_supported_files, SUPPORTED_EXTENSIONS
-from .cleaners import _parse_user_time, _parse_times
+from .cleaners import _parse_user_time, _parse_times, normalize_column_names
 from .report_formatter import _style_sheet, _create_report_layout
 
 def generate_filtered_workbook(file_items, start_time_str, end_time_str):
@@ -37,6 +37,12 @@ def generate_filtered_workbook(file_items, start_time_str, end_time_str):
             df, time_col = _read_excel_with_time_header(file_bytes, engine=engine)
             if df is None:
                 continue
+
+            # Apply holistic schema normalizer to fix spacing, capitalization, and formatting inconsistencies
+            df.columns = normalize_column_names(df.columns)
+            
+            # Re-detect time_col after normalization since its name might have changed (e.g. 'Time ' -> 'Time')
+            time_col = next((c for c in df.columns if c == 'Time'), None)
 
             # OL / overrange value cleanup
             OL_THRESHOLD = 1e15
