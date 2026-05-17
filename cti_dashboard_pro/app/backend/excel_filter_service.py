@@ -29,7 +29,7 @@ def _find_header_row(preview_df):
     Requires the row to have 3+ non-empty cells (to skip metadata lines)
     and at least one cell that contains 'time' or 'date' as a substring.
     """
-    for idx, row in preview_df.head(30).iterrows():
+    for idx, row in preview_df.head(100).iterrows():
         non_empty = [v for v in row.values
                      if str(v).strip().lower() not in ('', 'nan', 'nat', 'none')]
         if len(non_empty) < 3:        # metadata rows typically have ≤ 2 filled cells
@@ -77,7 +77,7 @@ def _read_excel_with_time_header(file_bytes, engine=None):
     if time_col:
         return first_pass, time_col
 
-    preview = _read_excel_bytes(file_bytes, engine=engine, header=None, nrows=30)
+    preview = _read_excel_bytes(file_bytes, engine=engine, header=None, nrows=100)
     header_idx = _find_header_row(preview)
     if header_idx is None:
         # Fallback: find any datetime-typed column in the default-read df
