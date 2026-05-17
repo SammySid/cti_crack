@@ -38,6 +38,11 @@ def _merge_sensor_dfs(dfs, date_col, time_col):
         
         fallback = copy_df[date_col].map(lambda x: str(x).strip()) + '_' + copy_df[time_col].map(lambda x: str(x)[:5])
         copy_df.loc[copy_df['_merge_key'].isna(), '_merge_key'] = fallback.loc[copy_df['_merge_key'].isna()]
+        
+        # Remove empty rows and drop duplicates on the merge key to prevent Cartesian explosion
+        copy_df = copy_df[copy_df['_merge_key'] != 'nan_nan'].copy()
+        copy_df.drop_duplicates(subset=['_merge_key'], keep='last', inplace=True)
+        
         working.append(copy_df)
 
     merged = working[0]
