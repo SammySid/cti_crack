@@ -1,5 +1,5 @@
 import { INPUT_IDS, isCurveAffectingInput } from './constants.js';
-import { generateReport, updateAtcPreview, syncDesignFromThermal, bindFilterUpload, bindTestToggles, previewAllTests, launchReportFromThermal } from './report.js';
+import { generateReport, updateAtcPreview, syncDesignFromThermal, bindFilterUpload, bindTestToggles, previewAllTests, launchReportFromThermal } from './report/index.js';
 
 export function bindEvents(ui) {
     const debouncedUpdateAll = ui.debounce(ui.updateAll, 300);

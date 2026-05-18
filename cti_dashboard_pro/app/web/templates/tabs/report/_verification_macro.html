@@ -1,0 +1,62 @@
+{% macro verification_block(prefix, title, subtitle, theme='slate', is_delta=false, is_final=false) %}
+{% set main_bg = 'bg-cyan-950/30' if theme == 'cyan' else 'bg-slate-800/30' %}
+{% set border_main = 'border-cyan-500/20' if theme == 'cyan' else 'border-white/5' %}
+{% set icon_color = 'bg-cyan-500' if theme == 'cyan' else 'bg-slate-500' %}
+{% set tag_bg = 'bg-cyan-500/20 text-cyan-400 border-cyan-500/30' if theme == 'cyan' else 'bg-slate-700/80 text-white' %}
+
+<div class="rounded-3xl border {{ 'border-cyan-500/30 bg-slate-900/60 shadow-[0_0_40px_rgba(6,182,212,0.1)]' if theme == 'cyan' else 'border-white/10 bg-slate-900/50 shadow-xl' }} overflow-hidden">
+    <div class="flex items-center justify-between px-6 md:px-8 py-5 border-b {{ border_main }} {{ main_bg }}">
+        <div class="flex items-center gap-4">
+            <span class="px-3 py-1 rounded text-[11px] font-black tracking-widest {{ tag_bg }} {{ '' if theme == 'cyan' else 'shadow-inner' }} border">{{ title }}</span>
+            <span class="text-[13px] font-bold {{ 'text-slate-200' if theme == 'cyan' else 'text-slate-300' }} uppercase tracking-widest">{{ subtitle }}</span>
+        </div>
+        {% if is_delta %}
+        <div class="flex items-center gap-4 {{ 'bg-cyan-950/80 border-cyan-500/20' if theme == 'cyan' else 'bg-slate-900/80 border-white/5' }} px-4 py-1.5 rounded-full border">
+            <span class="text-[11px] font-bold {{ 'text-cyan-400/80' if theme == 'cyan' else 'text-slate-400' }} uppercase tracking-widest">Delta:</span>
+            <span id="{{ prefix }}-imp" class="text-[12px] font-black font-mono {{ 'text-cyan-300' if theme == 'cyan' else 'text-emerald-400' }}">—</span>
+        </div>
+        {% else %}
+        <span id="{{ prefix }}-verdict-badge" class="px-4 py-1.5 rounded-xl text-[11px] font-black uppercase tracking-widest border border-rose-500/30 bg-rose-500/10 text-rose-400">—</span>
+        {% endif %}
+    </div>
+    <div class="p-6 md:p-8 space-y-8">
+        <div>
+            <p class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4 flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full {{ icon_color }}"></span> Measured Site Conditions</p>
+            <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                <div class="rounded-xl bg-slate-900/80 border border-white/5 p-3 text-center"><p class="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1.5">WBT °C</p><p id="{{ prefix }}-in-wbt" class="text-base font-black font-mono text-slate-200">—</p></div>
+                <div class="rounded-xl bg-slate-900/80 border border-white/5 p-3 text-center"><p class="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1.5">HWT °C</p><p id="{{ prefix }}-in-hwt" class="text-base font-black font-mono text-slate-200">—</p></div>
+                <div class="rounded-xl bg-slate-900/80 border border-white/5 p-3 text-center"><p class="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1.5">CWT °C</p><p id="{{ prefix }}-in-cwt" class="text-base font-black font-mono text-slate-200">—</p></div>
+                <div class="rounded-xl bg-slate-900/80 border border-white/5 p-3 text-center"><p class="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1.5">Flow m³/hr</p><p id="{{ prefix }}-in-flow" class="text-base font-black font-mono text-slate-200">—</p></div>
+                <div class="rounded-xl bg-slate-900/80 border border-white/5 p-3 text-center col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-500 font-black uppercase tracking-widest mb-1.5">Fan kW</p><p id="{{ prefix }}-in-fanpow" class="text-base font-black font-mono text-slate-200">—</p></div>
+            </div>
+        </div>
+        <div>
+            <p class="text-[11px] font-black uppercase tracking-[0.2em] text-slate-400 mb-4 flex items-center gap-2"><span class="w-1.5 h-1.5 rounded-full {{ icon_color }}"></span> ATC-105 Calculation Matrix</p>
+            <div id="{{ prefix }}-calc-table" class="rounded-2xl border border-white/5 overflow-hidden"></div>
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-4">
+            <div class="bg-slate-900/40 rounded-2xl p-5 border border-white/5">
+                <p class="text-[11px] font-black uppercase tracking-widest text-slate-300 mb-1">Cross Plot 1 — CWT vs Range @ <span id="{{ prefix }}-cp1-wbt" class="font-mono text-slate-400"></span></p>
+                {% if not is_final %}<p class="text-[11px] text-slate-500 mb-4">Deriving performance curve points at 90/100/110% flow.</p>{% endif %}
+                <div style="height:280px;position:relative;" class="{{ 'mt-4' if is_final or is_delta else '' }}"><canvas id="{{ prefix }}-cp1"></canvas></div>
+            </div>
+            <div class="bg-slate-900/40 rounded-2xl p-5 border border-white/5">
+                <p class="text-[11px] font-black uppercase tracking-widest text-slate-300 mb-1">Cross Plot 2 — Performance Evaluation</p>
+                {% if not is_final %}<p class="text-[11px] text-slate-500 mb-4">Determining final Predicted CWT and Capability %.</p>{% endif %}
+                <div style="height:280px;position:relative;" class="{{ 'mt-4' if is_final or is_delta else '' }}"><canvas id="{{ prefix }}-cp2"></canvas></div>
+            </div>
+        </div>
+        <div class="pt-4 border-t {{ 'border-cyan-500/20' if theme == 'cyan' else 'border-white/5' }}">
+            <p class="text-[11px] font-black uppercase tracking-[0.2em] {{ 'text-cyan-400' if theme == 'cyan' else 'text-slate-400' }} mb-4">Normalised Results</p>
+            <div class="grid grid-cols-2 sm:grid-cols-6 gap-3">
+                <div class="rounded-xl bg-slate-800/80 border border-white/10 p-4 text-center"><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Range °C</p><p id="{{ prefix }}-range" class="text-xl font-black font-mono text-slate-100">—</p></div>
+                <div class="rounded-xl bg-slate-800/80 border border-white/10 p-4 text-center"><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Adj. Flow</p><p id="{{ prefix }}-flow" class="text-xl font-black font-mono text-slate-100">—</p></div>
+                <div class="rounded-xl {{ 'bg-cyan-500/20 border-cyan-500/50' if theme == 'cyan' else 'bg-cyan-900/30 border-cyan-500/30' }} p-4 text-center"><p class="text-[10px] {{ 'text-cyan-300' if theme == 'cyan' else 'text-cyan-400' }} font-black uppercase tracking-widest mb-2">Pred. CWT</p><p id="{{ prefix }}-cwt" class="text-xl font-black font-mono {{ 'text-white shadow-cyan-500/50 drop-shadow-lg' if theme == 'cyan' else 'text-cyan-300' }}">—</p></div>
+                <div class="rounded-xl bg-slate-800/80 border border-white/10 p-4 text-center"><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Shortfall App.C</p><p id="{{ prefix }}-shortfall" class="text-xl font-black font-mono text-slate-100">—</p></div>
+                <div class="rounded-xl bg-amber-950/30 border border-amber-500/20 p-4 text-center"><p class="text-[10px] text-amber-400 font-black uppercase tracking-widest mb-2">CW Dev. App.M</p><p id="{{ prefix }}-appM-cwd" class="text-xl font-black font-mono text-amber-300">—</p></div>
+                <div class="rounded-xl bg-slate-800/80 border border-white/10 p-4 text-center col-span-2 sm:col-span-1"><p class="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-2">Capability</p><p id="{{ prefix }}-cap" class="text-xl font-black font-mono text-slate-100">—</p></div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endmacro %}
