@@ -221,55 +221,55 @@ export function renderMarginTable(ui) {
     const colCount = 1 + visFlows.length * 3;
 
     // ── thead: row1 = group labels, row2 = sub-column labels ──────────
-    let theadR1 = \`
+    let theadR1 = `
         <tr style="background:#0d1117">
             <th rowspan="2"
                 class="px-4 py-3 text-left align-bottom sticky left-0 z-30 border-r border-white/8 min-w-[80px]"
                 style="background:#0d1117">
                 <span class="text-[10px] font-black uppercase tracking-widest text-slate-300">WBT</span><br>
                 <span class="text-[9px] font-semibold text-slate-600 normal-case tracking-normal">(°C)</span>
-            </th>\`;
+            </th>`;
     visFlows.forEach(f => {
         const m = fMeta[f];
-        theadR1 += \`
+        theadR1 += `
             <th colspan="3"
-                class="px-3 py-2.5 text-center border-l border-white/8 border-b border-white/10 \${m.groupBg}"
+                class="px-3 py-2.5 text-center border-l border-white/8 border-b border-white/10 ${m.groupBg}"
                 style="background-color: var(--tw-bg-opacity, inherit)">
-                <span class="text-[11px] font-black uppercase tracking-wider \${m.groupTxt}">\${m.label}</span>
-            </th>\`;
+                <span class="text-[11px] font-black uppercase tracking-wider ${m.groupTxt}">${m.label}</span>
+            </th>`;
     });
-    theadR1 += \`</tr>\`;
+    theadR1 += `</tr>`;
 
     const subBgMap = { 90: '#0d1f18', 100: '#0d1c24', 110: '#1f1a0d' };
-    let theadR2 = \`<tr style="background:#0d1117; box-shadow:0 3px 10px rgba(0,0,0,0.7)">\`;
+    let theadR2 = `<tr style="background:#0d1117; box-shadow:0 3px 10px rgba(0,0,0,0.7)">`;
     visFlows.forEach(f => {
         const solidBg = subBgMap[f] || '#0d1117';
-        theadR2 += \`
-            <th class="px-3 py-2 text-right border-l border-white/8 border-b-2 border-white/10" style="background:\${solidBg}">
+        theadR2 += `
+            <th class="px-3 py-2 text-right border-l border-white/8 border-b-2 border-white/10" style="background:${solidBg}">
                 <span class="text-[10px] font-bold uppercase tracking-wider text-slate-200">Base</span>
                 <span class="block text-[8px] font-medium text-slate-500 normal-case tracking-normal">no margin</span>
             </th>
-            <th class="px-3 py-2 text-right border-b-2 border-white/10" style="background:\${solidBg}">
-                <span class="text-[10px] font-bold uppercase tracking-wider \${fMeta[f].groupTxt}">Margin</span>
+            <th class="px-3 py-2 text-right border-b-2 border-white/10" style="background:${solidBg}">
+                <span class="text-[10px] font-bold uppercase tracking-wider ${fMeta[f].groupTxt}">Margin</span>
                 <span class="block text-[8px] font-medium text-slate-500 normal-case tracking-normal">with offset</span>
             </th>
-            <th class="px-3 py-2 text-center border-r border-white/8 border-b-2 border-white/10" style="background:\${solidBg}">
+            <th class="px-3 py-2 text-center border-r border-white/8 border-b-2 border-white/10" style="background:${solidBg}">
                 <span class="text-[10px] font-bold uppercase tracking-wider text-slate-200">Δ</span>
                 <span class="block text-[8px] font-medium text-slate-500 normal-case tracking-normal">delta °C</span>
-            </th>\`;
+            </th>`;
     });
-    theadR2 += \`</tr>\`;
+    theadR2 += `</tr>`;
 
     // ── tbody ──────────────────────────────────────────────────────────
     let tbody = '';
     if (rows.length === 0) {
-        tbody = \`<tr>
-            <td colspan="\${colCount}"
+        tbody = `<tr>
+            <td colspan="${colCount}"
                 class="px-4 py-8 text-center text-[12px] text-slate-600 italic">
                 No rows with active delta in selected flows.<br>
                 <span class="text-[10px]">Disable "Changed rows only" to see all WBT points.</span>
             </td>
-        </tr>\`;
+        </tr>`;
     } else {
         rows.forEach((row, i) => {
             const { wbt, isDesign } = row;
@@ -278,17 +278,17 @@ export function renderMarginTable(ui) {
             const trBorder = isDesign ? 'border-y-2 border-emerald-500/30' : 'border-b border-white/[0.06]';
 
             const wbtBg = isDesign ? '#0a1f14' : (isEven ? '#0d1117' : '#0e1219');
-            let cells = \`
+            let cells = `
                 <td class="px-4 py-2 sticky left-0 z-10 border-r border-white/8"
-                    style="background:\${wbtBg}">
-                    <span class="font-mono font-black text-[13px] \${isDesign ? 'text-white' : 'text-slate-300'}">\${wbt.toFixed(1)}</span>
-                    \${isDesign ? \`<span class="ml-1 text-emerald-400 text-[10px] font-black">★</span>\` : ''}
-                </td>\`;
+                    style="background:${wbtBg}">
+                    <span class="font-mono font-black text-[13px] ${isDesign ? 'text-white' : 'text-slate-300'}">${wbt.toFixed(1)}</span>
+                    ${isDesign ? `<span class="ml-1 text-emerald-400 text-[10px] font-black">★</span>` : ''}
+                </td>`;
 
             row.cells.filter(c => visFlows.includes(c.f)).forEach((c, ci) => {
                 const m = fMeta[c.f];
                 if (c.base == null || c.margin == null) {
-                    cells += \`<td colspan="3" class="px-3 py-2 text-center text-slate-700 border-l border-white/8 text-[11px]">—</td>\`;
+                    cells += `<td colspan="3" class="px-3 py-2 text-center text-slate-700 border-l border-white/8 text-[11px]">—</td>`;
                     return;
                 }
                 const isGuaranteed = isDesign && c.f === 100 && Math.abs(c.delta) < 0.05;
@@ -297,46 +297,46 @@ export function renderMarginTable(ui) {
 
                 let deltaPill;
                 if (isGuaranteed) {
-                    deltaPill = \`<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black bg-emerald-500/20 border border-emerald-500/30 text-emerald-300">✓ locked</span>\`;
+                    deltaPill = `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[9px] font-black bg-emerald-500/20 border border-emerald-500/30 text-emerald-300">✓ locked</span>`;
                 } else if (dAbs < 0.01) {
-                    deltaPill = \`<span class="text-slate-600 font-mono text-[11px]">—</span>\`;
+                    deltaPill = `<span class="text-slate-600 font-mono text-[11px]">—</span>`;
                 } else {
                     const pillBg  = c.delta > 0 ? 'bg-amber-500/15 border-amber-500/25 text-amber-300' : 'bg-sky-500/15 border-sky-500/25 text-sky-300';
-                    deltaPill = \`<span class="inline-flex items-center px-1.5 py-0.5 rounded font-mono font-bold text-[11px] border \${pillBg}">\${sign}\${c.delta.toFixed(2)}</span>\`;
+                    deltaPill = `<span class="inline-flex items-center px-1.5 py-0.5 rounded font-mono font-bold text-[11px] border ${pillBg}">${sign}${c.delta.toFixed(2)}</span>`;
                 }
 
-                cells += \`
+                cells += `
                     <td class="px-3 py-2 text-right font-mono text-[12px] font-semibold text-slate-300 border-l border-white/8">
-                        \${c.base.toFixed(2)}
+                        ${c.base.toFixed(2)}
                     </td>
-                    <td class="px-3 py-2 text-right font-mono text-[12px] font-black \${m.valCls}">
-                        \${c.margin.toFixed(2)}
+                    <td class="px-3 py-2 text-right font-mono text-[12px] font-black ${m.valCls}">
+                        ${c.margin.toFixed(2)}
                     </td>
                     <td class="px-3 py-2 text-center border-r border-white/8">
-                        \${deltaPill}
-                    </td>\`;
+                        ${deltaPill}
+                    </td>`;
             });
 
-            tbody += \`<tr class="\${trBg} \${trBorder}">\${cells}</tr>\`;
+            tbody += `<tr class="${trBg} ${trBorder}">${cells}</tr>`;
         });
     }
 
     const minW = 160 + visFlows.length * 210;
-    wrap.innerHTML = \`
+    wrap.innerHTML = `
         <div class="rounded-2xl border border-white/10 overflow-auto" style="max-height:55vh">
-            <table class="w-full border-collapse" style="min-width:\${minW}px">
-                <thead class="sticky top-0 z-20">\${theadR1}\${theadR2}</thead>
-                <tbody>\${tbody}</tbody>
+            <table class="w-full border-collapse" style="min-width:${minW}px">
+                <thead class="sticky top-0 z-20">${theadR1}${theadR2}</thead>
+                <tbody>${tbody}</tbody>
             </table>
         </div>
         <div class="flex items-center justify-between mt-2 px-1">
             <p class="text-[9px] text-slate-700">
-                ★ Design WBT \${dWBT.toFixed(1)}°C — 100% Flow Δ must show ✓ locked (anchored tilt guarantee).
+                ★ Design WBT ${dWBT.toFixed(1)}°C — 100% Flow Δ must show ✓ locked (anchored tilt guarantee).
             </p>
             <p class="text-[9px] text-slate-600">
-                \${rows.length} / \${ui._marginTableData.length} rows shown
+                ${rows.length} / ${ui._marginTableData.length} rows shown
             </p>
-        </div>\`;
+        </div>`;
 }
 
 export function bindMarginModalState(ui) {
