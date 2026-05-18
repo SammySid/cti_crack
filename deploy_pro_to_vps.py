@@ -92,6 +92,43 @@ def preflight_syntax_check() -> bool:
     return True
 
 
+def preflight_mypy_check() -> bool:
+    """
+    Runs mypy on the backend directory to catch Python type errors before deployment.
+    """
+    print("\n🔬  Running Python Type Check (Mypy)...")
+    
+    backend_dir = os.path.join(REPO_ROOT, "cti_dashboard_pro", "app", "backend")
+    if not os.path.exists(backend_dir):
+        print("    ⚠️  Backend directory not found. Skipping mypy check.")
+        return True
+        
+    try:
+        subprocess.run(["mypy", "--version"], capture_output=True, check=True)
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        print("    ⚠️  Mypy not found in PATH. Skipping type check. (Run: pip install mypy)")
+        return True
+
+    # Run mypy on the backend folder
+    # We ignore missing imports because some third-party libs might not have stubs locally
+    result = subprocess.run(
+        ["mypy", backend_dir, "--ignore-missing-imports"], 
+        capture_output=True, 
+        text=True
+    )
+    
+    if result.returncode != 0:
+        print(f"    ❌ PYTHON TYPE ERROR FOUND")
+        print("       " + "\n       ".join(result.stdout.strip().split('\n')[:10]))
+        if len(result.stdout.strip().split('\n')) > 10:
+            print("       ... (more errors truncated)")
+        print("\n🚫 Pre-flight type check failed! Deployment aborted.")
+        return False
+        
+    print(f"    ✅ Python backend passed mypy type validation.")
+    return True
+
+
 def git_push(commit_message: str) -> bool:
     """
     Stage, commit (if anything changed), and push to GitHub.
@@ -159,6 +196,10 @@ def deploy(commit_message: str):
 
     # Step 0: Pre-flight Syntax Check
     if not preflight_syntax_check():
+        sys.exit(1)
+        
+    # Step 0.5: Pre-flight Python Type Check
+    if not preflight_mypy_check():
         sys.exit(1)
 
     # Step 1: Push to GitHub

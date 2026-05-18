@@ -5,7 +5,7 @@ import threading
 from fastapi import APIRouter, HTTPException
 from fastapi.responses import Response
 
-from report_service import generate_pdf_report
+from services.report_service import generate_pdf_report
 
 router = APIRouter()
 
