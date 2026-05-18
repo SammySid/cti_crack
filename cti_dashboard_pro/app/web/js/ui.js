@@ -62,7 +62,7 @@ export const ui = {
         ui.loadInputs();
         ui.loadFilterSettings();
         ui.enginesReady = true;
-        ui.bindEvents();
+        bindEvents(ui);
 
         // Setup the calculation Web Worker
         ui.worker = new Worker('./js/worker.js', { type: 'module' });

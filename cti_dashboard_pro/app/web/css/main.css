@@ -1,4 +1,5 @@
 /* Main CSS for Premium Cooling Tower App */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
 /* ── GLOBAL: Strip ALL native number-input spin buttons ─────────────────── */
 input[type="number"]::-webkit-inner-spin-button,
@@ -144,8 +145,6 @@ input[type="number"] { -moz-appearance: textfield; }
 .test-card-disabled .tele-input {
     pointer-events: none;
 }
-
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap');
 
 :root {
     --bg-dark: #0a0c10;
