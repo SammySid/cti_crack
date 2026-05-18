@@ -48,6 +48,50 @@ def run_local(cmd: list[str], cwd: str = REPO_ROOT) -> str:
     return result.stdout.strip()
 
 
+def preflight_syntax_check() -> bool:
+    """
+    Scans all .js files in app/web/js and uses node -c to verify syntax.
+    Returns True if passed, False if syntax error found.
+    """
+    print("\n🔬  Running JS Syntax Pre-flight Check...")
+    
+    js_dir = os.path.join(REPO_ROOT, "cti_dashboard_pro", "app", "web", "js")
+    if not os.path.exists(js_dir):
+        print("    ⚠️  JS directory not found. Skipping check.")
+        return True
+        
+    try:
+        subprocess.run(["node", "--version"], capture_output=True, check=True)
+    except (subprocess.CalledProcessError, FileNotFoundError):
+        print("    ⚠️  Node.js not found in PATH. Skipping syntax check.")
+        return True
+
+    errors_found = False
+    files_checked = 0
+
+    for root, _, files in os.walk(js_dir):
+        for file in files:
+            if file.endswith(".js"):
+                file_path = os.path.join(root, file)
+                result = subprocess.run(["node", "-c", file_path], capture_output=True, text=True)
+                if result.returncode != 0:
+                    rel_path = os.path.relpath(file_path, REPO_ROOT)
+                    print(f"    ❌ SYNTAX ERROR in {rel_path}")
+                    # Extract the first meaningful error line
+                    err_lines = [line.strip() for line in result.stderr.split('\n') if line.strip() and not line.startswith('Node.js')]
+                    if err_lines:
+                        print(f"       {err_lines[0]}")
+                    errors_found = True
+                files_checked += 1
+
+    if errors_found:
+        print("\n🚫 Pre-flight check failed! Deployment aborted.")
+        return False
+        
+    print(f"    ✅ All {files_checked} JS files passed syntax validation.")
+    return True
+
+
 def git_push(commit_message: str) -> bool:
     """
     Stage, commit (if anything changed), and push to GitHub.
@@ -112,6 +156,10 @@ def deploy(commit_message: str):
     print("  CTI Dashboard PRO — Deploy to VPS")
     print("  Mode: GitHub auto-sync (push → trigger)")
     print("=" * 60)
+
+    # Step 0: Pre-flight Syntax Check
+    if not preflight_syntax_check():
+        sys.exit(1)
 
     # Step 1: Push to GitHub
     try:
